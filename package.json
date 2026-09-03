@@ -1,0 +1,20 @@
+{
+  "name": "girls-room",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A systemic one-room horror/dating sim.",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test 'test/**/*.test.ts'",
+    "check": "npm run typecheck && npm test",
+    "sim": "node sim/run.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.1",
+    "typescript": "^5.6.3"
+  }
+}

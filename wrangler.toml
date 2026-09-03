@@ -1,10 +1,13 @@
-# Cloudflare Pages.
+# Cloudflare — static site deployed as a Worker with static assets.
 #
-# Keeping this in the repo means the deploy settings are version-controlled rather than living
-# only in a dashboard nobody can diff. The Pages git integration reads it; `wrangler pages
-# deploy` uses it too, if you ever deploy by hand.
+# This matches the "Workers Builds" flow: Cloudflare runs `npm run build` to produce dist/,
+# then `npx wrangler deploy`, which reads this file. There is no Worker script — an assets-only
+# Worker just serves the built files, which is all a static page needs.
 #
-# The repo can stay private. Cloudflare Pages builds private repos on the free plan.
+# The repo can stay private; Cloudflare builds private repos on the free plan.
 
 name = "girls-room"
-pages_build_output_dir = "dist"
+compatibility_date = "2025-01-01"
+
+[assets]
+directory = "./dist"

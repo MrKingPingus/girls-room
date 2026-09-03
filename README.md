@@ -27,22 +27,24 @@ clock stopped moving.
 
 ## Deploying
 
-**Cloudflare Pages.** The repo can stay private; Cloudflare builds private repos on the free
-plan. GitHub Pages would require making it public.
+**Cloudflare.** The repo can stay private; Cloudflare builds private repos on the free plan.
+GitHub Pages would require making it public.
 
-One-time setup, in the Cloudflare dashboard:
+Cloudflare's current flow deploys the site as a Worker that serves static files. In the
+dashboard, **Workers & Pages -> Create -> Import a repository**, pick this repo, then:
 
-1. **Workers & Pages → Create → Pages → Connect to Git**, pick this repo
-2. Build command: `npm run build`
-3. Build output directory: `dist`
-4. Save and deploy
+- Build command: `npm run build`
+- Deploy command: `npx wrangler deploy`  (this is the default; it reads `wrangler.toml`)
 
-That is all. Every push to the branch redeploys. `wrangler.toml` and `.node-version` are in the
-repo so the settings are version-controlled rather than living only in a dashboard.
+**The branch matters.** Cloudflare builds one branch. The whole project must be on it — if it
+builds a branch that has no `package.json`, the build fails with `ENOENT ... package.json`
+before it does anything else. Point it at whichever branch actually holds the code (normally
+`main`).
 
-The page fetches nothing from anywhere — no fonts, no analytics, no CDN — so `public/_headers`
-locks it to exactly that. If something later tries to reach off-site it will fail loudly in the
-browser console instead of quietly working.
+`wrangler.toml` and `.node-version` are in the repo, so the deploy settings are
+version-controlled rather than living only in a dashboard. The page fetches nothing from
+anywhere, so `public/_headers` locks it to exactly that: anything that later tries to reach
+off-site fails loudly in the browser console instead of quietly working.
 
 ## How it is laid out
 

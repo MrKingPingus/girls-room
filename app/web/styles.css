@@ -1,0 +1,161 @@
+/*
+ * Girl's Room — the ugly version, deliberately.
+ *
+ * Design doc §16: clickable text boxes, no art. Everything here is restraint — a warm dark
+ * ground, one accent, and type doing all the work. The room is supposed to feel small and
+ * close; the interface should not be competing with it.
+ */
+
+:root {
+  --ink: #d8d2c8;
+  --ink-dim: #8c857a;
+  --ground: #14120f;
+  --panel: #1c1917;
+  --panel-edge: #2c2823;
+  --her: #e8c9a0;
+  --thought: #9aa8a0;
+  --warn: #b56b5a;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 16px/1.6 Iowan Old Style, Palatino, Georgia, serif;
+}
+
+#root { min-height: 100vh; }
+
+.shell {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px 20px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* --- the status strip ---------------------------------------------------- */
+
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  align-items: baseline;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--panel-edge);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.status .here { color: var(--her); }
+.status .alone { color: var(--ink-dim); }
+.status .title { margin-right: auto; letter-spacing: 0.14em; color: var(--ink); }
+
+/* --- the log ------------------------------------------------------------- */
+
+.log {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 220px;
+}
+
+.beat {
+  padding: 12px 16px;
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: 2px;
+  white-space: pre-wrap;
+}
+
+/* Presentation lives here, in the renderer — never in the beat's prose. */
+.beat.her { border-left: 2px solid var(--her); color: var(--her); }
+.beat.player_thought { color: var(--thought); font-style: italic; }
+.beat.narrator { color: var(--ink); }
+
+.beat.stale { opacity: 0.42; }
+
+.repeat { color: var(--her); opacity: 0.8; }
+
+.you {
+  margin: 4px 0 0;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+/* --- the menu ------------------------------------------------------------ */
+
+.menu { display: flex; flex-direction: column; gap: 14px; }
+
+.menu h2 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: normal;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+button {
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: 2px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 120ms, border-color 120ms;
+}
+
+button:hover { background: #262220; border-color: #453e37; }
+button:focus-visible { outline: 2px solid var(--her); outline-offset: 2px; }
+
+button.thing[aria-expanded='true'] { border-color: var(--her); color: var(--her); }
+
+.verbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--panel-edge);
+  border-left: 2px solid var(--her);
+  background: #191614;
+}
+
+.verbs button { background: transparent; }
+
+.footer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid var(--panel-edge);
+  font-size: 13px;
+  color: var(--ink-dim);
+}
+
+.footer button { font-size: 13px; padding: 5px 10px; }
+
+.over { padding: 20px; border: 1px solid var(--warn); color: var(--warn); }
+
+.fatal {
+  margin: 40px auto;
+  max-width: 760px;
+  padding: 20px;
+  border: 1px solid var(--warn);
+  color: var(--warn);
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+}

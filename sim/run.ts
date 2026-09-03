@@ -19,7 +19,7 @@ import { newGame } from '../engine/newgame.ts';
 import { takeTurn } from '../engine/turn.ts';
 import { buildMenu } from '../render/text.ts';
 import { loadGameContent } from '../app/load.ts';
-import { pick } from '../engine/random.ts';
+import { pick, roll } from '../engine/random.ts';
 
 const args = process.argv.slice(2);
 const runs = Number(args[args.indexOf('--runs') + 1]) || 500;
@@ -28,10 +28,33 @@ const maxTurns = Number(args[args.indexOf('--turns') + 1]) || 1200;
 
 const content = loadGameContent();
 
-/** Do nothing with your hands while she is in the room. Look, listen, and wait her out. */
+/**
+ * Play it safe while she is in the room: look, listen, wait her out — and take the care she
+ * offers, which is the whole point of the loop. Never palm anything in front of her.
+ */
 function cautious(menu: ReturnType<typeof buildMenu>, sheIsHere: boolean) {
-  const safe = ['look', 'listen', 'wait', 'rest', 'read_journal'];
-  return sheIsHere ? menu.filter((entry) => safe.includes(entry.action)) : menu;
+  const safe = new Set(['look', 'listen', 'wait', 'rest', 'read_journal']);
+  for (const action of content.actions) {
+    if (action.effect === 'care_accept' || action.effect === 'talk') safe.add(action.id);
+  }
+  return sheIsHere ? menu.filter((entry) => safe.has(entry.action)) : menu;
+}
+
+/**
+ * Cautious, and restrained during her absences too: touches something in the room roughly one
+ * turn in eight rather than ransacking it the moment she is gone.
+ *
+ * This is the policy that answers the question the POC exists to ask. `cautious` only behaves
+ * while she is watching, which is not the same as playing well — if restraint during absences
+ * does not buy anything measurable, the player's choices are not doing any work.
+ */
+function sparing(
+  menu: ReturnType<typeof buildMenu>, sheIsHere: boolean, seed: number, turn: number,
+) {
+  const safe = cautious(menu, true);
+  if (sheIsHere) return safe;
+  if (roll(seed, turn, 'restraint') < 0.125) return menu;
+  return safe.length > 0 ? safe : menu;
 }
 
 const beatsFired = new Set<string>();
@@ -58,7 +81,11 @@ for (let run = 0; run < runs; run++) {
     // touching anything while she is in the room — and answers the question that actually
     // matters: can you play well and stay safe? If both end at the same suspicion, the
     // player's choices aren't doing anything and the game has no game in it.
-    const options = policyName === 'cautious' ? cautious(menu, state.her.location === 'attic') : menu;
+    const options = policyName === 'cautious'
+      ? cautious(menu, state.her.location === 'attic')
+      : policyName === 'sparing'
+        ? sparing(menu, state.her.location === 'attic', seed, turn)
+        : menu;
     const choice = pick(seed, turn, 'policy', options.length > 0 ? options : menu);
     if (choice === null) break;
 

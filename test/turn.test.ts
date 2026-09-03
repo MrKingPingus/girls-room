@@ -117,7 +117,9 @@ test('single writer — EFFECTS cannot move a meter', async () => {
 test('single writer — APPRAISAL cannot move an object', async () => {
   const appraisal = await import('../engine/stages/appraisal.ts');
   const before = start();
-  const after = appraisal.run(before, content, 'open', { action: 'open', detected: true }, 2);
+  const after = appraisal.run(
+    before, content, 'open', { action: 'open', detected: true }, 2, null,
+  );
   assert.deepEqual(after.state.objects, before.objects, 'the meter stage moved something');
   assert.deepEqual(after.state.world, before.world);
 });

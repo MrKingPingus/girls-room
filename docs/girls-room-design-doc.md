@@ -142,7 +142,7 @@ happening down there.
 ### Mood vs disposition
 
 **Mood is this scene. Disposition is this month.** Disposition biases which moods are likely
-without determining them, so an adoring disposition rarely rolls angry but the day-to-day still
+without determining them, so a devoted disposition rarely rolls angry but the day-to-day still
 surprises. Player actions mostly move disposition; mood is rolled against it plus her own
 external state.
 
@@ -183,8 +183,8 @@ indistinguishable from randomness, and players will call it unfair. The tells *a
 Not shown to the player, ever. This is the weather system that decides which moods are likely.
 A run starts at **Content** — she is nice, settled, and unremarkable, which is the whole trap.
 
-Design doc §3 says cruelty is what happens when her model of the situation is threatened. These
-four are that model, from intact to failing.
+Cruelty is what happens when her model of the situation is threatened (§3 opening). These four
+are that model, from intact to failing.
 
 | Disposition | Her model of you | Biases toward | The danger |
 |---|---|---|---|

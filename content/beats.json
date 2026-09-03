@@ -286,5 +286,185 @@
     "text": "\"You had the lamp on.\"",
     "pose": "stairwell",
     "advancesClock": true
+  },
+  "f_not_a_thing": {
+    "speaker": "narrator",
+    "text": "She isn't something you can move.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "f_she_isnt_here": {
+    "speaker": "narrator",
+    "text": "She isn't in the room.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "f_nothing_offered": {
+    "speaker": "narrator",
+    "text": "She isn't holding anything out.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "her_warm": {
+    "speaker": "narrator",
+    "text": "She's sitting down, unhurried. Coat off, hours to spare.",
+    "pose": "chair",
+    "advancesClock": true
+  },
+  "her_excited": {
+    "speaker": "narrator",
+    "text": "She's talking fast, and she's brought something up with her.",
+    "pose": "standing",
+    "advancesClock": true
+  },
+  "her_irritated": {
+    "speaker": "narrator",
+    "text": "She keeps straightening things that were already straight.",
+    "pose": "standing",
+    "advancesClock": true
+  },
+  "her_angry": {
+    "speaker": "narrator",
+    "text": "She came up fast. The stairs are still settling.",
+    "pose": "stairwell",
+    "advancesClock": true
+  },
+  "her_sad": {
+    "speaker": "narrator",
+    "text": "She hasn't turned the lamp on. She doesn't seem to have noticed.",
+    "pose": "chair",
+    "advancesClock": true
+  },
+  "her_worried": {
+    "speaker": "narrator",
+    "text": "She's asked how you're feeling twice now.",
+    "pose": "bedside",
+    "advancesClock": true
+  },
+  "her_absent": {
+    "speaker": "narrator",
+    "text": "She's here, doing something with her hands. You can't read her.",
+    "pose": "turned_away",
+    "advancesClock": true
+  },
+  "watch_generic": {
+    "speaker": "narrator",
+    "text": "You watch her work. She doesn't look up.",
+    "pose": "turned_away",
+    "advancesClock": true
+  },
+  "watch_noticed": {
+    "speaker": "her",
+    "text": "She catches you looking and holds it a moment too long.",
+    "pose": "bedside",
+    "advancesClock": true
+  },
+  "thanks_warm": {
+    "speaker": "her",
+    "text": "\"You don't have to keep saying that.\"",
+    "pose": "bedside",
+    "advancesClock": true
+  },
+  "thanks_flat": {
+    "speaker": "her",
+    "text": "She nods, and carries on with what she was doing.",
+    "pose": "turned_away",
+    "advancesClock": true
+  },
+  "thanks_cold": {
+    "speaker": "her",
+    "text": "\"Mm.\"",
+    "pose": "turned_away",
+    "advancesClock": true
+  },
+  "offer_food_any": {
+    "speaker": "her",
+    "text": "She sets a bowl on the nightstand and waits.",
+    "pose": "bedside",
+    "advancesClock": true
+  },
+  "offer_food_warm": {
+    "speaker": "her",
+    "text": "\"I made too much. You'll help me with it.\"",
+    "pose": "chair",
+    "advancesClock": true
+  },
+  "offer_water_any": {
+    "speaker": "her",
+    "text": "She holds the glass where you can reach it.",
+    "pose": "bedside",
+    "advancesClock": true
+  },
+  "offer_pills_any": {
+    "speaker": "her",
+    "text": "She shakes two out into her palm and holds them out.",
+    "pose": "bedside",
+    "advancesClock": true
+  },
+  "offer_pills_pain": {
+    "speaker": "her",
+    "text": "\"Don't be brave about it. I can tell.\"",
+    "pose": "bedside",
+    "advancesClock": true
+  },
+  "offer_dressing": {
+    "speaker": "her",
+    "text": "She unwraps the leg without asking, and starts.",
+    "pose": "bedside",
+    "advancesClock": true
+  },
+  "ate": {
+    "speaker": "narrator",
+    "text": "You eat what she brought. She watches until the bowl is empty.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "drank": {
+    "speaker": "narrator",
+    "text": "You drink. She takes the glass back before you've quite finished.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "swallowed": {
+    "speaker": "narrator",
+    "text": "You swallow them. The edge comes off the leg, and off everything else.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "dressed": {
+    "speaker": "narrator",
+    "text": "She works on the leg. It takes a while, and she is careful with it.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "refused_soft": {
+    "speaker": "her",
+    "text": "\"...Alright. It'll keep.\"",
+    "pose": "bedside",
+    "advancesClock": true
+  },
+  "refused_panic": {
+    "speaker": "her",
+    "text": "\"Why not? Is it the taste? I'll make something else.\"",
+    "pose": "bedside",
+    "advancesClock": true
+  },
+  "refused_hard": {
+    "speaker": "her",
+    "text": "She puts it down harder than she needs to.",
+    "pose": "standing",
+    "advancesClock": true
+  },
+  "palmed": {
+    "speaker": "narrator",
+    "text": "You take them, and they don't go where she thinks they go.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "palmed_caught": {
+    "speaker": "her",
+    "text": "She takes your wrist and turns it over. Neither of you says anything.",
+    "pose": "bedside",
+    "advancesClock": true
   }
 }

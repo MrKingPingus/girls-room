@@ -123,6 +123,10 @@ button:focus-visible { outline: 2px solid var(--her); outline-offset: 2px; }
 
 button.thing[aria-expanded='true'] { border-color: var(--her); color: var(--her); }
 
+/* She is not furniture, and the menu should not read as though she were. */
+button.person { border-color: #4a3f35; color: var(--her); }
+button.person:hover { border-color: var(--her); }
+
 .verbs {
   display: flex;
   flex-wrap: wrap;

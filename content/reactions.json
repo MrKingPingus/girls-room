@@ -1128,5 +1128,691 @@
     "effects": {
       "suspicion": 4
     }
+  },
+  {
+    "id": "look_her_warm",
+    "action": "look",
+    "when": {
+      "object": "her",
+      "mood": "warm"
+    },
+    "beats": [
+      "her_warm"
+    ]
+  },
+  {
+    "id": "look_her_excited",
+    "action": "look",
+    "when": {
+      "object": "her",
+      "mood": "excited"
+    },
+    "beats": [
+      "her_excited"
+    ]
+  },
+  {
+    "id": "look_her_irritated",
+    "action": "look",
+    "when": {
+      "object": "her",
+      "mood": "irritated"
+    },
+    "beats": [
+      "her_irritated"
+    ]
+  },
+  {
+    "id": "look_her_angry",
+    "action": "look",
+    "when": {
+      "object": "her",
+      "mood": "angry"
+    },
+    "beats": [
+      "her_angry"
+    ]
+  },
+  {
+    "id": "look_her_sad",
+    "action": "look",
+    "when": {
+      "object": "her",
+      "mood": "sad"
+    },
+    "beats": [
+      "her_sad"
+    ]
+  },
+  {
+    "id": "look_her_worried",
+    "action": "look",
+    "when": {
+      "object": "her",
+      "mood": "worried"
+    },
+    "beats": [
+      "her_worried"
+    ]
+  },
+  {
+    "id": "look_her_any",
+    "action": "look",
+    "when": {
+      "object": "her"
+    },
+    "beats": [
+      "her_absent"
+    ]
+  },
+  {
+    "id": "watch_any",
+    "action": "watch_her",
+    "when": {},
+    "beats": [
+      "watch_generic"
+    ],
+    "effects": {
+      "affection": 1
+    }
+  },
+  {
+    "id": "watch_seen",
+    "action": "watch_her",
+    "when": {
+      "attention": {
+        "gte": 0.7
+      }
+    },
+    "beats": [
+      "watch_noticed"
+    ],
+    "effects": {
+      "affection": 3,
+      "trust": 1
+    }
+  },
+  {
+    "id": "thank_any",
+    "action": "thank_her",
+    "when": {},
+    "beats": [
+      "thanks_flat"
+    ],
+    "effects": {
+      "affection": 3,
+      "trust": 1
+    }
+  },
+  {
+    "id": "thank_warm",
+    "action": "thank_her",
+    "when": {
+      "mood": "warm"
+    },
+    "beats": [
+      "thanks_warm"
+    ],
+    "effects": {
+      "affection": 6,
+      "trust": 2,
+      "dispositionPressure": 4
+    }
+  },
+  {
+    "id": "thank_angry",
+    "action": "thank_her",
+    "when": {
+      "mood": "angry"
+    },
+    "beats": [
+      "thanks_cold"
+    ],
+    "effects": {
+      "affection": 1
+    }
+  },
+  {
+    "id": "offer_food_rule",
+    "action": "offer_food",
+    "when": {},
+    "beats": [
+      "offer_food_any"
+    ]
+  },
+  {
+    "id": "offer_food_warmr",
+    "action": "offer_food",
+    "when": {
+      "mood": "warm"
+    },
+    "beats": [
+      "offer_food_warm"
+    ]
+  },
+  {
+    "id": "offer_water_rule",
+    "action": "offer_water",
+    "when": {},
+    "beats": [
+      "offer_water_any"
+    ]
+  },
+  {
+    "id": "offer_pills_rule",
+    "action": "offer_medication",
+    "when": {},
+    "beats": [
+      "offer_pills_any"
+    ]
+  },
+  {
+    "id": "offer_pills_pn",
+    "action": "offer_medication",
+    "when": {
+      "pain": {
+        "gte": 60
+      }
+    },
+    "beats": [
+      "offer_pills_pain"
+    ]
+  },
+  {
+    "id": "offer_wound_rule",
+    "action": "offer_wound_care",
+    "when": {},
+    "beats": [
+      "offer_dressing"
+    ]
+  },
+  {
+    "id": "eat_any",
+    "action": "eat",
+    "when": {},
+    "beats": [
+      "ate"
+    ],
+    "effects": {
+      "affection": 6,
+      "trust": 3
+    }
+  },
+  {
+    "id": "drink_any",
+    "action": "drink",
+    "when": {},
+    "beats": [
+      "drank"
+    ],
+    "effects": {
+      "affection": 3,
+      "trust": 2
+    }
+  },
+  {
+    "id": "pill_any",
+    "action": "swallow_pill",
+    "when": {},
+    "beats": [
+      "swallowed"
+    ],
+    "effects": {
+      "affection": 7,
+      "trust": 5
+    }
+  },
+  {
+    "id": "dressing_any",
+    "action": "accept_dressing",
+    "when": {},
+    "beats": [
+      "dressed"
+    ],
+    "effects": {
+      "affection": 8,
+      "trust": 4,
+      "dispositionPressure": 5
+    }
+  },
+  {
+    "id": "refuse_any",
+    "action": "refuse_care",
+    "when": {},
+    "beats": [
+      "refused_soft"
+    ],
+    "effects": {
+      "affection": -4,
+      "trust": -2
+    }
+  },
+  {
+    "id": "refuse_warm",
+    "action": "refuse_care",
+    "when": {
+      "disposition": "devoted"
+    },
+    "beats": [
+      "refused_panic"
+    ],
+    "effects": {
+      "affection": -2,
+      "trust": -1,
+      "dispositionPressure": -4
+    }
+  },
+  {
+    "id": "refuse_cold",
+    "action": "refuse_care",
+    "when": {
+      "mood": "angry"
+    },
+    "beats": [
+      "refused_hard"
+    ],
+    "effects": {
+      "affection": -8,
+      "trust": -5,
+      "suspicion": 6,
+      "dispositionPressure": -8
+    }
+  },
+  {
+    "id": "palm_any",
+    "action": "palm_pill",
+    "when": {},
+    "beats": [
+      "palmed"
+    ]
+  },
+  {
+    "id": "palm_caught",
+    "action": "palm_pill",
+    "when": {
+      "detected": true
+    },
+    "beats": [
+      "palmed_caught"
+    ],
+    "effects": {
+      "suspicion": 30,
+      "trust": -18,
+      "affection": -6,
+      "dispositionPressure": -14
+    }
+  },
+  {
+    "id": "fail_watch_her_she_isnt_here",
+    "action": "watch_her",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_watch_her_any",
+    "action": "watch_her",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_thank_her_she_isnt_here",
+    "action": "thank_her",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_thank_her_any",
+    "action": "thank_her",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_eat_she_isnt_here",
+    "action": "eat",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_eat_nothing_offered",
+    "action": "eat",
+    "when": {
+      "valid": false,
+      "failure": "nothing_offered"
+    },
+    "beats": [
+      "f_nothing_offered"
+    ]
+  },
+  {
+    "id": "fail_eat_any",
+    "action": "eat",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_drink_she_isnt_here",
+    "action": "drink",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_drink_nothing_offered",
+    "action": "drink",
+    "when": {
+      "valid": false,
+      "failure": "nothing_offered"
+    },
+    "beats": [
+      "f_nothing_offered"
+    ]
+  },
+  {
+    "id": "fail_drink_any",
+    "action": "drink",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_swallow_pill_she_isnt_here",
+    "action": "swallow_pill",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_swallow_pill_nothing_offered",
+    "action": "swallow_pill",
+    "when": {
+      "valid": false,
+      "failure": "nothing_offered"
+    },
+    "beats": [
+      "f_nothing_offered"
+    ]
+  },
+  {
+    "id": "fail_swallow_pill_any",
+    "action": "swallow_pill",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_palm_pill_she_isnt_here",
+    "action": "palm_pill",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_palm_pill_nothing_offered",
+    "action": "palm_pill",
+    "when": {
+      "valid": false,
+      "failure": "nothing_offered"
+    },
+    "beats": [
+      "f_nothing_offered"
+    ]
+  },
+  {
+    "id": "fail_palm_pill_any",
+    "action": "palm_pill",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_accept_dressing_she_isnt_here",
+    "action": "accept_dressing",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_accept_dressing_nothing_offered",
+    "action": "accept_dressing",
+    "when": {
+      "valid": false,
+      "failure": "nothing_offered"
+    },
+    "beats": [
+      "f_nothing_offered"
+    ]
+  },
+  {
+    "id": "fail_accept_dressing_any",
+    "action": "accept_dressing",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_refuse_care_she_isnt_here",
+    "action": "refuse_care",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_refuse_care_nothing_offered",
+    "action": "refuse_care",
+    "when": {
+      "valid": false,
+      "failure": "nothing_offered"
+    },
+    "beats": [
+      "f_nothing_offered"
+    ]
+  },
+  {
+    "id": "fail_refuse_care_any",
+    "action": "refuse_care",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_offer_food_any",
+    "action": "offer_food",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_offer_water_any",
+    "action": "offer_water",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_offer_medication_any",
+    "action": "offer_medication",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_offer_wound_care_any",
+    "action": "offer_wound_care",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_take_not_a_thing",
+    "action": "take",
+    "when": {
+      "valid": false,
+      "failure": "not_a_thing"
+    },
+    "beats": [
+      "f_not_a_thing"
+    ]
+  },
+  {
+    "id": "fail_take_she_isnt_here",
+    "action": "take",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_open_not_a_thing",
+    "action": "open",
+    "when": {
+      "valid": false,
+      "failure": "not_a_thing"
+    },
+    "beats": [
+      "f_not_a_thing"
+    ]
+  },
+  {
+    "id": "fail_open_she_isnt_here",
+    "action": "open",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_move_not_a_thing",
+    "action": "move",
+    "when": {
+      "valid": false,
+      "failure": "not_a_thing"
+    },
+    "beats": [
+      "f_not_a_thing"
+    ]
+  },
+  {
+    "id": "fail_move_she_isnt_here",
+    "action": "move",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_hide_not_a_thing",
+    "action": "hide",
+    "when": {
+      "valid": false,
+      "failure": "not_a_thing"
+    },
+    "beats": [
+      "f_not_a_thing"
+    ]
+  },
+  {
+    "id": "fail_hide_she_isnt_here",
+    "action": "hide",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_look_she_isnt_here",
+    "action": "look",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
   }
 ]

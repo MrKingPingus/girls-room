@@ -1,31 +1,232 @@
 [
-  { "id": "look",   "name": "Look at",  "universal": true, "timeCost": 1,  "noise": "silent",
-    "effect": "inspect",    "concealable": true,  "target": "object" },
-
-  { "id": "listen", "name": "Listen",   "universal": true, "timeCost": 5,  "noise": "silent",
-    "effect": "none",       "concealable": true,  "target": "none" },
-
-  { "id": "take",   "name": "Take",     "universal": true, "timeCost": 2,  "noise": "low",
-    "effect": "take",       "concealable": true,  "target": "object" },
-
-  { "id": "open",   "name": "Open",     "universal": true, "timeCost": 2,  "noise": "medium",
-    "effect": "open_close", "concealable": false, "target": "object" },
-
-  { "id": "move",   "name": "Move",     "universal": true, "timeCost": 4,  "noise": "medium",
-    "effect": "relocate",   "concealable": false, "target": "object_and_place" },
-
-  { "id": "hide",   "name": "Hide",     "universal": true, "timeCost": 5,  "noise": "low",
-    "effect": "conceal",    "concealable": true,  "target": "object_and_place" },
-
-  { "id": "wait",   "name": "Wait",     "universal": true, "timeCost": 15, "noise": "silent",
-    "effect": "none",       "concealable": true,  "target": "none" },
-
-  { "id": "rest",   "name": "Rest",     "universal": true, "timeCost": 60, "noise": "silent",
-    "effect": "none",       "concealable": true,  "target": "none" },
-
-  { "id": "light_lamp",   "name": "Switch the lamp", "universal": false, "timeCost": 1,
-    "noise": "low",    "effect": "toggle_on", "concealable": true, "target": "object" },
-
-  { "id": "read_journal", "name": "Read the journal", "universal": false, "timeCost": 5,
-    "noise": "silent", "effect": "inspect",   "concealable": true, "target": "object" }
+  {
+    "id": "look",
+    "name": "Look at",
+    "universal": true,
+    "timeCost": 1,
+    "noise": "silent",
+    "effect": "inspect",
+    "concealable": true,
+    "target": "object"
+  },
+  {
+    "id": "listen",
+    "name": "Listen",
+    "universal": true,
+    "timeCost": 5,
+    "noise": "silent",
+    "effect": "none",
+    "concealable": true,
+    "target": "none"
+  },
+  {
+    "id": "take",
+    "name": "Take",
+    "universal": true,
+    "timeCost": 2,
+    "noise": "low",
+    "effect": "take",
+    "concealable": true,
+    "target": "object"
+  },
+  {
+    "id": "open",
+    "name": "Open",
+    "universal": true,
+    "timeCost": 2,
+    "noise": "medium",
+    "effect": "open_close",
+    "concealable": false,
+    "target": "object"
+  },
+  {
+    "id": "move",
+    "name": "Move",
+    "universal": true,
+    "timeCost": 4,
+    "noise": "medium",
+    "effect": "relocate",
+    "concealable": false,
+    "target": "object_and_place"
+  },
+  {
+    "id": "hide",
+    "name": "Hide",
+    "universal": true,
+    "timeCost": 5,
+    "noise": "low",
+    "effect": "conceal",
+    "concealable": true,
+    "target": "object_and_place"
+  },
+  {
+    "id": "wait",
+    "name": "Wait",
+    "universal": true,
+    "timeCost": 15,
+    "noise": "silent",
+    "effect": "none",
+    "concealable": true,
+    "target": "none"
+  },
+  {
+    "id": "rest",
+    "name": "Rest",
+    "universal": true,
+    "timeCost": 60,
+    "noise": "silent",
+    "effect": "none",
+    "concealable": true,
+    "target": "none"
+  },
+  {
+    "id": "light_lamp",
+    "name": "Switch the lamp",
+    "universal": false,
+    "timeCost": 1,
+    "noise": "low",
+    "effect": "toggle_on",
+    "concealable": true,
+    "target": "object"
+  },
+  {
+    "id": "read_journal",
+    "name": "Read the journal",
+    "universal": false,
+    "timeCost": 5,
+    "noise": "silent",
+    "effect": "inspect",
+    "concealable": true,
+    "target": "object"
+  },
+  {
+    "id": "offer_food",
+    "name": "She offers food",
+    "universal": false,
+    "timeCost": 0,
+    "noise": "silent",
+    "effect": "none",
+    "offers": "hunger",
+    "concealable": false,
+    "target": "none"
+  },
+  {
+    "id": "offer_water",
+    "name": "She offers water",
+    "universal": false,
+    "timeCost": 0,
+    "noise": "silent",
+    "effect": "none",
+    "offers": "thirst",
+    "concealable": false,
+    "target": "none"
+  },
+  {
+    "id": "offer_medication",
+    "name": "She offers the pills",
+    "universal": false,
+    "timeCost": 0,
+    "noise": "silent",
+    "effect": "none",
+    "offers": "medication",
+    "concealable": false,
+    "target": "none"
+  },
+  {
+    "id": "offer_wound_care",
+    "name": "She changes the dressing",
+    "universal": false,
+    "timeCost": 0,
+    "noise": "silent",
+    "effect": "none",
+    "offers": "woundCare",
+    "concealable": false,
+    "target": "none"
+  },
+  {
+    "id": "eat",
+    "name": "Eat it",
+    "universal": false,
+    "timeCost": 15,
+    "noise": "silent",
+    "effect": "care_accept",
+    "satisfies": "hunger",
+    "concealable": false,
+    "target": "object"
+  },
+  {
+    "id": "drink",
+    "name": "Drink it",
+    "universal": false,
+    "timeCost": 5,
+    "noise": "silent",
+    "effect": "care_accept",
+    "satisfies": "thirst",
+    "concealable": false,
+    "target": "object"
+  },
+  {
+    "id": "swallow_pill",
+    "name": "Swallow it",
+    "universal": false,
+    "timeCost": 3,
+    "noise": "silent",
+    "effect": "care_accept",
+    "satisfies": "medication",
+    "concealable": false,
+    "target": "object"
+  },
+  {
+    "id": "palm_pill",
+    "name": "Palm it",
+    "universal": false,
+    "timeCost": 3,
+    "noise": "silent",
+    "effect": "care_palm",
+    "satisfies": "medication",
+    "produces": "palmed_pill",
+    "concealable": true,
+    "target": "object"
+  },
+  {
+    "id": "accept_dressing",
+    "name": "Let her",
+    "universal": false,
+    "timeCost": 20,
+    "noise": "silent",
+    "effect": "care_accept",
+    "satisfies": "woundCare",
+    "concealable": false,
+    "target": "object"
+  },
+  {
+    "id": "refuse_care",
+    "name": "Refuse",
+    "universal": false,
+    "timeCost": 2,
+    "noise": "silent",
+    "effect": "care_refuse",
+    "concealable": false,
+    "target": "object"
+  },
+  {
+    "id": "watch_her",
+    "name": "Watch her",
+    "universal": false,
+    "timeCost": 2,
+    "noise": "silent",
+    "effect": "talk",
+    "concealable": true,
+    "target": "object"
+  },
+  {
+    "id": "thank_her",
+    "name": "Thank her",
+    "universal": false,
+    "timeCost": 2,
+    "noise": "silent",
+    "effect": "talk",
+    "concealable": false,
+    "target": "object"
+  }
 ]

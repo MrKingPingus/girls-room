@@ -13,6 +13,7 @@
 
 import type { ContentBundle } from '../engine/content.ts';
 import type { GameState } from '../engine/state.ts';
+import { dueCareNeed } from '../engine/care.ts';
 
 export type MenuEntry = {
   key: string;
@@ -31,6 +32,10 @@ export type ObjectGroup = {
 export type RoomMenu = {
   /** Things you do without touching anything — listen, wait, rest. */
   general: MenuEntry[];
+
+  /** Her, when she is in the room. Kept apart from the furniture on purpose. */
+  people: ObjectGroup[];
+
   objects: ObjectGroup[];
 };
 
@@ -41,7 +46,11 @@ export type RoomMenu = {
  */
 export function buildMenu(state: GameState, content: ContentBundle): MenuEntry[] {
   const room = buildRoomMenu(state, content);
-  const flat = [...room.general, ...room.objects.flatMap((group) => group.entries)];
+  const flat = [
+    ...room.general,
+    ...room.people.flatMap((group) => group.entries),
+    ...room.objects.flatMap((group) => group.entries),
+  ];
   return flat.map((entry, index) => ({ ...entry, key: String(index + 1) }));
 }
 
@@ -49,17 +58,43 @@ export function buildRoomMenu(state: GameState, content: ContentBundle): RoomMen
   const entry = (label: string, action: string, object: string | null, place: string | null):
     MenuEntry => ({ key: '', label, action, object, place });
 
+  // Her half of a care scene is hers. It takes no target, which would otherwise land it in the
+  // player's own menu as something they could click to be offered dinner — which is exactly
+  // backwards: design doc §8 makes these things she does *to* you.
   const general = content.actions
-    .filter((action) => action.target === 'none')
+    .filter((action) => action.target === 'none' && action.offers === undefined)
     .map((action) => entry(action.name, action.id, null, null));
 
   const groups: ObjectGroup[] = [];
+  const people: ObjectGroup[] = [];
 
   for (const object of content.objects) {
     const here = state.objects[object.id];
     if (here === undefined || !here.known || here.location.kind === 'gone') continue;
 
     const entries: MenuEntry[] = [entry('Look at it', 'look', object.id, null)];
+
+    // She is in the room, not part of it. Looking and talking; never the handling verbs, and
+    // never at all when she is two floors down.
+    if (object.person === true) {
+      if (state.her.location !== 'attic') continue;
+
+      // Only the answers that fit the scene she is actually offering. A reach refusal teaches
+      // the player a system; "drink it" when she is holding out pills teaches nothing.
+      const due = dueCareNeed(state);
+      for (const verb of object.verbs ?? []) {
+        const def = content.actions.find((a) => a.id === verb);
+        if (def === undefined) continue;
+
+        const isAnswer = def.effect === 'care_accept' || def.effect === 'care_palm';
+        if (isAnswer && def.satisfies !== due) continue;
+        if (def.effect === 'care_refuse' && due === null) continue;
+
+        entries.push(entry(def.name, verb, object.id, null));
+      }
+      people.push({ objectId: object.id, name: object.name, entries });
+      continue;
+    }
 
     if (object.container) {
       entries.push(entry(here.open === true ? 'Close it' : 'Open it', 'open', object.id, null));
@@ -97,5 +132,5 @@ export function buildRoomMenu(state: GameState, content: ContentBundle): RoomMen
     groups.push({ objectId: object.id, name: object.name, entries });
   }
 
-  return { general, objects: groups };
+  return { general, people, objects: groups };
 }

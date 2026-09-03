@@ -1,30 +1,142 @@
 [
-  { "id": "lamp", "name": "the lamp", "container": false, "togglable": true, "portable": false,
-    "changeTier": 2, "startsAt": { "kind": "placed", "place": "nightstand" },
-    "verbs": ["light_lamp"] },
-
-  { "id": "clock", "name": "the clock", "container": false, "portable": false,
-    "changeTier": 3, "knownAtStart": true,
-    "startsAt": { "kind": "placed", "place": "across_room" } },
-
-  { "id": "water_glass", "name": "the water glass", "container": false, "portable": true,
-    "changeTier": 2, "startsAt": { "kind": "placed", "place": "nightstand" } },
-
-  { "id": "journal", "name": "the journal", "container": false, "portable": true,
-    "changeTier": 2, "startsAt": { "kind": "placed", "place": "nightstand" },
-    "verbs": ["read_journal"] },
-
-  { "id": "drawer", "name": "the nightstand drawer", "container": true, "portable": false,
-    "changeTier": 2, "startsAt": { "kind": "placed", "place": "nightstand" },
-    "noise": { "open": "high" } },
-
-  { "id": "pill_bottle", "name": "the pill bottle", "container": true, "portable": true,
-    "changeTier": 3, "startsAt": { "kind": "inside", "container": "drawer" },
-    "noise": { "take": "medium", "open": "medium" } },
-
-  { "id": "her_chair", "name": "her chair", "container": false, "portable": true,
-    "changeTier": 4, "startsAt": { "kind": "placed", "place": "her_chair" } },
-
-  { "id": "blanket", "name": "the blanket", "container": false, "portable": true,
-    "changeTier": 1, "startsAt": { "kind": "placed", "place": "bed" } }
+  {
+    "id": "her",
+    "name": "her",
+    "person": true,
+    "container": false,
+    "portable": false,
+    "changeTier": 4,
+    "knownAtStart": true,
+    "startsAt": {
+      "kind": "placed",
+      "place": "her_chair"
+    },
+    "verbs": [
+      "watch_her",
+      "thank_her",
+      "eat",
+      "drink",
+      "swallow_pill",
+      "palm_pill",
+      "accept_dressing",
+      "refuse_care"
+    ]
+  },
+  {
+    "id": "lamp",
+    "name": "the lamp",
+    "container": false,
+    "togglable": true,
+    "portable": false,
+    "changeTier": 2,
+    "startsAt": {
+      "kind": "placed",
+      "place": "nightstand"
+    },
+    "verbs": [
+      "light_lamp"
+    ]
+  },
+  {
+    "id": "clock",
+    "name": "the clock",
+    "container": false,
+    "portable": false,
+    "changeTier": 3,
+    "knownAtStart": true,
+    "startsAt": {
+      "kind": "placed",
+      "place": "across_room"
+    }
+  },
+  {
+    "id": "water_glass",
+    "name": "the water glass",
+    "container": false,
+    "portable": true,
+    "changeTier": 2,
+    "startsAt": {
+      "kind": "placed",
+      "place": "nightstand"
+    }
+  },
+  {
+    "id": "journal",
+    "name": "the journal",
+    "container": false,
+    "portable": true,
+    "changeTier": 2,
+    "startsAt": {
+      "kind": "placed",
+      "place": "nightstand"
+    },
+    "verbs": [
+      "read_journal"
+    ]
+  },
+  {
+    "id": "drawer",
+    "name": "the nightstand drawer",
+    "container": true,
+    "portable": false,
+    "changeTier": 2,
+    "startsAt": {
+      "kind": "placed",
+      "place": "nightstand"
+    },
+    "noise": {
+      "open": "high"
+    }
+  },
+  {
+    "id": "pill_bottle",
+    "name": "the pill bottle",
+    "container": true,
+    "portable": true,
+    "changeTier": 3,
+    "startsAt": {
+      "kind": "inside",
+      "container": "drawer"
+    },
+    "noise": {
+      "take": "medium",
+      "open": "medium"
+    }
+  },
+  {
+    "id": "her_chair",
+    "name": "her chair",
+    "container": false,
+    "portable": true,
+    "changeTier": 4,
+    "startsAt": {
+      "kind": "placed",
+      "place": "her_chair"
+    }
+  },
+  {
+    "id": "blanket",
+    "name": "the blanket",
+    "container": false,
+    "portable": true,
+    "changeTier": 1,
+    "startsAt": {
+      "kind": "placed",
+      "place": "bed"
+    }
+  },
+  {
+    "id": "palmed_pill",
+    "name": "the palmed pill",
+    "container": false,
+    "portable": true,
+    "changeTier": 3,
+    "startsAt": {
+      "kind": "gone"
+    },
+    "noise": {
+      "take": "silent",
+      "hide": "silent"
+    }
+  }
 ]

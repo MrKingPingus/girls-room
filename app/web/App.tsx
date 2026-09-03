@@ -142,6 +142,36 @@ export default function App() {
             </div>
           </section>
 
+          {menu.people.length > 0 && (
+            <section>
+              <h2>She is here</h2>
+              <div className="row">
+                {menu.people.map((group) => (
+                  <button
+                    key={group.objectId}
+                    className="thing person"
+                    aria-expanded={openThing === group.objectId}
+                    onClick={() =>
+                      setOpenThing(openThing === group.objectId ? null : group.objectId)}
+                  >
+                    {group.name}
+                  </button>
+                ))}
+              </div>
+              {openThing !== null && menu.people.some((g) => g.objectId === openThing) && (
+                <div className="verbs">
+                  {menu.people
+                    .find((group) => group.objectId === openThing)
+                    ?.entries.map((entry) => (
+                      <button key={entry.label + entry.action} onClick={() => act(entry)}>
+                        {entry.label}
+                      </button>
+                    ))}
+                </div>
+              )}
+            </section>
+          )}
+
           <section>
             <h2>The room</h2>
             <div className="row">
@@ -157,7 +187,7 @@ export default function App() {
                 </button>
               ))}
             </div>
-            {openThing !== null && (
+            {openThing !== null && menu.objects.some((g) => g.objectId === openThing) && (
               <div className="verbs">
                 {menu.objects
                   .find((group) => group.objectId === openThing)

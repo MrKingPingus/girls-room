@@ -9,6 +9,27 @@ Ships first as a text-only build. **Must be convertible to a visual novel later 
 rewriting game logic.** Nearly every rule below exists to protect that conversion or to keep
 the simulation from collapsing into hardcoded branches.
 
+## Talking to me
+
+I'm the designer, not a coder. I'm good at story, systems, and creative direction. I do not know
+technical terminology and I'm not going to pick it up from context — assume zero.
+
+- **Plain language, always.** If a technical term is genuinely unavoidable, define it in one line
+  the first time it appears, in the same message. Don't send me to look something up.
+- **Explain the code through the game.** "The step that decides how she feels is the only one
+  allowed to move suspicion" lands. "APPRAISAL owns `her.suspicion`" does not.
+- **Lead with what it costs the game.** Consequence first, mechanism second. If a technical choice
+  closes off a creative option later, say so at the time — I can't see those coming.
+- **Don't ask me to pick between things I can't evaluate.** Give me a recommendation and frame the
+  tradeoff in terms of the fiction, the player's experience, or how long it'll take. I'll decide on
+  that basis. A question phrased as two technical options is a question I can't answer.
+- **Never assume I know what something in this repo does** because it's in my repo. Most of it was
+  written for me, not by me.
+- **Don't simplify the thinking, only the vocabulary.** I want the real tradeoff, not a softened
+  version of it. Tell me when something is a bad idea and why.
+- **Flag it when I've asked for something that contradicts the docs or these rules** rather than
+  quietly making it work.
+
 ## Read first
 
 - `docs/one-room-sim-architecture.md` — how it's built. State shape, the pipeline, the rule database.

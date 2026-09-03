@@ -30,6 +30,17 @@ technical terminology and I'm not going to pick it up from context — assume ze
 - **Flag it when I've asked for something that contradicts the docs or these rules** rather than
   quietly making it work.
 
+**I create subtractively.** I'm much better at "nah, nah, nah, yes" than at filling a blank page.
+
+- **Propose, don't poll.** Put something concrete in front of me — a full list, a named set, a
+  draft — and I'll tell you what to cut. An open question with nothing attached is the slowest
+  possible way to get an answer out of me.
+- **Make the small calls yourself until the game is playable.** Until I can actually run it and
+  feel it, default to deciding and telling me what you picked and why. The decisions I genuinely
+  need to make are the ones about who she is; almost everything else I'll trust and correct later.
+- **Offer things to cut, not just things to add.** If something in the design is redundant or
+  fighting itself, say which one you'd drop.
+
 ## Read first
 
 - `docs/one-room-sim-architecture.md` — how it's built. State shape, the pipeline, the rule database.

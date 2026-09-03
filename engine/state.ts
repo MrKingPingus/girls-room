@@ -19,6 +19,17 @@
  *      the light level), exactly one stage recomputes it and the comment says so.
  */
 
+import type {
+  Activity, ChangeTier, Disposition, HouseLocation, Light, MobilityTier,
+  Mood, Phase, PlayerClass, Temperature, Weather,
+} from './vocab.ts';
+
+// Re-exported so callers can reach the whole state vocabulary from one place.
+export type {
+  Activity, ChangeTier, Disposition, HouseLocation, Light, MobilityTier,
+  Mood, Phase, PlayerClass, Temperature, Weather,
+};
+
 // ---------------------------------------------------------------------------
 // Identifiers
 //
@@ -49,83 +60,6 @@ export type Meter = number;
 
 /** 0.0–1.0. */
 export type Unit = number;
-
-// ---------------------------------------------------------------------------
-// The fixed vocabularies
-//
-// A mood that doesn't exist is a build error rather than a rule that silently never fires.
-// Design doc §1 is the argument for this file existing at all.
-// ---------------------------------------------------------------------------
-
-/** Design doc §2e. How far out of the bed the player can get. */
-export type MobilityTier = 0 | 1 | 2 | 3;
-
-/** Design doc §12. Where we are in the day. */
-export type Phase = 'wake' | 'morning' | 'absence' | 'return' | 'evening' | 'sleep';
-
-export type Light = 'daylight' | 'lamp' | 'dark';
-
-/** Design doc §2c. She controls this from downstairs. */
-export type Temperature = 'cold' | 'cool' | 'comfortable' | 'warm' | 'hot';
-
-/** Seen through the dormer window. Feeds her mood without the player causing it. */
-export type Weather = 'clear' | 'overcast' | 'rain' | 'snow';
-
-/**
- * Design doc §3. This scene. Volatile, rolled fresh, always has a visible tell.
- * The POC ships the first four.
- *
- * There is deliberately no 'suspicious' mood: suspicion is a 0-100 meter, and having both
- * would make mood a readout of a meter instead of something rolled. High suspicion plus any
- * mood is what produces searching behaviour, as a criterion in the rule database.
- */
-export type Mood =
-  | 'warm'       // baseline. Sits down, unhurried
-  | 'excited'    // talks fast, brought something. Misses small changes
-  | 'irritated'  // straightens objects. More critical, short visit
-  | 'angry'      // comes up fast, stairs loud. Actively inspects
-  | 'sad'        // doesn't turn the lamp on. Stays a long time — the absence window closes
-  | 'worried';   // checks on you unprompted, off-schedule. Kindness as surveillance
-
-/**
- * Design doc §3. This month. Slow, hidden from the player, biases which moods are likely
- * without deciding them. These four are her model of the situation, from intact to failing —
- * design doc §3: cruelty is what happens when that model is threatened.
- *
- * Moves slowly and mostly downward; climbing back out of 'brittle' should cost real work.
- */
-export type Disposition =
-  | 'devoted'    // certain of you. Rolls warm and excited — and never leaves the room
-  | 'content'    // settled, nothing to examine. THE STARTING STATE
-  | 'unsettled'  // something doesn't add up. Rolls worried and irritated
-  | 'brittle';   // actively threatened. Rolls angry and sad. Where cruelty lives
-
-/** Design doc §2b. Where she is in the house, which is what noise thresholds key off. */
-export type HouseLocation =
-  | 'attic'        // in the room with you
-  | 'stairs'       // on the way up or down — the creak is your warning
-  | 'kitchen'
-  | 'living_room'
-  | 'her_bedroom'
-  | 'bathroom'
-  | 'basement'
-  | 'outside'      // out of the house entirely — the widest window
-  | 'unknown';     // the player's model of her, when the game needs one
-
-/** What she is doing there. Her own noise, which is the player's cover. */
-export type Activity =
-  | 'cooking' | 'washing' | 'watching_tv' | 'on_phone' | 'cleaning'
-  | 'tending_you' | 'sitting_with_you' | 'sleeping' | 'away' | 'unknown';
-
-/** Design doc §13. The eight universal verbs are locked. Contextual verbs are free. */
-export type UniversalVerb =
-  | 'look' | 'listen' | 'take' | 'open' | 'move' | 'hide' | 'wait' | 'rest';
-
-/** Design doc §7a. How big a change is, which sets how likely she is to clock it. */
-export type ChangeTier = 1 | 2 | 3 | 4;
-
-/** Design doc §4. One per run. POC ships the Mailman only. */
-export type PlayerClass = 'mailman' | 'family_friend' | 'former_bully' | 'charmer';
 
 // ---------------------------------------------------------------------------
 // meta — the run itself

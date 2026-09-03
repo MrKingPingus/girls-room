@@ -17,7 +17,12 @@
  * Like `state.ts`, this file contains no code.
  */
 
-import type { BeatId, Light, Mood, Weather } from './state';
+import type { BeatId } from './state.ts';
+import type {
+  ConfidenceRegister, Light, Mood, Pose, SceneLocation, Speaker, TimeOfDay, Weather,
+} from './vocab.ts';
+
+export type { ConfidenceRegister, Pose, SceneLocation, Speaker, TimeOfDay };
 
 // ---------------------------------------------------------------------------
 // Identifiers
@@ -29,28 +34,8 @@ export type SfxCue = string & { readonly __kind: 'SfxCue' };
 export type AmbienceCue = string & { readonly __kind: 'AmbienceCue' };
 
 // ---------------------------------------------------------------------------
-// Who is talking
-// ---------------------------------------------------------------------------
-
-export type Speaker =
-  | 'her'             // dialogue. Gets a portrait
-  | 'narrator'        // the room, described. Design doc §6 — its register shifts with confidence
-  | 'player_thought'; // the PC's own head, which is not always right
-
-// ---------------------------------------------------------------------------
 // portrait — what she looks like
 // ---------------------------------------------------------------------------
-
-/**
- * Design doc §2c. Where she is in the room, physically. Five of these times six moods is a
- * hard ceiling of thirty sprites for the whole game — a number worth keeping quotable.
- */
-export type Pose =
-  | 'stairwell'    // head just clear of the hole in the floor. She sees the bed before you see her
-  | 'standing'     // upright on the centre strip, where the ceiling allows it
-  | 'chair'        // in her chair, beside the bed. Hers
-  | 'bedside'      // leaning in. Close enough to touch
-  | 'turned_away'; // back to you, doing something with her hands
 
 /**
  * A discriminated union rather than a nullable field, so "she isn't here" is something an
@@ -72,20 +57,6 @@ export type Portrait =
 // ---------------------------------------------------------------------------
 // scene — what the background looks like
 // ---------------------------------------------------------------------------
-
-/**
- * One entry today. A second location is planned, and typing it as a list means adding it is a
- * one-word change here that immediately makes the compiler check every beat in the game — and
- * tells you exactly what the new location costs in backgrounds before you commission any.
- */
-export type SceneLocation = 'attic';
-
-/**
- * Visual time, not narrative time. `world.phase` says where we are in the day's structure
- * (absence, return, evening); this says what the light through the dormer looks like.
- * Derived from the clock when the beat is stamped — never stored in state.
- */
-export type TimeOfDay = 'dawn' | 'morning' | 'afternoon' | 'dusk' | 'night';
 
 export type Scene = {
   location: SceneLocation;
@@ -176,26 +147,6 @@ export type Prompt = {
   choices: Choice[];
   timer: TimerSpec;
 };
-
-// ---------------------------------------------------------------------------
-// confidence — reserved for v2
-// ---------------------------------------------------------------------------
-
-/**
- * Design doc §6. Which register this line is written in, so the narrator can sound certain,
- * careful, or defeated depending on the PC's calibration:
- *
- *   overconfident   "She won't check."
- *   calibrated      "If she's still in the kitchen, there's time."
- *   underconfident  "Maybe if... no, she'd hear it."
- *
- * RESERVED. Nothing reads this in v1 and the confidence system is not to be implemented
- * without asking. It exists now only so we are not re-tagging hundreds of beats later —
- * which is the exact failure this whole file is designed to prevent.
- *
- * null means the line is register-neutral and can be used at any calibration.
- */
-export type ConfidenceRegister = 'overconfident' | 'calibrated' | 'underconfident';
 
 // ---------------------------------------------------------------------------
 // The beat

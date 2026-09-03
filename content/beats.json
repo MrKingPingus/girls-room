@@ -1,0 +1,290 @@
+{
+  "f_out_of_reach": {
+    "speaker": "narrator",
+    "text": "You can't reach that from where you are.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "f_object_unknown": {
+    "speaker": "narrator",
+    "text": "You don't know what that is.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "f_not_portable": {
+    "speaker": "narrator",
+    "text": "That isn't something you can pick up.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "f_not_a_container": {
+    "speaker": "narrator",
+    "text": "There's nothing to open.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "f_inside_closed": {
+    "speaker": "narrator",
+    "text": "It's shut inside the drawer.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "f_already_held": {
+    "speaker": "narrator",
+    "text": "You're already holding it.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "f_nowhere_to_hide": {
+    "speaker": "narrator",
+    "text": "There's nowhere to put it.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "f_nothing_to_hide": {
+    "speaker": "narrator",
+    "text": "That isn't something you can hide.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "f_target_required": {
+    "speaker": "narrator",
+    "text": "You'd have to pick something.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "f_asleep": {
+    "speaker": "narrator",
+    "text": "You're too far under to do anything about it.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "f_no_such_object": {
+    "speaker": "narrator",
+    "text": "There's nothing there.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "f_unknown_action": {
+    "speaker": "narrator",
+    "text": "You can't do that.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "l_generic": {
+    "speaker": "narrator",
+    "text": "Nothing about it has changed.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "l_first": {
+    "speaker": "narrator",
+    "text": "You take it in properly for the first time.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "l_open": {
+    "speaker": "narrator",
+    "text": "It's open. You can see what's inside.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "l_clock": {
+    "speaker": "narrator",
+    "text": "The clock is across the room. You can read it from here, just.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "h_quiet": {
+    "speaker": "narrator",
+    "text": "Nothing. The house holds still.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "h_here": {
+    "speaker": "player_thought",
+    "text": "She's here. There's nothing to listen for.",
+    "pose": "chair",
+    "advancesClock": true
+  },
+  "h_stairs": {
+    "speaker": "narrator",
+    "text": "The staircase creaks. She's coming up.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "h_washing": {
+    "speaker": "narrator",
+    "text": "Water running, somewhere below. It'll cover a lot.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "h_tv": {
+    "speaker": "narrator",
+    "text": "The television, muffled, two floors down.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "h_cooking": {
+    "speaker": "narrator",
+    "text": "Movement in the kitchen. A cupboard, then a pan.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "h_cleaning": {
+    "speaker": "narrator",
+    "text": "Something being dragged across a floor below you.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "h_phone": {
+    "speaker": "narrator",
+    "text": "Her voice, downstairs. One side of a conversation.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "h_away": {
+    "speaker": "narrator",
+    "text": "Nothing at all. The house is empty under you.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "t_generic": {
+    "speaker": "narrator",
+    "text": "You take it.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "t_caught": {
+    "speaker": "her",
+    "text": "\"What have you got there?\"",
+    "pose": "stairwell",
+    "advancesClock": true
+  },
+  "o_open": {
+    "speaker": "narrator",
+    "text": "It slides open.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "o_shut": {
+    "speaker": "narrator",
+    "text": "You push it shut.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "o_caught": {
+    "speaker": "her",
+    "text": "\"That isn't yours to go through.\"",
+    "pose": "standing",
+    "advancesClock": true
+  },
+  "o_heard": {
+    "speaker": "narrator",
+    "text": "The drawer is louder than you expected.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "m_generic": {
+    "speaker": "narrator",
+    "text": "You move it.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "m_caught": {
+    "speaker": "her",
+    "text": "\"You've been moving things.\"",
+    "pose": "standing",
+    "advancesClock": true
+  },
+  "d_generic": {
+    "speaker": "narrator",
+    "text": "You put it out of sight.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "d_caught": {
+    "speaker": "her",
+    "text": "\"What were you doing just now?\"",
+    "pose": "bedside",
+    "advancesClock": true
+  },
+  "w_generic": {
+    "speaker": "narrator",
+    "text": "Time passes.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "w_watched": {
+    "speaker": "narrator",
+    "text": "Time passes. She doesn't leave.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "r_generic": {
+    "speaker": "narrator",
+    "text": "You sleep, and it's dark when you stop.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "r_pain": {
+    "speaker": "narrator",
+    "text": "You rest. It helps, a little.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "lamp_on": {
+    "speaker": "narrator",
+    "text": "The lamp comes on.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "lamp_off": {
+    "speaker": "narrator",
+    "text": "The lamp goes off. The window is the only light left.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "j_blank": {
+    "speaker": "narrator",
+    "text": "Blank, except for what you've put in it.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "j_moved": {
+    "speaker": "narrator",
+    "text": "It isn't where you left it.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "late_open": {
+    "speaker": "her",
+    "text": "She stops at the nightstand. \"This was shut when I left.\"",
+    "pose": "standing",
+    "advancesClock": true
+  },
+  "late_take": {
+    "speaker": "her",
+    "text": "She looks at the space where it was. \"Where has it gone?\"",
+    "pose": "standing",
+    "advancesClock": true
+  },
+  "late_move": {
+    "speaker": "her",
+    "text": "She puts it back where it was, without a word.",
+    "pose": "bedside",
+    "advancesClock": true
+  },
+  "late_hide": {
+    "speaker": "her",
+    "text": "She stops halfway across the room and looks at the floor.",
+    "pose": "standing",
+    "advancesClock": true
+  },
+  "late_lamp": {
+    "speaker": "her",
+    "text": "\"You had the lamp on.\"",
+    "pose": "stairwell",
+    "advancesClock": true
+  }
+}

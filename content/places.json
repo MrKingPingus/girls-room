@@ -1,0 +1,8 @@
+[
+  { "id": "bed",        "name": "the bed",            "reach": 0, "concealment": 25, "noiseModifier": 0 },
+  { "id": "nightstand", "name": "the nightstand",     "reach": 0, "concealment": 5,  "noiseModifier": 0 },
+  { "id": "floor",      "name": "the floor",          "reach": 1, "concealment": 5,  "noiseModifier": 1 },
+  { "id": "under_bed",  "name": "under the bed",      "reach": 1, "concealment": 75, "noiseModifier": 0 },
+  { "id": "her_chair",  "name": "her chair",          "reach": 1, "concealment": 0,  "noiseModifier": 0 },
+  { "id": "across_room","name": "across the room",    "reach": 2, "concealment": 10, "noiseModifier": 1 }
+]

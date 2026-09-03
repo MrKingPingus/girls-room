@@ -1,0 +1,31 @@
+[
+  { "id": "look",   "name": "Look at",  "universal": true, "timeCost": 1,  "noise": "silent",
+    "effect": "inspect",    "concealable": true,  "target": "object" },
+
+  { "id": "listen", "name": "Listen",   "universal": true, "timeCost": 5,  "noise": "silent",
+    "effect": "none",       "concealable": true,  "target": "none" },
+
+  { "id": "take",   "name": "Take",     "universal": true, "timeCost": 2,  "noise": "low",
+    "effect": "take",       "concealable": true,  "target": "object" },
+
+  { "id": "open",   "name": "Open",     "universal": true, "timeCost": 2,  "noise": "medium",
+    "effect": "open_close", "concealable": false, "target": "object" },
+
+  { "id": "move",   "name": "Move",     "universal": true, "timeCost": 4,  "noise": "medium",
+    "effect": "relocate",   "concealable": false, "target": "object_and_place" },
+
+  { "id": "hide",   "name": "Hide",     "universal": true, "timeCost": 5,  "noise": "low",
+    "effect": "conceal",    "concealable": true,  "target": "object_and_place" },
+
+  { "id": "wait",   "name": "Wait",     "universal": true, "timeCost": 15, "noise": "silent",
+    "effect": "none",       "concealable": true,  "target": "none" },
+
+  { "id": "rest",   "name": "Rest",     "universal": true, "timeCost": 60, "noise": "silent",
+    "effect": "none",       "concealable": true,  "target": "none" },
+
+  { "id": "light_lamp",   "name": "Switch the lamp", "universal": false, "timeCost": 1,
+    "noise": "low",    "effect": "toggle_on", "concealable": true, "target": "object" },
+
+  { "id": "read_journal", "name": "Read the journal", "universal": false, "timeCost": 5,
+    "noise": "silent", "effect": "inspect",   "concealable": true, "target": "object" }
+]

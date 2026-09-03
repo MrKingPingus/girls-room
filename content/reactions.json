@@ -1,0 +1,1132 @@
+[
+  {
+    "id": "fail_look_object_unknown",
+    "action": "look",
+    "when": {
+      "valid": false,
+      "failure": "object_unknown"
+    },
+    "beats": [
+      "f_object_unknown"
+    ]
+  },
+  {
+    "id": "fail_look_target_required",
+    "action": "look",
+    "when": {
+      "valid": false,
+      "failure": "target_required"
+    },
+    "beats": [
+      "f_target_required"
+    ]
+  },
+  {
+    "id": "fail_look_asleep",
+    "action": "look",
+    "when": {
+      "valid": false,
+      "failure": "asleep"
+    },
+    "beats": [
+      "f_asleep"
+    ]
+  },
+  {
+    "id": "fail_look_no_such_object",
+    "action": "look",
+    "when": {
+      "valid": false,
+      "failure": "no_such_object"
+    },
+    "beats": [
+      "f_no_such_object"
+    ]
+  },
+  {
+    "id": "fail_look_any",
+    "action": "look",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_listen_object_unknown",
+    "action": "listen",
+    "when": {
+      "valid": false,
+      "failure": "object_unknown"
+    },
+    "beats": [
+      "f_object_unknown"
+    ]
+  },
+  {
+    "id": "fail_listen_target_required",
+    "action": "listen",
+    "when": {
+      "valid": false,
+      "failure": "target_required"
+    },
+    "beats": [
+      "f_target_required"
+    ]
+  },
+  {
+    "id": "fail_listen_asleep",
+    "action": "listen",
+    "when": {
+      "valid": false,
+      "failure": "asleep"
+    },
+    "beats": [
+      "f_asleep"
+    ]
+  },
+  {
+    "id": "fail_listen_no_such_object",
+    "action": "listen",
+    "when": {
+      "valid": false,
+      "failure": "no_such_object"
+    },
+    "beats": [
+      "f_no_such_object"
+    ]
+  },
+  {
+    "id": "fail_listen_any",
+    "action": "listen",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_take_object_unknown",
+    "action": "take",
+    "when": {
+      "valid": false,
+      "failure": "object_unknown"
+    },
+    "beats": [
+      "f_object_unknown"
+    ]
+  },
+  {
+    "id": "fail_take_target_required",
+    "action": "take",
+    "when": {
+      "valid": false,
+      "failure": "target_required"
+    },
+    "beats": [
+      "f_target_required"
+    ]
+  },
+  {
+    "id": "fail_take_asleep",
+    "action": "take",
+    "when": {
+      "valid": false,
+      "failure": "asleep"
+    },
+    "beats": [
+      "f_asleep"
+    ]
+  },
+  {
+    "id": "fail_take_no_such_object",
+    "action": "take",
+    "when": {
+      "valid": false,
+      "failure": "no_such_object"
+    },
+    "beats": [
+      "f_no_such_object"
+    ]
+  },
+  {
+    "id": "fail_take_out_of_reach",
+    "action": "take",
+    "when": {
+      "valid": false,
+      "failure": "out_of_reach"
+    },
+    "beats": [
+      "f_out_of_reach"
+    ]
+  },
+  {
+    "id": "fail_take_inside_closed",
+    "action": "take",
+    "when": {
+      "valid": false,
+      "failure": "inside_closed"
+    },
+    "beats": [
+      "f_inside_closed"
+    ]
+  },
+  {
+    "id": "fail_take_not_portable",
+    "action": "take",
+    "when": {
+      "valid": false,
+      "failure": "not_portable"
+    },
+    "beats": [
+      "f_not_portable"
+    ]
+  },
+  {
+    "id": "fail_take_already_held",
+    "action": "take",
+    "when": {
+      "valid": false,
+      "failure": "already_held"
+    },
+    "beats": [
+      "f_already_held"
+    ]
+  },
+  {
+    "id": "fail_take_any",
+    "action": "take",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_open_object_unknown",
+    "action": "open",
+    "when": {
+      "valid": false,
+      "failure": "object_unknown"
+    },
+    "beats": [
+      "f_object_unknown"
+    ]
+  },
+  {
+    "id": "fail_open_target_required",
+    "action": "open",
+    "when": {
+      "valid": false,
+      "failure": "target_required"
+    },
+    "beats": [
+      "f_target_required"
+    ]
+  },
+  {
+    "id": "fail_open_asleep",
+    "action": "open",
+    "when": {
+      "valid": false,
+      "failure": "asleep"
+    },
+    "beats": [
+      "f_asleep"
+    ]
+  },
+  {
+    "id": "fail_open_no_such_object",
+    "action": "open",
+    "when": {
+      "valid": false,
+      "failure": "no_such_object"
+    },
+    "beats": [
+      "f_no_such_object"
+    ]
+  },
+  {
+    "id": "fail_open_out_of_reach",
+    "action": "open",
+    "when": {
+      "valid": false,
+      "failure": "out_of_reach"
+    },
+    "beats": [
+      "f_out_of_reach"
+    ]
+  },
+  {
+    "id": "fail_open_inside_closed",
+    "action": "open",
+    "when": {
+      "valid": false,
+      "failure": "inside_closed"
+    },
+    "beats": [
+      "f_inside_closed"
+    ]
+  },
+  {
+    "id": "fail_open_not_a_container",
+    "action": "open",
+    "when": {
+      "valid": false,
+      "failure": "not_a_container"
+    },
+    "beats": [
+      "f_not_a_container"
+    ]
+  },
+  {
+    "id": "fail_open_any",
+    "action": "open",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_move_object_unknown",
+    "action": "move",
+    "when": {
+      "valid": false,
+      "failure": "object_unknown"
+    },
+    "beats": [
+      "f_object_unknown"
+    ]
+  },
+  {
+    "id": "fail_move_target_required",
+    "action": "move",
+    "when": {
+      "valid": false,
+      "failure": "target_required"
+    },
+    "beats": [
+      "f_target_required"
+    ]
+  },
+  {
+    "id": "fail_move_asleep",
+    "action": "move",
+    "when": {
+      "valid": false,
+      "failure": "asleep"
+    },
+    "beats": [
+      "f_asleep"
+    ]
+  },
+  {
+    "id": "fail_move_no_such_object",
+    "action": "move",
+    "when": {
+      "valid": false,
+      "failure": "no_such_object"
+    },
+    "beats": [
+      "f_no_such_object"
+    ]
+  },
+  {
+    "id": "fail_move_out_of_reach",
+    "action": "move",
+    "when": {
+      "valid": false,
+      "failure": "out_of_reach"
+    },
+    "beats": [
+      "f_out_of_reach"
+    ]
+  },
+  {
+    "id": "fail_move_inside_closed",
+    "action": "move",
+    "when": {
+      "valid": false,
+      "failure": "inside_closed"
+    },
+    "beats": [
+      "f_inside_closed"
+    ]
+  },
+  {
+    "id": "fail_move_not_portable",
+    "action": "move",
+    "when": {
+      "valid": false,
+      "failure": "not_portable"
+    },
+    "beats": [
+      "f_not_portable"
+    ]
+  },
+  {
+    "id": "fail_move_any",
+    "action": "move",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_hide_object_unknown",
+    "action": "hide",
+    "when": {
+      "valid": false,
+      "failure": "object_unknown"
+    },
+    "beats": [
+      "f_object_unknown"
+    ]
+  },
+  {
+    "id": "fail_hide_target_required",
+    "action": "hide",
+    "when": {
+      "valid": false,
+      "failure": "target_required"
+    },
+    "beats": [
+      "f_target_required"
+    ]
+  },
+  {
+    "id": "fail_hide_asleep",
+    "action": "hide",
+    "when": {
+      "valid": false,
+      "failure": "asleep"
+    },
+    "beats": [
+      "f_asleep"
+    ]
+  },
+  {
+    "id": "fail_hide_no_such_object",
+    "action": "hide",
+    "when": {
+      "valid": false,
+      "failure": "no_such_object"
+    },
+    "beats": [
+      "f_no_such_object"
+    ]
+  },
+  {
+    "id": "fail_hide_out_of_reach",
+    "action": "hide",
+    "when": {
+      "valid": false,
+      "failure": "out_of_reach"
+    },
+    "beats": [
+      "f_out_of_reach"
+    ]
+  },
+  {
+    "id": "fail_hide_inside_closed",
+    "action": "hide",
+    "when": {
+      "valid": false,
+      "failure": "inside_closed"
+    },
+    "beats": [
+      "f_inside_closed"
+    ]
+  },
+  {
+    "id": "fail_hide_not_portable",
+    "action": "hide",
+    "when": {
+      "valid": false,
+      "failure": "not_portable"
+    },
+    "beats": [
+      "f_not_portable"
+    ]
+  },
+  {
+    "id": "fail_hide_nowhere_to_hide",
+    "action": "hide",
+    "when": {
+      "valid": false,
+      "failure": "nowhere_to_hide"
+    },
+    "beats": [
+      "f_nowhere_to_hide"
+    ]
+  },
+  {
+    "id": "fail_hide_nothing_to_hide",
+    "action": "hide",
+    "when": {
+      "valid": false,
+      "failure": "nothing_to_hide"
+    },
+    "beats": [
+      "f_nothing_to_hide"
+    ]
+  },
+  {
+    "id": "fail_hide_any",
+    "action": "hide",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_wait_object_unknown",
+    "action": "wait",
+    "when": {
+      "valid": false,
+      "failure": "object_unknown"
+    },
+    "beats": [
+      "f_object_unknown"
+    ]
+  },
+  {
+    "id": "fail_wait_target_required",
+    "action": "wait",
+    "when": {
+      "valid": false,
+      "failure": "target_required"
+    },
+    "beats": [
+      "f_target_required"
+    ]
+  },
+  {
+    "id": "fail_wait_asleep",
+    "action": "wait",
+    "when": {
+      "valid": false,
+      "failure": "asleep"
+    },
+    "beats": [
+      "f_asleep"
+    ]
+  },
+  {
+    "id": "fail_wait_no_such_object",
+    "action": "wait",
+    "when": {
+      "valid": false,
+      "failure": "no_such_object"
+    },
+    "beats": [
+      "f_no_such_object"
+    ]
+  },
+  {
+    "id": "fail_wait_any",
+    "action": "wait",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_rest_object_unknown",
+    "action": "rest",
+    "when": {
+      "valid": false,
+      "failure": "object_unknown"
+    },
+    "beats": [
+      "f_object_unknown"
+    ]
+  },
+  {
+    "id": "fail_rest_target_required",
+    "action": "rest",
+    "when": {
+      "valid": false,
+      "failure": "target_required"
+    },
+    "beats": [
+      "f_target_required"
+    ]
+  },
+  {
+    "id": "fail_rest_asleep",
+    "action": "rest",
+    "when": {
+      "valid": false,
+      "failure": "asleep"
+    },
+    "beats": [
+      "f_asleep"
+    ]
+  },
+  {
+    "id": "fail_rest_no_such_object",
+    "action": "rest",
+    "when": {
+      "valid": false,
+      "failure": "no_such_object"
+    },
+    "beats": [
+      "f_no_such_object"
+    ]
+  },
+  {
+    "id": "fail_rest_any",
+    "action": "rest",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_light_lamp_object_unknown",
+    "action": "light_lamp",
+    "when": {
+      "valid": false,
+      "failure": "object_unknown"
+    },
+    "beats": [
+      "f_object_unknown"
+    ]
+  },
+  {
+    "id": "fail_light_lamp_target_required",
+    "action": "light_lamp",
+    "when": {
+      "valid": false,
+      "failure": "target_required"
+    },
+    "beats": [
+      "f_target_required"
+    ]
+  },
+  {
+    "id": "fail_light_lamp_asleep",
+    "action": "light_lamp",
+    "when": {
+      "valid": false,
+      "failure": "asleep"
+    },
+    "beats": [
+      "f_asleep"
+    ]
+  },
+  {
+    "id": "fail_light_lamp_no_such_object",
+    "action": "light_lamp",
+    "when": {
+      "valid": false,
+      "failure": "no_such_object"
+    },
+    "beats": [
+      "f_no_such_object"
+    ]
+  },
+  {
+    "id": "fail_light_lamp_out_of_reach",
+    "action": "light_lamp",
+    "when": {
+      "valid": false,
+      "failure": "out_of_reach"
+    },
+    "beats": [
+      "f_out_of_reach"
+    ]
+  },
+  {
+    "id": "fail_light_lamp_inside_closed",
+    "action": "light_lamp",
+    "when": {
+      "valid": false,
+      "failure": "inside_closed"
+    },
+    "beats": [
+      "f_inside_closed"
+    ]
+  },
+  {
+    "id": "fail_light_lamp_any",
+    "action": "light_lamp",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "fail_read_journal_object_unknown",
+    "action": "read_journal",
+    "when": {
+      "valid": false,
+      "failure": "object_unknown"
+    },
+    "beats": [
+      "f_object_unknown"
+    ]
+  },
+  {
+    "id": "fail_read_journal_target_required",
+    "action": "read_journal",
+    "when": {
+      "valid": false,
+      "failure": "target_required"
+    },
+    "beats": [
+      "f_target_required"
+    ]
+  },
+  {
+    "id": "fail_read_journal_asleep",
+    "action": "read_journal",
+    "when": {
+      "valid": false,
+      "failure": "asleep"
+    },
+    "beats": [
+      "f_asleep"
+    ]
+  },
+  {
+    "id": "fail_read_journal_no_such_object",
+    "action": "read_journal",
+    "when": {
+      "valid": false,
+      "failure": "no_such_object"
+    },
+    "beats": [
+      "f_no_such_object"
+    ]
+  },
+  {
+    "id": "fail_read_journal_any",
+    "action": "read_journal",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "look_any",
+    "action": "look",
+    "when": {},
+    "beats": [
+      "l_generic"
+    ]
+  },
+  {
+    "id": "look_first",
+    "action": "look",
+    "when": {
+      "object_searched": false
+    },
+    "beats": [
+      "l_first"
+    ]
+  },
+  {
+    "id": "look_open",
+    "action": "look",
+    "when": {
+      "object_open": true
+    },
+    "beats": [
+      "l_open"
+    ]
+  },
+  {
+    "id": "look_clock",
+    "action": "look",
+    "when": {
+      "object": "clock"
+    },
+    "beats": [
+      "l_clock"
+    ],
+    "weight": 1
+  },
+  {
+    "id": "listen_any",
+    "action": "listen",
+    "when": {},
+    "beats": [
+      "h_quiet"
+    ]
+  },
+  {
+    "id": "listen_here",
+    "action": "listen",
+    "when": {
+      "she_is_here": true
+    },
+    "beats": [
+      "h_here"
+    ]
+  },
+  {
+    "id": "listen_stairs",
+    "action": "listen",
+    "when": {
+      "her_location": "stairs"
+    },
+    "beats": [
+      "h_stairs"
+    ],
+    "weight": 2
+  },
+  {
+    "id": "listen_away",
+    "action": "listen",
+    "when": {
+      "her_location": "outside"
+    },
+    "beats": [
+      "h_away"
+    ]
+  },
+  {
+    "id": "listen_washing",
+    "action": "listen",
+    "when": {
+      "her_activity": "washing",
+      "she_is_here": false
+    },
+    "beats": [
+      "h_washing"
+    ]
+  },
+  {
+    "id": "listen_watching_tv",
+    "action": "listen",
+    "when": {
+      "her_activity": "watching_tv",
+      "she_is_here": false
+    },
+    "beats": [
+      "h_tv"
+    ]
+  },
+  {
+    "id": "listen_cooking",
+    "action": "listen",
+    "when": {
+      "her_activity": "cooking",
+      "she_is_here": false
+    },
+    "beats": [
+      "h_cooking"
+    ]
+  },
+  {
+    "id": "listen_cleaning",
+    "action": "listen",
+    "when": {
+      "her_activity": "cleaning",
+      "she_is_here": false
+    },
+    "beats": [
+      "h_cleaning"
+    ]
+  },
+  {
+    "id": "listen_on_phone",
+    "action": "listen",
+    "when": {
+      "her_activity": "on_phone",
+      "she_is_here": false
+    },
+    "beats": [
+      "h_phone"
+    ]
+  },
+  {
+    "id": "take_any",
+    "action": "take",
+    "when": {},
+    "beats": [
+      "t_generic"
+    ]
+  },
+  {
+    "id": "take_caught",
+    "action": "take",
+    "when": {
+      "detected": true
+    },
+    "beats": [
+      "t_caught"
+    ],
+    "effects": {
+      "suspicion": 12,
+      "trust": -4
+    }
+  },
+  {
+    "id": "open_any",
+    "action": "open",
+    "when": {},
+    "beats": [
+      "o_open"
+    ]
+  },
+  {
+    "id": "open_shut",
+    "action": "open",
+    "when": {
+      "object_open": false
+    },
+    "beats": [
+      "o_shut"
+    ]
+  },
+  {
+    "id": "open_loud",
+    "action": "open",
+    "when": {
+      "noise_heard": true,
+      "she_is_here": false
+    },
+    "beats": [
+      "o_heard"
+    ],
+    "effects": {
+      "suspicion": 6
+    }
+  },
+  {
+    "id": "open_caught",
+    "action": "open",
+    "when": {
+      "detected": true
+    },
+    "beats": [
+      "o_caught"
+    ],
+    "effects": {
+      "suspicion": 18,
+      "trust": -6,
+      "dispositionPressure": -8
+    }
+  },
+  {
+    "id": "move_any",
+    "action": "move",
+    "when": {},
+    "beats": [
+      "m_generic"
+    ]
+  },
+  {
+    "id": "move_caught",
+    "action": "move",
+    "when": {
+      "detected": true
+    },
+    "beats": [
+      "m_caught"
+    ],
+    "effects": {
+      "suspicion": 15,
+      "trust": -5
+    }
+  },
+  {
+    "id": "hide_any",
+    "action": "hide",
+    "when": {},
+    "beats": [
+      "d_generic"
+    ]
+  },
+  {
+    "id": "hide_caught",
+    "action": "hide",
+    "when": {
+      "detected": true
+    },
+    "beats": [
+      "d_caught"
+    ],
+    "effects": {
+      "suspicion": 25,
+      "trust": -10,
+      "dispositionPressure": -12
+    }
+  },
+  {
+    "id": "wait_any",
+    "action": "wait",
+    "when": {},
+    "beats": [
+      "w_generic"
+    ]
+  },
+  {
+    "id": "wait_watched",
+    "action": "wait",
+    "when": {
+      "she_is_here": true
+    },
+    "beats": [
+      "w_watched"
+    ]
+  },
+  {
+    "id": "rest_any",
+    "action": "rest",
+    "when": {},
+    "beats": [
+      "r_generic"
+    ]
+  },
+  {
+    "id": "rest_pain",
+    "action": "rest",
+    "when": {
+      "pain": {
+        "gte": 40
+      }
+    },
+    "beats": [
+      "r_pain"
+    ]
+  },
+  {
+    "id": "lamp_any",
+    "action": "light_lamp",
+    "when": {},
+    "beats": [
+      "lamp_on"
+    ]
+  },
+  {
+    "id": "lamp_off",
+    "action": "light_lamp",
+    "when": {
+      "light": "dark"
+    },
+    "beats": [
+      "lamp_off"
+    ]
+  },
+  {
+    "id": "journal_any",
+    "action": "read_journal",
+    "when": {},
+    "beats": [
+      "j_blank"
+    ]
+  },
+  {
+    "id": "journal_moved",
+    "action": "read_journal",
+    "when": {
+      "suspicion_tier": {
+        "gte": 2
+      }
+    },
+    "beats": [
+      "j_moved"
+    ],
+    "effects": {
+      "suspicion": 2
+    }
+  },
+  {
+    "id": "late_open_found",
+    "action": "open",
+    "when": {
+      "detected": true,
+      "deferred": true
+    },
+    "beats": [
+      "late_open"
+    ],
+    "effects": {
+      "suspicion": 14,
+      "trust": -5,
+      "dispositionPressure": -6
+    }
+  },
+  {
+    "id": "late_take_found",
+    "action": "take",
+    "when": {
+      "detected": true,
+      "deferred": true
+    },
+    "beats": [
+      "late_take"
+    ],
+    "effects": {
+      "suspicion": 20,
+      "trust": -8,
+      "dispositionPressure": -8
+    }
+  },
+  {
+    "id": "late_move_found",
+    "action": "move",
+    "when": {
+      "detected": true,
+      "deferred": true
+    },
+    "beats": [
+      "late_move"
+    ],
+    "effects": {
+      "suspicion": 10,
+      "trust": -3
+    }
+  },
+  {
+    "id": "late_hide_found",
+    "action": "hide",
+    "when": {
+      "detected": true,
+      "deferred": true
+    },
+    "beats": [
+      "late_hide"
+    ],
+    "effects": {
+      "suspicion": 22,
+      "trust": -9,
+      "dispositionPressure": -10
+    }
+  },
+  {
+    "id": "late_lamp_found",
+    "action": "light_lamp",
+    "when": {
+      "detected": true,
+      "deferred": true
+    },
+    "beats": [
+      "late_lamp"
+    ],
+    "effects": {
+      "suspicion": 4
+    }
+  }
+]

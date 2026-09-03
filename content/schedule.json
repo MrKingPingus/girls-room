@@ -1,0 +1,233 @@
+[
+  {
+    "day": 1,
+    "blocks": [
+      {
+        "from": 0,
+        "to": 45,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.85,
+        "phase": "wake"
+      },
+      {
+        "from": 45,
+        "to": 120,
+        "location": "attic",
+        "activity": "sitting_with_you",
+        "attention": 0.7,
+        "phase": "morning"
+      },
+      {
+        "from": 120,
+        "to": 150,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
+        "phase": "absence"
+      },
+      {
+        "from": 150,
+        "to": 300,
+        "location": "kitchen",
+        "activity": "cooking",
+        "attention": 0.1,
+        "phase": "absence"
+      },
+      {
+        "from": 300,
+        "to": 360,
+        "location": "living_room",
+        "activity": "watching_tv",
+        "attention": 0.05,
+        "phase": "absence"
+      },
+      {
+        "from": 360,
+        "to": 420,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.75,
+        "phase": "return"
+      },
+      {
+        "from": 420,
+        "to": 540,
+        "location": "bathroom",
+        "activity": "washing",
+        "attention": 0.05,
+        "phase": "absence"
+      },
+      {
+        "from": 540,
+        "to": 660,
+        "location": "living_room",
+        "activity": "watching_tv",
+        "attention": 0.1,
+        "phase": "absence"
+      },
+      {
+        "from": 660,
+        "to": 780,
+        "location": "attic",
+        "activity": "sitting_with_you",
+        "attention": 0.8,
+        "phase": "evening"
+      },
+      {
+        "from": 780,
+        "to": 840,
+        "location": "her_bedroom",
+        "activity": "cleaning",
+        "attention": 0.1,
+        "phase": "evening"
+      },
+      {
+        "from": 840,
+        "to": 1440,
+        "location": "her_bedroom",
+        "activity": "sleeping",
+        "attention": 0.02,
+        "phase": "sleep"
+      }
+    ]
+  },
+  {
+    "day": 2,
+    "blocks": [
+      {
+        "from": 0,
+        "to": 60,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.8,
+        "phase": "wake"
+      },
+      {
+        "from": 60,
+        "to": 180,
+        "location": "attic",
+        "activity": "sitting_with_you",
+        "attention": 0.7,
+        "phase": "morning"
+      },
+      {
+        "from": 180,
+        "to": 420,
+        "location": "outside",
+        "activity": "away",
+        "attention": 0.0,
+        "phase": "absence"
+      },
+      {
+        "from": 420,
+        "to": 480,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.8,
+        "phase": "return"
+      },
+      {
+        "from": 480,
+        "to": 540,
+        "location": "kitchen",
+        "activity": "cooking",
+        "attention": 0.1,
+        "phase": "absence"
+      },
+      {
+        "from": 540,
+        "to": 600,
+        "location": "living_room",
+        "activity": "on_phone",
+        "attention": 0.05,
+        "phase": "absence"
+      },
+      {
+        "from": 600,
+        "to": 720,
+        "location": "attic",
+        "activity": "sitting_with_you",
+        "attention": 0.75,
+        "phase": "evening"
+      },
+      {
+        "from": 720,
+        "to": 840,
+        "location": "living_room",
+        "activity": "watching_tv",
+        "attention": 0.1,
+        "phase": "evening"
+      },
+      {
+        "from": 840,
+        "to": 1440,
+        "location": "her_bedroom",
+        "activity": "sleeping",
+        "attention": 0.02,
+        "phase": "sleep"
+      }
+    ]
+  },
+  {
+    "day": 3,
+    "blocks": [
+      {
+        "from": 0,
+        "to": 60,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.8,
+        "phase": "wake"
+      },
+      {
+        "from": 60,
+        "to": 150,
+        "location": "kitchen",
+        "activity": "cleaning",
+        "attention": 0.15,
+        "phase": "morning"
+      },
+      {
+        "from": 150,
+        "to": 240,
+        "location": "her_bedroom",
+        "activity": "on_phone",
+        "attention": 0.05,
+        "phase": "morning"
+      },
+      {
+        "from": 240,
+        "to": 480,
+        "location": "outside",
+        "activity": "away",
+        "attention": 0.0,
+        "phase": "absence"
+      },
+      {
+        "from": 480,
+        "to": 600,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.85,
+        "phase": "return"
+      },
+      {
+        "from": 600,
+        "to": 780,
+        "location": "attic",
+        "activity": "sitting_with_you",
+        "attention": 0.9,
+        "phase": "evening"
+      },
+      {
+        "from": 780,
+        "to": 1440,
+        "location": "her_bedroom",
+        "activity": "sleeping",
+        "attention": 0.02,
+        "phase": "sleep"
+      }
+    ]
+  }
+]

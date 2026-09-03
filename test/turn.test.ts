@@ -161,6 +161,26 @@ test('meters can come down again — an uneventful hour is a move', () => {
   assert.ok(settled.her.trust > 20, 'trust never recovers');
 });
 
+test('the clock never stops, not even at night', () => {
+  // Sleep is a forced time skip (design doc §12), not a state the player has to guess their
+  // way out of. If every action is refused, refusals cost no time, and the clock freezes —
+  // a menu full of buttons that do nothing, which looks exactly like a working game.
+  let state = start();
+  let frozen = 0;
+  let sawSleep = false;
+
+  for (let turn = 0; turn < 700; turn++) {
+    const before = state.meta.minutesElapsed;
+    state = takeTurn(state, content, { action: 'wait', object: null, place: null }).state;
+    if (state.world.phase === 'sleep') sawSleep = true;
+    frozen = state.meta.minutesElapsed === before ? frozen + 1 : 0;
+    assert.ok(frozen < 5, `the clock stopped during "${state.world.phase}"`);
+  }
+
+  assert.ok(sawSleep, 'never reached the night, so this proved nothing');
+  assert.ok(state.meta.day > 1, 'never reached the next day');
+});
+
 test('her mood is rolled by the world, not by what the player did', async () => {
   // Two different seeds, identical play. If mood only ever came from player actions these
   // would match, and she would read as a mechanism rather than a person (design doc §3).

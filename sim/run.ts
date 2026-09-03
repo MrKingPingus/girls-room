@@ -37,12 +37,14 @@ function cautious(menu: ReturnType<typeof buildMenu>, sheIsHere: boolean) {
 const beatsFired = new Set<string>();
 const rulesWon = new Set<string>();
 const stuck: number[] = [];
+const stalled: number[] = [];
 const byDay = new Map<number, { suspicion: number[]; affection: number[]; trust: number[] }>();
 let totalTurns = 0;
 
 for (let run = 0; run < runs; run++) {
   const seed = run * 7919 + 13;
   let state = newGame(content, { seed });
+  let frozenFor = 0;
 
   for (let turn = 0; turn < maxTurns; turn++) {
     const menu = buildMenu(state, content);
@@ -61,11 +63,21 @@ for (let run = 0; run < runs; run++) {
     if (choice === null) break;
 
     const before = state.meta.day;
+    const clockBefore = state.meta.minutesElapsed;
     const result = takeTurn(state, content, {
       action: choice.action, object: choice.object, place: choice.place,
     });
     state = result.state;
     totalTurns++;
+
+    // A menu full of buttons that all refuse is worse than an empty one: the game looks like
+    // it is working while the clock has stopped and nothing the player presses will ever
+    // change that. Thirty turns without the clock moving is not a player being careful.
+    frozenFor = state.meta.minutesElapsed === clockBefore ? frozenFor + 1 : 0;
+    if (frozenFor >= 30) {
+      stalled.push(seed);
+      break;
+    }
 
     for (const beat of result.beats) beatsFired.add(beat.id);
     if (result.trace.ruleId !== null) rulesWon.add(result.trace.ruleId);
@@ -92,7 +104,8 @@ console.log(`\n  ${runs} runs, ${totalTurns} turns, ${policyName} policy\n`);
 
 console.log(`  beats fired    ${beatsFired.size}/${Object.keys(content.beats).length}`);
 console.log(`  rules won      ${rulesWon.size}/${content.reactions.length}`);
-console.log(`  stuck runs     ${stuck.length}`);
+console.log(`  stuck runs     ${stuck.length}   (nothing to press)`);
+console.log(`  stalled runs   ${stalled.length}   (buttons that never move the clock)`);
 
 if (deadBeats.length > 0) {
   console.log(`\n  DEAD BEATS (${deadBeats.length}) — nothing ever reached these.`);
@@ -123,4 +136,8 @@ console.log('');
 // A stuck run is always a bug: the player is looking at a screen with nothing to press.
 // Dead beats are reported, not fatal — some refusals exist for renderers that don't exist yet
 // (a parser, or the point-and-click layer) and cannot be reached from a verb menu.
-if (stuck.length > 0) process.exit(1);
+if (stalled.length > 0) {
+  console.log(`  STALLED SEEDS: ${stalled.slice(0, 10).join(', ')}`);
+}
+
+if (stuck.length > 0 || stalled.length > 0) process.exit(1);

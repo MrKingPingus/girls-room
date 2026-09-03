@@ -38,7 +38,9 @@ export function run(
   const action = content.actions.find((def) => def.id === input.action);
   if (action === undefined) return { ok: false, reason: 'unknown_action' };
 
-  if (state.world.phase === 'sleep' && input.action !== 'rest') {
+  // Asleep, you can still lie there, listen, and look at the ceiling — those pass time, and
+  // time has to keep moving or the game stops dead. It is your hands that are unavailable.
+  if (state.world.phase === 'sleep' && isHandsOn(action.effect)) {
     return { ok: false, reason: 'asleep' };
   }
 

@@ -118,26 +118,46 @@ each other and do not know each other exists. Adding a system = adding a stage.
 1. VALIDITY     Can this action happen? (reach, mobility, phase, object state)
                 Failure returns a beat explaining why — failure is content, not an error.
 
-2. EFFECTS      Apply the mechanical result. Move objects, spend time, change flags.
+2. EFFECTS      Apply the mechanical result *in the room*. Move objects, spend the clock,
+                set player knowledge, log the action and any claim made.
 
-3. DETECTION    Does she notice? Roll/threshold against her.attention, concealment,
-                noise of the action, and how long until she next enters.
+3. WORLD        Time and the world move on, with or without you. Roll the day over, advance
+                her through her schedule, roll her mood, run her own stress, heal or hurt the
+                body, heat or cool the attic, recompute the light.
+                Owns everything that is not the room and not a meter.
+
+4. NOISE        How loud was that, and what cover was there? Resolves the action's noise
+                against her own noise (water, TV, her footsteps) and the floor between you.
+
+5. DETECTION    Does she notice? Rolls against her.attention, concealment, the noise result,
+                and the change tier (§7a of the design doc). Also promotes anything on the
+                pending queue whose moment has now arrived, and re-baselines what she saw.
                 Emits: unnoticed | noticed_now | noticed_later.
 
-4. APPRAISAL    Convert what happened into affection/suspicion deltas.
-                The ONLY stage allowed to write to her.affection / her.suspicion.
+6. APPRAISAL    Convert what happened into affection / trust / suspicion / disposition deltas.
+                Runs the rule query (§6) and applies the winning rule's `effects`, then hands
+                the winning rule id forward. The ONLY stage allowed to move a meter.
 
-5. REACTION     Query the rule database (§6) for her response. May return nothing.
+7. REACTION     Resolve the winning rule id into her response. May return nothing.
 
-6. BEATS        Assemble beats from the above. Presentation assembled here and nowhere else.
+8. BEATS        Assemble beats from the above. Presentation assembled here and nowhere else.
 ```
 
-Two rules that keep this clean:
+**Why WORLD is its own stage.** Her mood, her whereabouts, and the weather must be able to
+change for reasons that have nothing to do with the player (design doc §3 — if every mood
+traces to a player action she reads as a mechanism). Folding this into EFFECTS would make
+"the world reacting to you" the path of least resistance every time we author. Separating it
+makes "her life happens without you" structural rather than a thing we have to remember.
+
+Three rules that keep this clean:
 
 - **Single-writer principle.** Each field of state has exactly one stage permitted to write it.
-  Write it down in a table. When something changes unexpectedly, you have one suspect.
-- **Deferred consequences.** `noticed_later` doesn't fire now — it pushes onto a pending queue
-  checked when she next enters. The delay between the act and the discovery *is* the dread.
+  The table is §5a. When something changes unexpectedly, you have one suspect.
+- **Deferred consequences.** `noticed_later` doesn't fire now — it pushes onto `state.pending`,
+  checked by DETECTION once she is back in the room. The delay between the act and the
+  discovery *is* the dread.
+- **Rules propose, owners dispose.** A reaction rule's `effects` block is applied by APPRAISAL,
+  which owns the meters — never by REACTION. REACTION only turns the selected rule into beats.
 
 ---
 

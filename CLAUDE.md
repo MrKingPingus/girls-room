@@ -98,7 +98,7 @@ Never put presentation information inside prose. `"She looks annoyed"` is wrong;
 ### 6. The pipeline is ordered and stages don't call each other
 
 ```
-VALIDITY -> EFFECTS -> NOISE -> DETECTION -> APPRAISAL -> REACTION -> BEATS
+VALIDITY -> EFFECTS -> WORLD -> NOISE -> DETECTION -> APPRAISAL -> REACTION -> BEATS
 ```
 
 Each stage is `(state, ctx) => diff`. Stages never import or invoke one another. Adding a

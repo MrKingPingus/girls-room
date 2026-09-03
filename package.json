@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test 'test/**/*.test.ts'",
     "check": "npm run typecheck && npm test",
-    "sim": "node sim/run.ts"
+    "sim": "node sim/run.ts",
+    "play": "node app/play.ts"
   },
   "devDependencies": {
     "@types/node": "^22.20.1",

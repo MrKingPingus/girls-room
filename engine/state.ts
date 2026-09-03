@@ -71,14 +71,34 @@ export type Temperature = 'cold' | 'cool' | 'comfortable' | 'warm' | 'hot';
 /** Seen through the dormer window. Feeds her mood without the player causing it. */
 export type Weather = 'clear' | 'overcast' | 'rain' | 'snow';
 
-/** Design doc §3. This scene. Volatile. The POC uses the first four. */
-export type Mood = 'warm' | 'excited' | 'irritable' | 'angry' | 'sad' | 'suspicious';
+/**
+ * Design doc §3. This scene. Volatile, rolled fresh, always has a visible tell.
+ * The POC ships the first four.
+ *
+ * There is deliberately no 'suspicious' mood: suspicion is a 0-100 meter, and having both
+ * would make mood a readout of a meter instead of something rolled. High suspicion plus any
+ * mood is what produces searching behaviour, as a criterion in the rule database.
+ */
+export type Mood =
+  | 'warm'       // baseline. Sits down, unhurried
+  | 'excited'    // talks fast, brought something. Misses small changes
+  | 'irritated'  // straightens objects. More critical, short visit
+  | 'angry'      // comes up fast, stairs loud. Actively inspects
+  | 'sad'        // doesn't turn the lamp on. Stays a long time — the absence window closes
+  | 'worried';   // checks on you unprompted, off-schedule. Kindness as surveillance
 
 /**
- * Design doc §3. This month. Slow. Biases which moods are likely without deciding them.
- * PROPOSED SET — the design doc names the axis but never lists the values. Needs sign-off.
+ * Design doc §3. This month. Slow, hidden from the player, biases which moods are likely
+ * without deciding them. These four are her model of the situation, from intact to failing —
+ * design doc §3: cruelty is what happens when that model is threatened.
+ *
+ * Moves slowly and mostly downward; climbing back out of 'brittle' should cost real work.
  */
-export type Disposition = 'adoring' | 'warm' | 'unsettled' | 'hardened';
+export type Disposition =
+  | 'devoted'    // certain of you. Rolls warm and excited — and never leaves the room
+  | 'content'    // settled, nothing to examine. THE STARTING STATE
+  | 'unsettled'  // something doesn't add up. Rolls worried and irritated
+  | 'brittle';   // actively threatened. Rolls angry and sad. Where cruelty lives
 
 /** Design doc §2b. Where she is in the house, which is what noise thresholds key off. */
 export type HouseLocation =

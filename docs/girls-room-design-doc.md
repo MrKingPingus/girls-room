@@ -142,23 +142,63 @@ happening down there.
 ### Mood vs disposition
 
 **Mood is this scene. Disposition is this month.** Disposition biases which moods are likely
-without determining them, so a warm disposition rarely rolls angry but the day-to-day still
+without determining them, so an adoring disposition rarely rolls angry but the day-to-day still
 surprises. Player actions mostly move disposition; mood is rolled against it plus her own
 external state.
 
-Mood effects, per your list:
+### Moods — the six
 
-| Mood | Perception | Time in room | Response timer | Tell |
-|---|---|---|---|---|
-| Excited | Less critical — misses tier 1–2 changes | Short, restless | Generous | Talks fast, brought something |
-| Warm | Baseline | Normal | Generous | Sits down, unhurried |
-| Sad | Slightly less critical | **Long** — the absence window closes | Generous but heavy | Doesn't turn the lamp on |
-| Irritable | More critical | Short | Tight | Straightens objects |
-| Angry | **Much** more critical, actively inspects | Variable | **Very tight** | Comes up fast, stairs loud |
-| Suspicious | Actively searching, not just noticing | Long | Tight | Quiet. Doesn't announce herself |
+POC ships the first four. She is a simple yandere leaning nice from the outset, so **Warm is
+the floor, not the ceiling** — most days start somewhere pleasant and the horror is what she
+does from there.
+
+| Mood | POC | Perception | Time in room | Response timer | Tell |
+|---|---|---|---|---|---|
+| Warm | ✓ | Baseline | Normal | Generous | Sits down, unhurried |
+| Excited | ✓ | Less critical — misses tier 1–2 changes | Short, restless | Generous | Talks fast, brought something |
+| Irritated | ✓ | More critical | Short | Tight | Straightens objects |
+| Angry | ✓ | **Much** more critical, actively inspects | Variable | **Very tight** | Comes up fast, stairs loud |
+| Sad | | Slightly less critical | **Long** — the absence window closes | Generous but heavy | Doesn't turn the lamp on |
+| Worried | | More critical, but about *you*, not the room | **Long**, and she comes up off-schedule | Generous | Checks on you unprompted. Asks how you're feeling twice |
+
+**Worried is the mood that makes her frightening while she is being kind.** It shortens absences
+without a single hostile line, and it's the one where the player first understands that being
+cared for and being watched are the same activity.
+
+**Two cuts from the earlier list, with reasons:**
+
+- **Suspicious — cut as a mood.** Suspicion is already a 0–100 meter. Having both means mood
+  becomes a readout of a meter instead of something rolled, and the two would drift into
+  contradiction ("she's in a warm mood but her suspicion is 90 — which is it?"). High suspicion
+  plus *any* mood already produces the searching behaviour; that's a criterion in the rule
+  database, not a seventh mood. This also frees `Worried` to be the caring one.
+- **Depressed — moved to disposition.** Sad is a scene. Depressed is a month. It's the same
+  distinction this section is built on, so it belongs one layer down.
 
 **Every mood needs a diegetic tell.** A hidden system with no visible surface is
 indistinguishable from randomness, and players will call it unfair. The tells *are* the game.
+
+### Dispositions — the four
+
+Not shown to the player, ever. This is the weather system that decides which moods are likely.
+A run starts at **Content** — she is nice, settled, and unremarkable, which is the whole trap.
+
+Design doc §3 says cruelty is what happens when her model of the situation is threatened. These
+four are that model, from intact to failing.
+
+| Disposition | Her model of you | Biases toward | The danger |
+|---|---|---|---|
+| **Devoted** | Certain. You are hers and you're staying | Warm, Excited | Not anger — *attention*. She has no reason to leave the room |
+| **Content** | Settled. Nothing to examine. **Starting state** | Warm, Irritated | It's the baseline everything else is read against |
+| **Unsettled** | Something doesn't add up and she can't name it | Worried, Irritated | Worry becomes surveillance without ever becoming hostility |
+| **Brittle** | Actively threatened. She is holding it together | Angry, Sad | Where cruelty lives. Small things trigger disproportionate scenes |
+
+**Disposition moves slowly and mostly downward.** Recovering from Brittle should cost the player
+real, sustained work — that asymmetry is what makes a bad week feel like a bad week rather than
+a bad afternoon.
+
+*(POC realistically only travels Content ↔ Unsettled, with Brittle reachable on a bad run.
+Devoted needs the affection curve of a longer game.)*
 
 ---
 
@@ -506,7 +546,7 @@ Standard: content warnings up front, jumpscare toggle, skip for repeated care-lo
 - **Three days**, forced conclusion
 - **One mobility transition:** tier 0 → tier 1
 - **Meters:** affection, trust, suspicion. Confidence deferred
-- **Four moods** with tells: warm, excited, irritable, angry
+- **Four moods** with tells: warm, excited, irritated, angry
 - **Objects:** nightstand, lamp, clock, water glass, pill bottle, journal, her chair, under the bed
 - **Care loop:** one meal, one medication scene per day
 - **Detection:** sight and noise. Claims ledger deferred
@@ -546,8 +586,9 @@ architecture spec.
 - Reach moved out of state and into content, attached to *places* rather than objects — the same
   book is tier 0 on the nightstand and tier 2 on the dresser.
 - Mobility tiers are 0–3, matching §2e. The architecture spec previously said 0–4.
-- `Disposition`'s actual values (`adoring` / `warm` / `unsettled` / `hardened`) are a proposal.
-  This doc names the axis but never lists the values. **Needs a decision.**
+- ~~`Disposition`'s actual values are a proposal.~~ Settled in §3: `devoted` / `content` /
+  `unsettled` / `brittle`, starting at `content`. Moods settled at six, POC four, with
+  `suspicious` cut (it duplicates the meter) and `worried` added.
 
 ---
 

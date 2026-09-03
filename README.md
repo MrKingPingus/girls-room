@@ -17,7 +17,24 @@ npm run dev      # the clickable build, in a browser. This is the one you want
 npm run play     # the same game in a terminal
 npm run check    # typecheck + tests
 npm run sim      # play it 500 times with nobody watching, and report what broke
+npm run replay -- <seed> <moves...>   # put a reported run back on screen
 ```
+
+## Reporting a problem you hit while playing
+
+In the game, **Report a problem** at the bottom. Write down what looked wrong, then download it
+or copy it. The file has the transcript, the reasoning behind each turn (which rule fired,
+whether she noticed, what the meters did), the whole save, and — the part that matters — a
+**replay line**:
+
+```
+npm run replay -- 813218377 wait wait look:her open:drawer
+```
+
+Because the engine is pure and every roll comes from the seed, that command reproduces the run
+move for move: same moods, same detection rolls, same everything. A replayed transcript is
+byte-for-byte identical to the reported one, so it can be diffed. That turns "she did something
+odd around lunchtime" into a thing anyone can put back on screen in one command.
 
 `npm run sim` is not optional after changing anything in `engine/` or `content/`. In a game
 made of interacting rules you cannot find the gaps by playing — a rule that stopped firing

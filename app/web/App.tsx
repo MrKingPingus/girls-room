@@ -21,6 +21,7 @@ import { clockFace } from '../../engine/clock.ts';
 import { buildRoomMenu, type MenuEntry } from '../../render/menu.ts';
 import { loadBundledContent } from '../content.ts';
 import * as saves from '../save.ts';
+import { buildReport, describeMove, type RecordedTurn } from '../report.ts';
 
 const content = loadBundledContent();
 const LAST_DAY = 3;
@@ -53,6 +54,13 @@ export default function App() {
   );
   const [log, setLog] = useState<LogEntry[]>([]);
   const [openThing, setOpenThing] = useState<string | null>(null);
+
+  // Every turn, kept for the test report. Not game state — it never affects a run, and it is
+  // deliberately not saved: a report is about the session you just played.
+  const [recording, setRecording] = useState<RecordedTurn[]>([]);
+  const [note, setNote] = useState('');
+  const [reporting, setReporting] = useState(false);
+  const [copied, setCopied] = useState(false);
   const bottom = useRef<HTMLDivElement>(null);
 
   useEffect(() => { saves.save(state); }, [state]);
@@ -66,6 +74,20 @@ export default function App() {
       action: entry.action, object: entry.object, place: entry.place,
     });
     setState(turn.state);
+    setRecording((previous) => [
+      ...previous,
+      {
+        input: { action: entry.action, object: entry.object, place: entry.place },
+        // Worded from the content, not from the button, so a replay of this report produces a
+        // transcript that diffs cleanly against it.
+        label: describeMove(content, {
+          action: entry.action, object: entry.object, place: entry.place,
+        }),
+        beats: turn.beats,
+        trace: turn.trace,
+        after: turn.state,
+      },
+    ]);
 
     const you = describe(entry);
     setLog((previous) => {
@@ -85,7 +107,35 @@ export default function App() {
     saves.clear();
     setState(newGame(content, { seed: freshSeed() }));
     setLog([]);
+    setRecording([]);
+    setNote('');
     setOpenThing(null);
+  }
+
+  const report = () => buildReport({
+    seed: state.meta.seed, turns: recording, final: state, note,
+  });
+
+  async function copyReport() {
+    try {
+      await navigator.clipboard.writeText(report());
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  function downloadReport() {
+    const blob = new Blob([report()], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `girls-room-${state.meta.seed}-${recording.length}turns.md`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   return (
@@ -204,8 +254,36 @@ export default function App() {
 
       <div className="footer">
         <span>seed {state.meta.seed}</span>
+        <span>{recording.length} turns</span>
         <button onClick={restart}>Start again</button>
+        <button onClick={() => setReporting(!reporting)}>
+          {reporting ? 'Close report' : 'Report a problem'}
+        </button>
       </div>
+
+      {reporting && (
+        <div className="report">
+          <p>
+            This writes down everything that happened, including the seed — which means the run
+            can be replayed move for move, exactly as you saw it.
+          </p>
+          <textarea
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder="What looked wrong? (optional)"
+            rows={3}
+          />
+          <div className="row">
+            <button onClick={downloadReport} disabled={recording.length === 0}>
+              Download report
+            </button>
+            <button onClick={copyReport} disabled={recording.length === 0}>
+              {copied ? 'Copied' : 'Copy to clipboard'}
+            </button>
+          </div>
+          {recording.length === 0 && <p className="muted">Play a turn or two first.</p>}
+        </div>
+      )}
     </div>
   );
 }

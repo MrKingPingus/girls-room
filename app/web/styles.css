@@ -153,6 +153,34 @@ button.person:hover { border-color: var(--her); }
 
 .over { padding: 20px; border: 1px solid var(--warn); color: var(--warn); }
 
+/* Not part of the game. Kept plainly separate from it. */
+.report {
+  padding: 16px;
+  border: 1px dashed var(--panel-edge);
+  background: #171412;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.report p { margin: 0; font-size: 14px; color: var(--ink-dim); }
+.report .muted { font-size: 13px; }
+
+.report textarea {
+  font: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-radius: 2px;
+  padding: 10px;
+  resize: vertical;
+  width: 100%;
+}
+
+.report textarea:focus-visible { outline: 2px solid var(--her); outline-offset: 1px; }
+button:disabled { opacity: 0.4; cursor: default; }
+
 .fatal {
   margin: 40px auto;
   max-width: 760px;

@@ -551,6 +551,7 @@ Standard: content warnings up front, jumpscare toggle, skip for repeated care-lo
 - **Care loop:** one meal, one medication scene per day
 - **Detection:** sight and noise. Claims ledger deferred
 - **Journal:** manual entry, and she reads it
+- **Talking:** proposed in §19, not built. Two verbs exist
 - **Three endings:** death, one escape attempt, one stay
 
 **Build the ugly version first.** Clickable text boxes, object and action descriptions, no
@@ -589,6 +590,89 @@ architecture spec.
 - ~~`Disposition`'s actual values are a proposal.~~ Settled in §3: `devoted` / `content` /
   `unsettled` / `brittle`, starting at `content`. Moods settled at six, POC four, with
   `suspicious` cut (it duplicates the meter) and `worried` added.
+
+---
+
+## 19. Talking to her — PROPOSED, not built
+
+Wanted: an option to simply talk to her whenever she's in the room. Ask questions, get to know
+her. This is the shape proposed for the POC. **Nothing here is built** except the two verbs that
+already exist (`watch_her`, `thank_her`).
+
+### The constraint everything else follows from
+
+Saying a nice thing cannot be a source of affection.
+
+This is not hypothetical. `thank_her` shipped as +6 affection, repeatable, two minutes a go —
+and thanking her forty times took affection and trust from 40/50 to **100/100 in eighty in-game
+minutes**. One button, pressed until the game was won. Any conversation system is that same
+button with more words on it unless it is designed against this from the start.
+
+Fixed for the two existing verbs: **a topic pays once.** Saying it again is her noticing you
+already said it. Read off `history`, so nothing new is stored and nothing new is owned.
+
+### Three principles
+
+1. **A topic pays once.** The first time you ask is the content. Asking again is a different,
+   flatter beat — and it is *her* noticing, which is characterisation rather than a cooldown.
+2. **Topics unlock from knowledge, not from a tree.** An action can declare
+   `requiresKnown: FactId[]` and `teaches: FactId[]`. Knowing a thing is what makes the next
+   question askable. This is §3's "learning who she is *is* the progression system" made
+   mechanical, and it is a ladder rather than a branching script — no dialogue tree to author,
+   maintain, or get lost in.
+3. **Asking is not free.** The interesting questions cost trust or spike suspicion, scaled by
+   mood and by how much she already trusts you. A conversation you can have for nothing is one
+   with no decisions in it.
+
+### Three kinds of topic
+
+| Kind | Costs | Pays | Availability |
+|---|---|---|---|
+| **Small talk** | nothing | almost nothing | always |
+| **About her** | little, at good trust | knowledge, and warmth | unlocked by what you know |
+| **About the situation** | trust, suspicion | the escape track | always, and always a risk |
+
+The third is the one with the game in it — *how long am I here · does anyone know where I am ·
+whose clothes are in the dresser*. These are how the player probes, and each one is a small bet.
+Asking several in one visit should compound: she notices a direction of travel.
+
+The second is the progression spine, and it is where §4's per-class knowledge does its work.
+The Family Friend starts able to ask things the Mailman cannot.
+
+### What this needs
+
+Two content fields (`requiresKnown`, `teaches`) and one engine branch — the action grants what
+it teaches, checked in VALIDITY, applied in EFFECTS, which already owns `player.knows`. **No new
+state field, no new stage, and no new universal verb.** Topics are contextual verbs bound to her,
+which design doc §13 says are free to add.
+
+Answers come out of the rule database keyed on trust, mood and day like everything else, so a
+topic that needs a special moment gets a rule and everything else falls through to a catch-all.
+
+### What this defers
+
+- **The claims ledger (§7c).** `her.claims` stays in state and stays unused. Contradiction
+  checking needs the player to be *asserting* things, not just asking, and that is the dialogue
+  mode proper.
+- **A real dialogue mode.** With prompts, response timers, and the confidence register. The beat
+  schema already reserves `prompt` and `register` for it; nothing reads them yet.
+- **Anything free-text.** No parser, no typing.
+
+### The scaling limit, stated up front
+
+Topics as contextual verbs means one button each on her. Eight is comfortable. Twelve is a wall
+of buttons and the point at which this stops being adequate — that is the signal to build the
+dialogue mode, not a failure of the stopgap. Shaped this way so the mode inherits the topics
+rather than replacing them.
+
+### Open
+
+1. Does asking a probing question at low trust get an **answer** at all, or a deflection that
+   still costs? (Deflection is more her, and cheaper to author.)
+2. Do topics reset per day, or per run? Per day makes conversation a daily resource; per run
+   makes knowledge feel like ground gained.
+3. Is there a "just sit with her" that pays a little and costs a little — the intimacy route's
+   floor? The §5 tax means the reward is also more attention.
 
 ---
 

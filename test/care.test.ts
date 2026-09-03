@@ -152,6 +152,22 @@ test('the player can never choose to be offered care', () => {
   }
 });
 
+test('saying a nice thing twice is not saying two nice things', () => {
+  // Before this, thanking her forty times took affection and trust from 40/50 to 100/100 in
+  // eighty in-game minutes. Anything that costs nothing to say cannot be a source of affection,
+  // or the fastest way to play the game is to press one button until it stops going up.
+  const once = takeTurn(start(), content, { action: 'thank_her', object: 'her', place: null });
+  assert.ok(once.state.her.affection > start().her.affection, 'a sincere thanks stopped landing');
+
+  let spammed = start();
+  for (let i = 0; i < 40; i++) {
+    spammed = takeTurn(spammed, content, { action: 'thank_her', object: 'her', place: null }).state;
+  }
+  assert.ok(spammed.her.affection <= once.state.her.affection,
+    'repeating a pleasantry compounds, so affection can be farmed');
+  assert.ok(spammed.her.trust <= once.state.her.trust + 1, 'trust can be farmed the same way');
+});
+
 test('she is a person, not furniture', () => {
   const { state } = untilSheOffers();
   for (const action of ['take', 'move', 'hide', 'open']) {

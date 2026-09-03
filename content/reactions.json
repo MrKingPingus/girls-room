@@ -1814,5 +1814,27 @@
     "beats": [
       "f_she_isnt_here"
     ]
+  },
+  {
+    "id": "thank_repeat",
+    "action": "thank_her",
+    "when": {
+      "repeated": true
+    },
+    "beats": [
+      "thanks_again"
+    ],
+    "weight": 10
+  },
+  {
+    "id": "watch_repeat",
+    "action": "watch_her",
+    "when": {
+      "repeated": true
+    },
+    "beats": [
+      "watch_again"
+    ],
+    "weight": 10
   }
 ]

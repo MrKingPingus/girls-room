@@ -466,5 +466,17 @@
     "text": "She takes your wrist and turns it over. Neither of you says anything.",
     "pose": "bedside",
     "advancesClock": true
+  },
+  "thanks_again": {
+    "speaker": "her",
+    "text": "\"You've said.\"",
+    "pose": "turned_away",
+    "advancesClock": true
+  },
+  "watch_again": {
+    "speaker": "narrator",
+    "text": "She's doing what she was doing before.",
+    "pose": "turned_away",
+    "advancesClock": true
   }
 }

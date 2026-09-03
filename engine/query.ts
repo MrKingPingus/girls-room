@@ -28,6 +28,12 @@ export function suspicionTier(suspicion: number): 0 | 1 | 2 | 3 {
   return 0;
 }
 
+/** How many times this action happened in the last so-many minutes, this turn included. */
+function countRecent(state: GameState, action: string, minutes: number): number {
+  const since = state.meta.minutesElapsed - minutes;
+  return state.history.filter((entry) => entry.type === action && entry.at >= since).length;
+}
+
 export function buildQuery(
   state: GameState,
   content: ContentBundle,
@@ -90,6 +96,15 @@ export function buildQuery(
 
     // History she can draw on
     times_caught: state.history.filter((entry) => entry.seen).length,
+
+    /**
+     * Whether the player has already done this, recently. Nothing that costs her something to
+     * say should pay the same twice in a row: without this, saying a nice thing is a button
+     * that prints affection, and the fastest way to play is to press it a hundred times.
+     *
+     * Read off the history log, so there is nothing new to store and nothing new to own.
+     */
+    repeated: countRecent(state, parts.action, 90) > 1,
   };
 
   if (parts.object !== null) {

@@ -75,31 +75,82 @@ Notes:
 
 The engine returns an array of beats. This is the *only* thing the renderer sees.
 
+**The authoritative definition is `engine/beat.ts`.** Sketch:
+
 ```js
 {
   id: "drawer_caught_01",
-  speaker: "her",              // her | narrator | player_thought
+  speaker: "her",                    // her | narrator | player_thought
   text: "You were in my drawer.",
 
-  portrait: { mood: "cold", pose: "doorway" },
-  scene:    { location: "bedroom", time: "night", light: "lamp" },
-  audio:    { music: "dread_low", sfx: ["door_close"] },
+  portrait: { onScreen: true, mood: "angry", pose: "stairwell" },
+  scene:    { location: "attic", light: "lamp", timeOfDay: "night", weather: "rain" },
+  audio:    { music:    { kind: "play", cue: "dread_low" },
+              ambience: { kind: "stop" },
+              sfx:      ["stair_creak"] },
 
-  tags: ["discovery", "suspicion_spike"],
-  choices: [ { id: "deny", label: "\"I wasn't.\"", requires: {} } ]
+  advancesClock: true,
+  register: null,                    // v2 — confidence variants. Nothing reads it
+
+  prompt: {
+    choices: [ { id: "deny", label: "\"I wasn't.\"", requires: {} } ],
+    timer: { kind: "mood_scaled" }
+  }
 }
 ```
 
-**Text renderer** prints `speaker` + `text`, renders `choices`, ignores the rest.
-**VN renderer** reads `portrait` to pick a sprite, `scene` for the background, `audio` for the mix.
+**Text renderer** prints `speaker` + `text`, renders the prompt, ignores the rest.
+**VN renderer** reads `portrait` for the sprite, `scene` for the background, `audio` for the mix.
 
 Fill in `portrait` / `scene` / `audio` on every beat starting with beat #1, even though nothing
 consumes them for months. They cost you five seconds each now and are unrecoverable later —
 you will not go back and re-mood four hundred beats.
 
+### The fields that aren't obvious
+
+- **`portrait` is a union, not a nullable field.** `{ onScreen: false }` has to be written on
+  purpose. Leaving her off the screen is a decision, not a default.
+- **`portrait.mood` is one of her six real moods**, never free text. Open text here would make
+  the sprite list unbounded and the manifest below a guess; it also stops a beat rendering her
+  cold while the simulation thinks she's warm.
+- **`scene.location` stays even though there is one room.** A second location is planned. It is
+  typed as a list with one entry, so adding the second is a one-word change that immediately
+  makes the compiler check every beat in the game — and prices the new location in backgrounds
+  before anything is commissioned.
+- **`scene.timeOfDay` is visual time, not narrative time.** `world.phase` says where we are in
+  the day's structure; this says what the light through the dormer looks like.
+- **`audio.ambience` is not decoration.** Design doc §2b: your floor is her ceiling, and sound
+  is the player's only instrument for tracking her during an absence. Water, the television,
+  the back door, her weight on the stairs. It carries information, so it is a first-class field.
+- **`audio` directions are spelled out** — `unchanged`, `play`, `stop` — because "leave the
+  music alone" and "cut the music" are different instructions and horror needs to say the
+  second one deliberately.
+- **`advancesClock`** implements design doc §12: time passes always, except during dialogue
+  that doesn't need a response. Only the last line before a prompt moves the clock, so a slow
+  reader is never punished for reading.
+- **`prompt.timer`** is `none`, `mood_scaled` (the default — length comes from her mood), or
+  `dramatic`. The accessibility contract is that a global multiplier applies to everything and
+  the disable switch removes every timer except `dramatic` ones. More than two or three
+  `dramatic` beats in the whole game is a design smell.
+- **`register`** is reserved for the confidence system (design doc §6). Nothing reads it. It
+  exists now so we are not re-tagging hundreds of beats in v2, which is this file's entire job.
+
+### Cut from the draft
+
+- **`tags: []`.** Nothing specified what tags were for or who read them. An untyped free-text
+  list is where typos go to hide. Add it back when something actually needs it.
+
 **Payoff:** your art manifest is derivable. Walk the content files, collect every distinct
-`portrait.mood` and `scene` combination, and you have an exact sprite and background list —
-before you draw anything. That number is also your reality check on scope.
+combination, and you have an exact list before you draw anything:
+
+```
+backgrounds = locations x light states     1 x 3 = 3 today, 6 with the second location
+              (timeOfDay and weather are overlays and tints, not new paintings)
+sprites     = moods x poses                6 x 5 = 30 ceiling, fewer in practice
+```
+
+That number is also your reality check on scope. If either comes back frightening, cut a pose
+or a light state now, while it costs a find-and-replace instead of a commission.
 
 ---
 

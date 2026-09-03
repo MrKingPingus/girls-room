@@ -572,8 +572,8 @@ architecture spec.
   see §3 of this doc, "she is never a vending machine." Pipeline is now eight stages.
 - ~~Add `her.location` tracking below-decks, since noise thresholds depend on it.~~ Done,
   with `her.activity` alongside it, since her own noise is the player's cover.
-- Beats need a `confidence` field so the renderer can select register variants. **Outstanding** —
-  the beat schema hasn't been written yet.
+- ~~Beats need a `confidence` field so the renderer can select register variants.~~ Done, as
+  `register` on the beat. Reserved and unread, like `player.confidence`.
 - Verification actions (`listen`, `check clock`) need explicit time costs in `actions.json`.
   **Outstanding** — content files don't exist yet.
 - ~~Single-writer table needs: confidence, baseline, claims, needs, pain, location.~~ All present.

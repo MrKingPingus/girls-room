@@ -1,0 +1,15 @@
+# Cloudflare Pages serves these with every response.
+#
+# The page is entirely self-contained — no fonts, no analytics, no CDN, nothing fetched from
+# anywhere. So it can be locked down to exactly that, and anything that later tries to reach
+# off-site will fail loudly in the console instead of quietly working.
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()
+
+# Vite fingerprints these filenames, so they can be cached forever.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

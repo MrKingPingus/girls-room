@@ -1,0 +1,10 @@
+# Cloudflare Pages.
+#
+# Keeping this in the repo means the deploy settings are version-controlled rather than living
+# only in a dashboard nobody can diff. The Pages git integration reads it; `wrangler pages
+# deploy` uses it too, if you ever deploy by hand.
+#
+# The repo can stay private. Cloudflare Pages builds private repos on the free plan.
+
+name = "girls-room"
+pages_build_output_dir = "dist"

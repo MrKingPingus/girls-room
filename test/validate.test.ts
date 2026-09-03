@@ -31,7 +31,7 @@ function validBundle(): Record<string, unknown> {
     ],
     actions: UNIVERSAL_VERBS.map((id) => ({
       id, name: id, universal: true, timeCost: 1, noise: 'low',
-      concealable: false, target: 'object',
+      effect: 'none', concealable: false, target: 'object',
     })),
     reactions: UNIVERSAL_VERBS.map((id) => ({
       id: `fallback_${id}`, action: id, when: {}, beats: [`b_${id}`],
@@ -150,7 +150,7 @@ test('a ninth universal verb is refused', () => {
   const report = problemsFor((b) => {
     (b['actions'] as unknown[]).push({
       id: 'lie', name: 'lie', universal: true, timeCost: 1, noise: 'silent',
-      concealable: true, target: 'none',
+      effect: 'none', concealable: true, target: 'none',
     });
   });
   assert.match(report, /"lie" is marked universal but is not one of the locked eight/);

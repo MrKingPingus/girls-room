@@ -357,19 +357,37 @@ Hand-author the twenty beats players will screenshot; let the table cover the ot
 All of it data, none of it code. Content is added without touching `engine/`.
 
 ```
-content/objects.json     id, reach, states, what actions apply
-content/actions.json     verbs, time cost, noise, concealability
+content/places.json      id, reach tier, concealment, noise modifier
+content/objects.json     id, where it starts, container/portable, change tier, contextual verbs
+content/actions.json     verbs, time cost, noise, concealability, target shape
 content/reactions.json   the rule database (§6)
-content/beats.json       beat id -> text + portrait/scene/audio tags
-content/schedule.json    her routine per day — when she enters, how long, attention level
+content/beats.json       beat id -> text + pose + clock + prompt
+content/schedule.json    her routine per day — where she is, what she's doing, attention level
 ```
 
 Keep `beats.json` separate from `reactions.json`. Rules reference beats by id. This means
 rewriting a line never risks breaking logic, and a translator or editor can work in one file.
 
+**`places.json` is separate from `objects.json` because reach belongs to the place.** The same
+book is tier 0 on the nightstand and tier 2 on the dresser. Objects carry a location; places
+carry a reach tier; raising mobility unlocks a whole tier at once.
+
+**Beats are authored smaller than they are rendered.** An author writes text, speaker, pose,
+whether the clock moves, and the prompt. Her mood, the light, the weather and the time of day
+are stamped on automatically by the last pipeline stage, because the simulation already knows
+them. This makes hard rule 5 structural: it is not possible to author a beat with missing or
+contradictory presentation tags. `pose` is the exception — nothing in state knows where in the
+room she is standing, so that is always authored.
+
 Validate content on load against a schema. A typo'd object id should fail loudly at startup,
 not silently produce a rule that never fires — silent non-firing is nearly undebuggable in a
-system this size.
+system this size. `engine/validate.ts` does this, reports every problem at once rather than
+stopping at the first, and additionally proves:
+
+- all eight universal verbs exist, and nothing else claims to be universal
+- every action has exactly one catch-all rule, so the game can never produce nothing (§6)
+- her schedule has no gaps or overlaps
+- no beat is unreachable by any rule (a warning — it is usually a typo'd criterion)
 
 ---
 

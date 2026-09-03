@@ -12,6 +12,8 @@
 
 import type { GameState } from './../state.ts';
 import type { ContentBundle, ScheduleBlock } from './../content.ts';
+import type { TurnInput } from './../turn.ts';
+import type { ValidityResult } from './validity.ts';
 import type { Disposition, Mood } from './../vocab.ts';
 import { dayOf, minuteOfDay, timeOfDay } from './../clock.ts';
 import { pickWeighted, roll } from './../random.ts';
@@ -48,7 +50,9 @@ function blockAt(content: ContentBundle, day: number, minute: number): ScheduleB
     ?? null;
 }
 
-export function run(state: GameState, content: ContentBundle): GameState {
+export function run(
+  state: GameState, content: ContentBundle, input: TurnInput, validity: ValidityResult,
+): GameState {
   const { meta } = state;
   const minute = meta.minutesElapsed;
   const day = dayOf(minute);
@@ -93,11 +97,32 @@ export function run(state: GameState, content: ContentBundle): GameState {
   // progression spine. Medication speeds it and clouds the narrator (design doc §8).
   const minutesPassed = Math.max(0, minute - lastMinute(state));
   const healing = minutesPassed * (0.0015 + state.player.medication.inSystem / 40000);
-  const pain = clamp(
-    state.player.pain - minutesPassed * (0.002 + state.player.medication.inSystem / 8000),
-    0, 100,
-  );
+  // Pain is not a countdown. A leg nobody has looked at goes on hurting, and hurts more the
+  // longer it goes untended — which is what makes design doc §8's trade real: palming buys
+  // clarity and pays for it in pain, and refusing to let her near the dressing compounds it.
+  // Without this, pain only ever fell, drifted under her threshold, and she stopped offering
+  // the pills entirely — the keystone item became unreachable.
+  const relief = minutesPassed * (0.001 + state.player.medication.inSystem / 6000);
+  const ache = minutesPassed * (state.player.needs.woundCare / 100) * 0.03;
+  const pain = clamp(state.player.pain - relief + ache, 0, 100);
   const inSystem = clamp(state.player.medication.inSystem - minutesPassed * 0.05, 0, 100);
+
+  // Whatever the player just accepted from her lands on the body, which is this stage's to
+  // write. One branch serves every care scene: the action names the need it answers, so a new
+  // one is a row in actions.json and nothing here changes.
+  const care = validity.ok
+    ? content.actions.find((def) => def.id === input.action)
+    : undefined;
+  const answered = care?.satisfies;
+  const relieved = { hunger: 0, thirst: 0, hygiene: 0, toileting: 0, woundCare: 0 };
+  let dosed = 0;
+  let palmed = 0;
+
+  if (care?.effect === 'care_accept' && answered !== undefined) {
+    if (answered === 'medication') dosed = 1;
+    else relieved[answered] = 85;
+  }
+  if (care?.effect === 'care_palm' && answered === 'medication') palmed = 1;
 
   return {
     ...state,
@@ -115,13 +140,23 @@ export function run(state: GameState, content: ContentBundle): GameState {
       pain,
       energy: clamp(state.player.energy + minutesPassed * 0.004, 0, 100),
       needs: {
-        hunger: clamp(state.player.needs.hunger + minutesPassed * 0.05, 0, 100),
-        thirst: clamp(state.player.needs.thirst + minutesPassed * 0.07, 0, 100),
-        hygiene: clamp(state.player.needs.hygiene + minutesPassed * 0.02, 0, 100),
-        toileting: clamp(state.player.needs.toileting + minutesPassed * 0.06, 0, 100),
-        woundCare: clamp(state.player.needs.woundCare + minutesPassed * 0.03 - healing, 0, 100),
+        hunger: clamp(state.player.needs.hunger + minutesPassed * 0.05 - relieved.hunger, 0, 100),
+        thirst: clamp(state.player.needs.thirst + minutesPassed * 0.07 - relieved.thirst, 0, 100),
+        hygiene: clamp(state.player.needs.hygiene + minutesPassed * 0.02 - relieved.hygiene, 0, 100),
+        toileting: clamp(
+          state.player.needs.toileting + minutesPassed * 0.06 - relieved.toileting, 0, 100),
+        woundCare: clamp(
+          state.player.needs.woundCare + minutesPassed * 0.03 - healing - relieved.woundCare,
+          0, 100),
       },
-      medication: { ...state.player.medication, inSystem },
+      medication: {
+        inSystem: clamp(inSystem + dosed * 70, 0, 100),
+        // Set by palming too: as far as she is concerned she has dosed you either way, and
+        // that is what decides when she next comes at you with the bottle.
+        lastDoseAt: dosed > 0 || palmed > 0 ? minute : state.player.medication.lastDoseAt,
+        dosesTaken: state.player.medication.dosesTaken + dosed,
+        dosesPalmed: state.player.medication.dosesPalmed + palmed,
+      },
     },
     her: {
       ...state.her,

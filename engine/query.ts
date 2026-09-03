@@ -18,6 +18,7 @@ import type { DetectionResult } from './stages/detection.ts';
 import type { NoiseResult } from './stages/noise.ts';
 import type { ValidityResult } from './stages/validity.ts';
 import { dayOf, minuteOfDay, timeOfDay } from './clock.ts';
+import { dueCareNeed } from './care.ts';
 
 /** Suspicion as a tier, because rules want "she's getting suspicious", not "she's at 43". */
 export function suspicionTier(suspicion: number): 0 | 1 | 2 | 3 {
@@ -76,6 +77,16 @@ export function buildQuery(
     pain: player.pain,
     energy: player.energy,
     medicated: player.medication.inSystem > 25,
+
+    // The body, as things she can see rather than as numbers
+    hunger: player.needs.hunger,
+    thirst: player.needs.thirst,
+    wound_care: player.needs.woundCare,
+    doses_taken: player.medication.dosesTaken,
+    doses_palmed: player.medication.dosesPalmed,
+
+    // The care loop. `care_due` is what she is holding out right now, or 'none'
+    care_due: dueCareNeed(state) ?? 'none',
 
     // History she can draw on
     times_caught: state.history.filter((entry) => entry.seen).length,

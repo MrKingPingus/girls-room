@@ -16,10 +16,19 @@ import type { ContentBundle } from './../content.ts';
 import type { QueryBag } from './../rules.ts';
 import type { Disposition } from './../vocab.ts';
 import { selectRule } from './../rules.ts';
+import { dueCareNeed } from './../care.ts';
 
 export type AppraisalResult = {
   /** The rule that answers this moment, for REACTION to turn into words. */
   ruleId: string | null;
+
+  /**
+   * Her offering something, when a care scene is open. Separate from the rule above because
+   * it is a second thing happening in the same moment — the player did something, *and* she
+   * is holding out a bowl — and squashing them into one would lose whichever came second.
+   */
+  offerRuleId: string | null;
+
   beats: string[];
 };
 
@@ -28,7 +37,7 @@ const LADDER: Disposition[] = ['brittle', 'unsettled', 'content', 'devoted'];
 
 export function run(
   state: GameState, content: ContentBundle, action: string, facts: QueryBag,
-  minutesPassed: number,
+  minutesPassed: number, careWasDue: string | null,
 ): { state: GameState; result: AppraisalResult } {
   const rule = selectRule(
     content.reactions, action, facts, state.meta.seed, state.meta.minutesElapsed,
@@ -59,9 +68,32 @@ export function run(
   const pressure = effects.dispositionPressure ?? 0;
   const disposition = shiftDisposition(state.her.disposition, pressure);
 
+  // She does not wait for you to finish what you were doing. If a care scene is open, her
+  // half of it plays in the same moment — design doc §8, these are things she does *to* you.
+  // Skipped when the action *was* the answer to it, or she would offer and be answered at once.
+  // She says it once, when she starts. Repeating the same line every turn until you answer
+  // would turn the most human thing in the game into a nag, and the menu already shows what
+  // is on the table. What is on offer is a fact the player can check by looking at her.
+  const answering = content.actions.find((def) => def.id === action)?.satisfies !== undefined;
+  const nowDue = dueCareNeed(state);
+  const due = answering || nowDue === careWasDue ? null : nowDue;
+  const offerAction = due === null
+    ? undefined
+    : content.actions.find((def) => def.offers === due);
+  const offer = offerAction === undefined || due === null
+    ? null
+    : selectRule(
+        content.reactions, offerAction.id, { ...facts, care_due: due },
+        state.meta.seed, state.meta.minutesElapsed,
+      );
+
   return {
     state: { ...state, her: { ...state.her, affection, trust, suspicion, disposition } },
-    result: { ruleId: rule?.id ?? null, beats: rule?.beats ?? [] },
+    result: {
+      ruleId: rule?.id ?? null,
+      offerRuleId: offer?.id ?? null,
+      beats: [...(rule?.beats ?? []), ...(offer?.beats ?? [])],
+    },
   };
 }
 

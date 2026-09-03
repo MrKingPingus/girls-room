@@ -49,10 +49,12 @@ export function newGame(
     },
     player: {
       mobility: 0, // bedbound. The whole POC is the climb to tier 1
-      pain: 65,
+      pain: 45,
       energy: 40,
-      needs: { hunger: 30, thirst: 45, hygiene: 20, toileting: 25, woundCare: 60 },
-      medication: { inSystem: 0, lastDoseAt: null, dosesTaken: 0, dosesPalmed: 0 },
+      // She dosed you before you woke up. It is the first thing the state says about her, and
+      // it means the first medication scene arrives when it wears off rather than at minute 0.
+      needs: { hunger: 20, thirst: 25, hygiene: 20, toileting: 25, woundCare: 40 },
+      medication: { inSystem: 60, lastDoseAt: 0, dosesTaken: 1, dosesPalmed: 0 },
       knows: [],
       confidence: { physical: 50, social: 50, deception: 50, observation: 50 }, // v2. Unread
     },

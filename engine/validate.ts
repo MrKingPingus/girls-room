@@ -15,7 +15,7 @@
 
 import type { ContentBundle } from './content.ts';
 import {
-  ACTION_EFFECTS, ACTIVITIES, CHANGE_TIERS, CONFIDENCE_REGISTERS, HOUSE_LOCATIONS, LIGHTS,
+  ACTION_EFFECTS, ACTIVITIES, CARE_NEEDS, CHANGE_TIERS, CONFIDENCE_REGISTERS, HOUSE_LOCATIONS, LIGHTS,
   MOBILITY_TIERS, MOODS, NOISE_LEVELS, PHASES, POSES, SCENE_LOCATIONS,
   SPEAKERS, TIMES_OF_DAY, UNIVERSAL_VERBS, WEATHERS,
 } from './vocab.ts';
@@ -120,6 +120,7 @@ export function validateContent(raw: unknown): Problem[] {
     requireString(object, 'name', at, add);
     requireBoolean(object, 'container', at, add);
     if (object['togglable'] !== undefined) requireBoolean(object, 'togglable', at, add);
+    if (object['person'] !== undefined) requireBoolean(object, 'person', at, add);
     if (object['knownAtStart'] !== undefined) requireBoolean(object, 'knownAtStart', at, add);
     requireBoolean(object, 'portable', at, add);
     requireOneOf(object, 'changeTier', CHANGE_TIERS, at, add);
@@ -167,6 +168,22 @@ export function validateContent(raw: unknown): Problem[] {
     requireNumber(action, 'timeCost', at, add, 0);
     requireOneOf(action, 'noise', NOISE_LEVELS, at, add);
     requireOneOf(action, 'effect', ACTION_EFFECTS, at, add);
+    if (action['satisfies'] !== undefined) requireOneOf(action, 'satisfies', CARE_NEEDS, at, add);
+    if (action['offers'] !== undefined) requireOneOf(action, 'offers', CARE_NEEDS, at, add);
+
+    // A care answer that names no need cannot be applied to anything, and the failure would be
+    // silent: the scene would play and the body would not change.
+    const effect = action['effect'];
+    if ((effect === 'care_accept' || effect === 'care_palm') && action['satisfies'] === undefined) {
+      add(`${at}.satisfies`,
+        `"${String(action['id'])}" accepts care but names no need, so it would relieve nothing`);
+    }
+    if (action['produces'] !== undefined) {
+      const produces = action['produces'];
+      if (typeof produces !== 'string' || !objectIds.has(produces)) {
+        add(`${at}.produces`, `"${String(produces)}" is not an object in objects.json`);
+      }
+    }
     requireOneOf(action, 'target', ['none', 'object', 'object_and_place'] as const, at, add);
 
     const id = action['id'];
@@ -232,6 +249,33 @@ export function validateContent(raw: unknown): Problem[] {
         }
       }
     }
+  });
+
+  // Her half of a care scene is hers to initiate. Bound to an object it would show up in the
+  // player's menu as something they could ask to be offered, which is not the relationship.
+  const boundVerbs = new Set<string>();
+  eachRecord(objects, 'objects', () => {}, (object) => {
+    const verbs = object['verbs'];
+    if (Array.isArray(verbs)) for (const verb of verbs) {
+      if (typeof verb === 'string') boundVerbs.add(verb);
+    }
+  });
+  const offersSeen = new Map<string, string>();
+  eachRecord(actions, 'actions', add, (action, at) => {
+    const offers = action['offers'];
+    const id = action['id'];
+    if (typeof offers !== 'string' || typeof id !== 'string') return;
+    if (boundVerbs.has(id)) {
+      add(`${at}.offers`,
+        `"${id}" is something she does, but it is bound to an object's verbs, ` +
+        'so it would appear in the player\'s menu');
+    }
+    const already = offersSeen.get(offers);
+    if (already !== undefined) {
+      add(`${at}.offers`,
+        `both "${already}" and "${id}" offer ${offers} — only one of them can ever fire`);
+    }
+    offersSeen.set(offers, id);
   });
 
   // Architecture §6: one catch-all per action, so the game can never produce nothing.

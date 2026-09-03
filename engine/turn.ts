@@ -26,6 +26,7 @@ import type { GameState } from './state.ts';
 import type { Beat } from './beat.ts';
 import type { ContentBundle } from './content.ts';
 import { buildQuery } from './query.ts';
+import { dueCareNeed } from './care.ts';
 
 import * as validity from './stages/validity.ts';
 import * as effects from './stages/effects.ts';
@@ -57,12 +58,19 @@ export type TurnResult = {
     noise: noise.NoiseResult;
     detection: detection.DetectionResult;
     ruleId: string | null;
+
+    /** Her half of a care scene, when one was open. */
+    offerRuleId: string | null;
   };
 };
 
 export function takeTurn(
   startingState: GameState, content: ContentBundle, input: TurnInput,
 ): TurnResult {
+  // What she was already holding out before this turn, so her offer plays once when the scene
+  // opens rather than every turn until it is answered.
+  const careWasDue = dueCareNeed(startingState);
+
   // 1. VALIDITY — decides only. Writes nothing.
   const validityResult = validity.run(startingState, content, input);
 
@@ -70,8 +78,9 @@ export function takeTurn(
   let state = effects.run(startingState, content, input, validityResult);
 
   // 3. WORLD — her, the house, the body. Runs whether or not the action was allowed,
-  //    because her life does not pause while you fail to reach the drawer.
-  state = world.run(state, content);
+  //    because her life does not pause while you fail to reach the drawer. It is handed the
+  //    action because the body is its territory and eating is a thing that happens to a body.
+  state = world.run(state, content, input, validityResult);
 
   // 4. NOISE — decides only.
   const noiseResult = noise.run(state, content, input, validityResult);
@@ -101,7 +110,9 @@ export function takeTurn(
 
   // 6. APPRAISAL — the meters. The only stage allowed near them.
   const minutesPassed = state.meta.minutesElapsed - startingState.meta.minutesElapsed;
-  const appraised = appraisal.run(state, content, subject.action, facts, minutesPassed);
+  const appraised = appraisal.run(
+    state, content, subject.action, facts, minutesPassed, careWasDue,
+  );
   state = appraised.state;
 
   // 7. REACTION — which beats.
@@ -118,6 +129,7 @@ export function takeTurn(
       noise: noiseResult,
       detection: detected.result,
       ruleId: appraised.result.ruleId,
+      offerRuleId: appraised.result.offerRuleId,
     },
   };
 }

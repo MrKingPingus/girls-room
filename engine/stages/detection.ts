@@ -20,7 +20,7 @@ import type { TurnInput } from './../turn.ts';
 import type { NoiseResult } from './noise.ts';
 import type { ValidityResult } from './validity.ts';
 import { chance } from './../random.ts';
-import { isHandsOn } from './../room.ts';
+import { leavesEvidence } from './../room.ts';
 
 export type DetectionOutcome = 'unnoticed' | 'noticed_now' | 'noticed_later';
 
@@ -77,28 +77,36 @@ export function run(
   let caught: string | null = null;
 
   if (validity.ok && input.object !== null) {
-    const objectDef = content.objects.find((def) => def.id === input.object);
-    const tier: ChangeTier = objectDef?.changeTier ?? 1;
-    // Looking at something leaves nothing behind to find. Only hands do.
     const actionDef = content.actions.find((def) => def.id === input.action);
-    const leavesATrace = actionDef !== undefined && isHandsOn(actionDef.effect);
+    const leavesATrace = actionDef !== undefined && leavesEvidence(actionDef.effect);
+
+    // What she would actually be noticing. For most verbs that is the thing you touched; for
+    // palming it is the pill now in your hand, not the woman you took it from.
+    const evidenceId = actionDef?.produces ?? input.object;
+    const objectDef = content.objects.find((def) => def.id === evidenceId);
+    const tier: ChangeTier = objectDef?.changeTier ?? 1;
+
+    // Some verbs are done carefully by their nature. It is never safe — she is a foot away —
+    // but it is the difference between a gamble and a certainty.
+    const care = actionDef?.concealable === true ? 0.45 : 1;
 
     if (noise.heard) {
       outcome = here ? 'noticed_now' : 'noticed_later';
       caught = input.object;
     } else if (leavesATrace) {
       if (here) {
-        const odds = BASE_NOTICE[tier] * (0.5 + state.her.attention + state.her.suspicion / 200);
-        if (chance(seed, minute, `sight:${input.object}`, odds)) {
+        const odds = BASE_NOTICE[tier] * care
+          * (0.5 + state.her.attention + state.her.suspicion / 200);
+        if (chance(seed, minute, `sight:${String(evidenceId)}`, odds)) {
           outcome = 'noticed_now';
-          caught = input.object;
+          caught = evidenceId;
         }
       } else {
         // She isn't here. It waits for her, which is the point.
         outcome = 'noticed_later';
-        caught = input.object;
+        caught = evidenceId;
         const deferred: PendingConsequence = {
-          objectId: input.object as ObjectId,
+          objectId: evidenceId as ObjectId,
           cause: input.action as PendingConsequence['cause'],
           tier,
           createdAt: minute,

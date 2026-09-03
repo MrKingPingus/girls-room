@@ -12,6 +12,7 @@ import type { GameState } from './../state.ts';
 import type { ContentBundle, ObjectDef } from './../content.ts';
 import type { TurnInput } from './../turn.ts';
 import { isHandsOn, reachOf } from './../room.ts';
+import { dueCareNeed } from './../care.ts';
 
 /** Why an action was refused. Each of these is a fact the rule database can answer to. */
 export type FailureReason =
@@ -26,7 +27,10 @@ export type FailureReason =
   | 'nowhere_to_hide'
   | 'nothing_to_hide'
   | 'target_required'
-  | 'asleep';
+  | 'asleep'
+  | 'not_a_thing'      // she is a person. You do not pick her up
+  | 'she_isnt_here'    // nothing to answer, because nobody is in the room
+  | 'nothing_offered'; // she is here, but she is not holding anything out
 
 export type ValidityResult =
   | { ok: true }
@@ -48,12 +52,35 @@ export function run(
 
   if (input.object === null) return { ok: false, reason: 'target_required' };
 
+  // Answering care needs her to be offering. Checked before anything about the room, because
+  // "she isn't here" is a better answer than "you can't reach that".
+  if (action.effect === 'care_accept' || action.effect === 'care_refuse'
+      || action.effect === 'care_palm' || action.effect === 'talk') {
+    if (state.her.location !== 'attic') return { ok: false, reason: 'she_isnt_here' };
+    if (action.effect !== 'talk') {
+      const due = dueCareNeed(state);
+      if (due === null) return { ok: false, reason: 'nothing_offered' };
+      if (action.satisfies !== undefined && action.satisfies !== due) {
+        return { ok: false, reason: 'nothing_offered' };
+      }
+    }
+    return { ok: true };
+  }
+
   const objectState = state.objects[input.object];
   const objectDef: ObjectDef | undefined = content.objects.find((def) => def.id === input.object);
   if (objectState === undefined || objectDef === undefined) {
     return { ok: false, reason: 'no_such_object' };
   }
   if (!objectState.known) return { ok: false, reason: 'object_unknown' };
+
+  // A person can be looked at and spoken to. Everything else in the verb set is handling, and
+  // handling her is not a thing the game lets you attempt.
+  if (objectDef.person === true) {
+    if (state.her.location !== 'attic') return { ok: false, reason: 'she_isnt_here' };
+    if (isHandsOn(action.effect)) return { ok: false, reason: 'not_a_thing' };
+    return { ok: true };
+  }
 
   // Looking and listening are never reach-gated — the clock is across the room and being
   // able to see it from the bed is the entire point of it (design doc §13). Reach gates the

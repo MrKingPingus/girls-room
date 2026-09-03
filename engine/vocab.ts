@@ -172,6 +172,16 @@ export type ConfidenceRegister = (typeof CONFIDENCE_REGISTERS)[number];
 // The run
 // ---------------------------------------------------------------------------
 
+/**
+ * Design doc §8. The needs she attends to, each one an interaction she performs *on you*.
+ * `medication` is not a need in the same sense — it is the keystone item, and it is here so a
+ * care action can name it as the thing it answers.
+ */
+export const CARE_NEEDS = [
+  'hunger', 'thirst', 'hygiene', 'toileting', 'woundCare', 'medication',
+] as const;
+export type CareNeed = (typeof CARE_NEEDS)[number];
+
 /** Design doc §4. One per run. POC ships the Mailman only. */
 export const PLAYER_CLASSES = ['mailman', 'family_friend', 'former_bully', 'charmer'] as const;
 export type PlayerClass = (typeof PLAYER_CLASSES)[number];
@@ -191,5 +201,11 @@ export const ACTION_EFFECTS = [
   'take',        // into the player's hands
   'relocate',    // to a named place, in the open
   'conceal',     // to a named place, hidden
+
+  // The care loop (design doc §8). Each of these is your half of a scene she performs on you.
+  'care_accept', // take what she is offering. Answers the need named by the action's `satisfies`
+  'care_refuse', // turn it down. Mechanically nothing happens, which is the point
+  'care_palm',   // appear to take it, don't. The keystone move — clarity bought with pain
+  'talk',        // say something to her. No mechanical result; the whole effect is social
 ] as const;
 export type ActionEffect = (typeof ACTION_EFFECTS)[number];

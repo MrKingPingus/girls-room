@@ -26,6 +26,13 @@ export function run(
   const objects: { [id: string]: ObjectState } = { ...state.objects };
   const knows = [...state.player.knows];
 
+  // Palming turns a dose into a physical object in your hand — something with a location, that
+  // has to go somewhere, and that she can find. A counter could not be hidden under a mattress.
+  const produced = action.produces === undefined ? undefined : objects[action.produces];
+  if (action.produces !== undefined && produced !== undefined) {
+    objects[action.produces] = { ...produced, location: { kind: 'carried' }, known: true };
+  }
+
   const targetId = input.object;
   const target = targetId === null ? undefined : objects[targetId];
 

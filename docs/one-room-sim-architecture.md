@@ -36,44 +36,38 @@ makes automated playtesting possible (§8) and what makes the VN swap a one-dire
 One serializable object. No class instances, no functions, no Maps. If `JSON.parse(JSON.stringify(state))`
 loses something, you've made a mistake. This buys you free saves, undo, replay, and testing.
 
-```js
-{
-  meta:    { day: 3, minutesElapsed: 412, seed: 88117 },
+**The authoritative definition is `engine/state.ts`.** That file carries every field, its allowed
+values, the doc section it serves, and its owning stage. What follows is the shape at a glance —
+if it disagrees with `engine/state.ts`, the file is right and this sketch is stale.
 
-  world:   { phase: "she_absent",        // she_present | she_absent | she_asleep | night
-             light: "lamp",              // daylight | lamp | dark
-             doorState: "locked" },
-
-  player:  { mobility: 2,                // 0 bedbound .. 4 can cross room
-             pain: 6, energy: 4,
-             knows: ["her_name", "phone_exists"],   // flag set
-             carrying: null,
-             concealed: ["paperclip"] },
-
-  her:     { affection: 34, suspicion: 12,
-             mood: "warm",               // derived, but cached for reaction queries
-             attention: 0.3,             // how closely she's watching right now
-             activity: "kitchen",
-             believes: ["you_are_grateful"] },
-
-  objects: {
-    nightstand_drawer: { reach: 2, open: false, known: true, searched: false },
-    paperclip:         { reach: 3, location: "drawer", taken: false,
-                         movedSinceSeen: false, missingNoticed: false }
-  },
-
-  history: [ { t: 388, type: "object_taken", id: "paperclip", seen: false } ]
-}
+```
+meta      schemaVersion, day, minutesElapsed, seed, playerClass
+world     phase, light, temperature, weather, doorBelow
+player    mobility, pain, energy, needs{}, medication{}, knows[], confidence{} (v2, unused)
+her       affection, trust, suspicion, mood, disposition, stress, attention,
+          location, activity, statedReturnAt, believes[], claims[], priors[], roomBaseline{}
+objects   id -> { location, open, known, searched, damaged }
+pending   deferred discoveries — the dread queue
+history   capped event log; the substrate for her memory
 ```
 
 Notes:
 
-- **`reach`** is the mobility tier required. Reach checks are one comparison, and raising
-  mobility silently unlocks a whole tranche of content. This is your progression curve.
+- **Reach lives in content, not state.** Reach is a property of the *place*, not the object: a
+  book on the nightstand is tier 0 and the same book on the dresser is tier 2. Objects carry a
+  `location`; places carry a reach tier. Raising mobility silently unlocks a tranche of content,
+  and that is the progression curve.
+- **One `location` field per object** covers placed, inside-a-container, carried, hidden, and
+  gone. There is no separate carried-list or concealed-list that could disagree with it.
 - **`history`** is not a log for debugging. It is the substrate for her *memory* — "you were
   quiet yesterday" requires queryable past. Cap it and summarize old entries into `her.believes`.
 - **`knows` / `believes`** are two separate flag sets. The gap between what the player knows and
   what she believes is where the entire game lives.
+- **`her.roomBaseline`** is her mental picture of the room, which is what detection compares
+  against — not the truth. That is what makes re-baselining (design doc §7a) possible at all.
+- **Randomness needs no state.** Every roll derives from `meta.seed` plus the current minute plus
+  which stage is asking, so replays are exact and there is no shared cursor for two stages to
+  fight over.
 
 ---
 
@@ -158,6 +152,111 @@ Three rules that keep this clean:
   discovery *is* the dread.
 - **Rules propose, owners dispose.** A reaction rule's `effects` block is applied by APPRAISAL,
   which owns the meters — never by REACTION. REACTION only turns the selected rule into beats.
+
+---
+
+## 5a. The single-writer table
+
+Every field, and the one stage allowed to change it. When a value moves and you don't know why,
+this table gives you one suspect instead of eight. Nothing gets added to state without getting
+a row here in the same change.
+
+Read it as: *"only the step named here may touch this."*
+
+### Outside the pipeline
+
+Three writers are not stages and must be named, or they become the invisible second writer:
+
+| Writer | May write | Constraint |
+|---|---|---|
+| **INIT** | The entire state, once | Builds a new game from content + class + seed. Never runs again |
+| **LOAD** | The entire state, once | Replaces state wholesale from a save file. Validates `schemaVersion` first |
+| **CONTENT** | Nothing | Content is read-only at runtime. Loaded once, validated, never written back |
+
+### `meta`
+
+| Field | Owner | Why |
+|---|---|---|
+| `schemaVersion` | INIT | Set at creation, compared on load |
+| `day` | WORLD | Rolls over when the clock crosses the boundary |
+| `minutesElapsed` | EFFECTS | The action's time cost is the only thing that spends the clock |
+| `seed` | INIT | Fixed for the run so playthroughs replay exactly |
+| `playerClass` | INIT | Chosen once |
+
+### `world`
+
+All of it WORLD's — the attic changes because time passed or because she did something downstairs,
+never because of the player's action directly.
+
+| Field | Owner | Why |
+|---|---|---|
+| `phase` | WORLD | Driven by the clock and her schedule |
+| `light` | WORLD | Cached. Recomputed from the hour + `objects.lamp.open` + the ceiling switch |
+| `temperature` | WORLD | She controls the heat from downstairs |
+| `weather` | WORLD | Outside the house entirely. Post-POC |
+| `doorBelow` | WORLD | She opens and closes it. Changes what carries up the stairs |
+
+### `player`
+
+The split: **WORLD owns the body, EFFECTS owns what the player knows.** Pain, energy, needs, and
+medication all move both from the clock and from what the player just did, so putting them in one
+stage — the one that runs immediately after EFFECTS and can see the action — is what keeps them to
+a single writer.
+
+| Field | Owner | Why |
+|---|---|---|
+| `mobility` | WORLD | Recovery over time and care. The progression spine |
+| `pain` | WORLD | Rises with exertion, falls with rest and medication |
+| `energy` | WORLD | Same |
+| `needs.*` | WORLD | Rise with the clock, fall when she performs the care scene |
+| `medication.*` | WORLD | Dose decays in the body; palming is recorded here, the pill itself in `objects` |
+| `knows[]` | EFFECTS | Learning a fact is the mechanical result of looking or listening |
+| `confidence.*` | *(none — v2)* | Reserved. No stage writes it, nothing reads it. Do not implement |
+
+### `her`
+
+The split: **APPRAISAL owns the meters, WORLD owns the mood and the body, DETECTION owns what
+she has seen.**
+
+| Field | Owner | Why |
+|---|---|---|
+| `affection` | APPRAISAL | The only stage permitted to move a meter |
+| `trust` | APPRAISAL | Same |
+| `suspicion` | APPRAISAL | Same. Rule `effects` blocks are applied here, never in REACTION |
+| `disposition` | APPRAISAL | Long-term, and design doc §3 says player actions are what move it |
+| `mood` | WORLD | Rolled against disposition, stress, and her own day — must be able to move without the player |
+| `stress` | WORLD | Outside pressure. Nothing the player does touches it |
+| `attention` | WORLD | Cached. Recomputed from mood + schedule + affection (design doc §5's tax) |
+| `location` | WORLD | Her schedule, not the player's action |
+| `activity` | WORLD | Same. Her noise is the player's cover window |
+| `statedReturnAt` | WORLD | Set when she leaves, distorted from the truth in proportion to mood |
+| `believes[]` | APPRAISAL | What she concludes from what happened |
+| `claims[]` *(append)* | EFFECTS | Saying something is an action; logging it is its mechanical result |
+| `claims[].believed` | APPRAISAL | Whether she bought it is a judgement, not a record |
+| `priors[].status` | APPRAISAL | Confirmed or denied by play |
+| `roomBaseline{}` | DETECTION | Updated only when she actually looks. Re-baselining lives here |
+
+### `objects`, `pending`, `history`
+
+| Field | Owner | Why |
+|---|---|---|
+| `objects.*.location` | EFFECTS | The room changing is what EFFECTS is for |
+| `objects.*.open` | EFFECTS | Same |
+| `objects.*.known` | EFFECTS | The player discovering a thing exists |
+| `objects.*.searched` | EFFECTS | Same |
+| `objects.*.damaged` | EFFECTS | Same |
+| `pending[]` | DETECTION | Appends `noticed_later`, and fires entries once she is back in the room |
+| `history[]` *(append)* | EFFECTS | The record of what was done |
+| `history[].seen` | DETECTION | Whether she saw it is decided later, and sometimes much later |
+
+### Not state at all
+
+Three things that look like state and must not become it:
+
+- **The winning reaction rule id.** APPRAISAL selects it, REACTION resolves it into beats. It
+  lives on the turn's working record and is thrown away at the end of the turn.
+- **The beats themselves.** Output, not state. They go to the renderer and are gone.
+- **Reach tiers, noise values, time costs, schedules.** Content. Loaded once, never written.
 
 ---
 

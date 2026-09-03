@@ -521,13 +521,33 @@ additional systems will fix it — and that's the question the POC exists to ans
 
 ## 17. Architecture spec changes
 
-- Add `player.confidence` as a per-domain map (v2, but reserve the field now).
-- Add `her.claims` and `her.roomBaseline` to state.
-- Add a NOISE stage to the pipeline, between EFFECTS and DETECTION.
-- Add `her.location` tracking below-decks, since noise thresholds depend on it.
-- Beats need a `confidence` field so the renderer can select register variants.
+All applied. `engine/state.ts` is the state shape; the single-writer table is §5a of the
+architecture spec.
+
+- ~~Add `player.confidence` as a per-domain map (v2, but reserve the field now).~~ Reserved,
+  unwritten and unread.
+- ~~Add `her.claims` and `her.roomBaseline` to state.~~ Done.
+- ~~Add a NOISE stage to the pipeline, between EFFECTS and DETECTION.~~ Done, and a WORLD stage
+  was added after EFFECTS so her mood, whereabouts and stress can move without the player —
+  see §3 of this doc, "she is never a vending machine." Pipeline is now eight stages.
+- ~~Add `her.location` tracking below-decks, since noise thresholds depend on it.~~ Done,
+  with `her.activity` alongside it, since her own noise is the player's cover.
+- Beats need a `confidence` field so the renderer can select register variants. **Outstanding** —
+  the beat schema hasn't been written yet.
 - Verification actions (`listen`, `check clock`) need explicit time costs in `actions.json`.
-- Single-writer table needs: confidence, baseline, claims, needs, pain, location.
+  **Outstanding** — content files don't exist yet.
+- ~~Single-writer table needs: confidence, baseline, claims, needs, pain, location.~~ All present.
+
+**Also changed while writing the shape down:**
+
+- `world.doorState: "locked"` is gone. §2a decided the stairs are the lock and the door at the
+  bottom can stand wide open; the field is now `world.doorBelow: open | closed`, tracked because
+  it changes what sound carries up.
+- Reach moved out of state and into content, attached to *places* rather than objects — the same
+  book is tier 0 on the nightstand and tier 2 on the dresser.
+- Mobility tiers are 0–3, matching §2e. The architecture spec previously said 0–4.
+- `Disposition`'s actual values (`adoring` / `warm` / `unsettled` / `hardened`) are a proposal.
+  This doc names the axis but never lists the values. **Needs a decision.**
 
 ---
 

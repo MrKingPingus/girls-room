@@ -175,3 +175,21 @@ export type ConfidenceRegister = (typeof CONFIDENCE_REGISTERS)[number];
 /** Design doc §4. One per run. POC ships the Mailman only. */
 export const PLAYER_CLASSES = ['mailman', 'family_friend', 'former_bully', 'charmer'] as const;
 export type PlayerClass = (typeof PLAYER_CLASSES)[number];
+
+/**
+ * What a verb mechanically *does*, as opposed to what it is called.
+ *
+ * The engine switches on this, never on the verb's name. That is what lets a contextual verb
+ * — "palm the pill", "pull the blanket over your head" — reuse an existing mechanic without a
+ * single line being added to engine/. Hard rule 4, applied to actions instead of reactions.
+ */
+export const ACTION_EFFECTS = [
+  'none',        // produces a beat and nothing else. wait, listen
+  'inspect',     // marks it known and searched, and reveals what is in it if it is open
+  'open_close',  // toggles a container
+  'toggle_on',   // toggles a thing that is on or off. The lamp
+  'take',        // into the player's hands
+  'relocate',    // to a named place, in the open
+  'conceal',     // to a named place, hidden
+] as const;
+export type ActionEffect = (typeof ACTION_EFFECTS)[number];

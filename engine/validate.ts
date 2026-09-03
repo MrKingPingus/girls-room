@@ -15,7 +15,7 @@
 
 import type { ContentBundle } from './content.ts';
 import {
-  ACTIVITIES, CHANGE_TIERS, CONFIDENCE_REGISTERS, HOUSE_LOCATIONS, LIGHTS,
+  ACTION_EFFECTS, ACTIVITIES, CHANGE_TIERS, CONFIDENCE_REGISTERS, HOUSE_LOCATIONS, LIGHTS,
   MOBILITY_TIERS, MOODS, NOISE_LEVELS, PHASES, POSES, SCENE_LOCATIONS,
   SPEAKERS, TIMES_OF_DAY, UNIVERSAL_VERBS, WEATHERS,
 } from './vocab.ts';
@@ -119,6 +119,8 @@ export function validateContent(raw: unknown): Problem[] {
   eachRecord(objects, 'objects', add, (object, at) => {
     requireString(object, 'name', at, add);
     requireBoolean(object, 'container', at, add);
+    if (object['togglable'] !== undefined) requireBoolean(object, 'togglable', at, add);
+    if (object['knownAtStart'] !== undefined) requireBoolean(object, 'knownAtStart', at, add);
     requireBoolean(object, 'portable', at, add);
     requireOneOf(object, 'changeTier', CHANGE_TIERS, at, add);
     checkObjectLocation(object['startsAt'], `${at}.startsAt`, placeIds, objectIds, add);
@@ -164,6 +166,7 @@ export function validateContent(raw: unknown): Problem[] {
     requireBoolean(action, 'concealable', at, add);
     requireNumber(action, 'timeCost', at, add, 0);
     requireOneOf(action, 'noise', NOISE_LEVELS, at, add);
+    requireOneOf(action, 'effect', ACTION_EFFECTS, at, add);
     requireOneOf(action, 'target', ['none', 'object', 'object_and_place'] as const, at, add);
 
     const id = action['id'];

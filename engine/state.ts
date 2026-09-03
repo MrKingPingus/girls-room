@@ -298,6 +298,9 @@ export type ObjectState = {
   /** Containers only; null for everything else. EFFECTS. */
   open: boolean | null;
 
+  /** Things that switch on and off — the lamp. null for everything else. EFFECTS. */
+  on: boolean | null;
+
   /** Whether the player knows this exists at all. EFFECTS. */
   known: boolean;
 

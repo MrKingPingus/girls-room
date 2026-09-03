@@ -16,7 +16,7 @@ import type {
 } from './state.ts';
 import type { Audio, Criteria, Scene, TimerSpec } from './beat.ts';
 import type {
-  Activity, ChangeTier, ConfidenceRegister, HouseLocation, MobilityTier,
+  ActionEffect, Activity, ChangeTier, ConfidenceRegister, HouseLocation, MobilityTier,
   Mood, NoiseLevel, Phase, Pose, Speaker,
 } from './vocab.ts';
 
@@ -59,6 +59,12 @@ export type ObjectDef = {
   /** Whether things can be put inside it, and therefore whether `open` applies. */
   container: boolean;
 
+  /** Whether it switches on and off. The lamp does; the water glass does not. */
+  togglable?: boolean;
+
+  /** Whether the player knows it exists from the first moment. Defaults to reach-tier 0. */
+  knownAtStart?: boolean;
+
   /** Whether `take` applies at all. */
   portable: boolean;
 
@@ -91,6 +97,12 @@ export type ActionDef = {
   timeCost: number;
 
   noise: NoiseLevel;
+
+  /**
+   * What it mechanically does. The engine switches on this, never on the verb's name, so a
+   * new contextual verb can reuse an existing mechanic without touching engine/.
+   */
+  effect: ActionEffect;
 
   /** Whether doing this can be concealed from her at all. */
   concealable: boolean;

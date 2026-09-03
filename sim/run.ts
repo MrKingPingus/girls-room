@@ -1,23 +1,126 @@
 /**
  * Girl's Room — headless test harness.
  *
- * Architecture §8: in a systemic game you cannot find content gaps by playing, you find them
- * statistically. This runs the engine thousands of times with no browser and no human and
- * reports which beats never fired, which endings were reached and how often, and which runs
- * got stuck with nothing to do.
+ * Architecture §8: in a systemic game you cannot find content gaps by playing. A rule that
+ * stopped firing looks exactly like a rule that was never reached, and no amount of playing
+ * will tell you which. You find them statistically instead.
  *
- * NOT BUILT YET. It needs the pipeline, which does not exist. This file exists so that
- * `npm run sim` says something useful instead of "file not found".
+ * This plays the game thousands of times with no screen and no human, then reports:
+ *
+ *   - beats that never fired         either unreachable, or a criterion with a typo in it
+ *   - rules that never won           the same problem one level up
+ *   - runs that got stuck            no valid action left, which is a dead end
+ *   - where suspicion and affection actually land, per day
+ *
+ *   npm run sim -- --runs 2000
  */
 
-console.error(
-  [
-    'The simulation harness is not built yet.',
-    '',
-    'It needs the eight-stage pipeline in engine/, which has not been written.',
-    'What exists today is the state shape, the beat schema, the content shapes,',
-    'and the content validator. Run `npm run check` to exercise those.',
-  ].join('\n'),
-);
+import { newGame } from '../engine/newgame.ts';
+import { takeTurn } from '../engine/turn.ts';
+import { buildMenu } from '../render/text.ts';
+import { loadGameContent } from '../app/load.ts';
+import { pick } from '../engine/random.ts';
 
-process.exit(1);
+const args = process.argv.slice(2);
+const runs = Number(args[args.indexOf('--runs') + 1]) || 500;
+const policyName = args.indexOf('--policy') === -1 ? 'random' : args[args.indexOf('--policy') + 1];
+const maxTurns = Number(args[args.indexOf('--turns') + 1]) || 1200;
+
+const content = loadGameContent();
+
+/** Do nothing with your hands while she is in the room. Look, listen, and wait her out. */
+function cautious(menu: ReturnType<typeof buildMenu>, sheIsHere: boolean) {
+  const safe = ['look', 'listen', 'wait', 'rest', 'read_journal'];
+  return sheIsHere ? menu.filter((entry) => safe.includes(entry.action)) : menu;
+}
+
+const beatsFired = new Set<string>();
+const rulesWon = new Set<string>();
+const stuck: number[] = [];
+const byDay = new Map<number, { suspicion: number[]; affection: number[]; trust: number[] }>();
+let totalTurns = 0;
+
+for (let run = 0; run < runs; run++) {
+  const seed = run * 7919 + 13;
+  let state = newGame(content, { seed });
+
+  for (let turn = 0; turn < maxTurns; turn++) {
+    const menu = buildMenu(state, content);
+    if (menu.length === 0) {
+      stuck.push(seed);
+      break;
+    }
+
+    // Two policies, because they answer different questions. `random` is the worst case and
+    // finds content nothing reaches. `cautious` plays the way a careful person would — never
+    // touching anything while she is in the room — and answers the question that actually
+    // matters: can you play well and stay safe? If both end at the same suspicion, the
+    // player's choices aren't doing anything and the game has no game in it.
+    const options = policyName === 'cautious' ? cautious(menu, state.her.location === 'attic') : menu;
+    const choice = pick(seed, turn, 'policy', options.length > 0 ? options : menu);
+    if (choice === null) break;
+
+    const before = state.meta.day;
+    const result = takeTurn(state, content, {
+      action: choice.action, object: choice.object, place: choice.place,
+    });
+    state = result.state;
+    totalTurns++;
+
+    for (const beat of result.beats) beatsFired.add(beat.id);
+    if (result.trace.ruleId !== null) rulesWon.add(result.trace.ruleId);
+
+    if (state.meta.day !== before) {
+      const bucket = byDay.get(before) ?? { suspicion: [], affection: [], trust: [] };
+      bucket.suspicion.push(state.her.suspicion);
+      bucket.affection.push(state.her.affection);
+      bucket.trust.push(state.her.trust);
+      byDay.set(before, bucket);
+    }
+
+    if (state.meta.day > 3) break;
+  }
+}
+
+const deadBeats = Object.keys(content.beats).filter((id) => !beatsFired.has(id));
+const deadRules = content.reactions.filter((rule) => !rulesWon.has(rule.id)).map((r) => r.id);
+
+const mean = (values: number[]) =>
+  values.length === 0 ? 0 : values.reduce((a, b) => a + b, 0) / values.length;
+
+console.log(`\n  ${runs} runs, ${totalTurns} turns, ${policyName} policy\n`);
+
+console.log(`  beats fired    ${beatsFired.size}/${Object.keys(content.beats).length}`);
+console.log(`  rules won      ${rulesWon.size}/${content.reactions.length}`);
+console.log(`  stuck runs     ${stuck.length}`);
+
+if (deadBeats.length > 0) {
+  console.log(`\n  DEAD BEATS (${deadBeats.length}) — nothing ever reached these.`);
+  console.log('  Check each: a typo\'d criterion looks exactly like this.');
+  for (const id of deadBeats) console.log(`    ${id}`);
+}
+if (deadRules.length > 0) {
+  console.log(`\n  RULES THAT NEVER WON (${deadRules.length}):`);
+  for (const id of deadRules) console.log(`    ${id}`);
+}
+if (stuck.length > 0) {
+  console.log(`\n  STUCK SEEDS: ${stuck.slice(0, 10).join(', ')}`);
+}
+
+console.log('\n  at each day boundary:');
+for (const day of [...byDay.keys()].sort((a, b) => a - b)) {
+  const bucket = byDay.get(day);
+  if (bucket === undefined) continue;
+  console.log(
+    `    day ${day}  suspicion ${mean(bucket.suspicion).toFixed(1).padStart(5)}` +
+    `   affection ${mean(bucket.affection).toFixed(1).padStart(5)}` +
+    `   trust ${mean(bucket.trust).toFixed(1).padStart(5)}` +
+    `   (${bucket.suspicion.length} runs)`,
+  );
+}
+console.log('');
+
+// A stuck run is always a bug: the player is looking at a screen with nothing to press.
+// Dead beats are reported, not fatal — some refusals exist for renderers that don't exist yet
+// (a parser, or the point-and-click layer) and cannot be reached from a verb menu.
+if (stuck.length > 0) process.exit(1);

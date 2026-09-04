@@ -191,3 +191,189 @@ button:disabled { opacity: 0.4; cursor: default; }
   font-size: 13px;
   white-space: pre-wrap;
 }
+
+/*
+ * The dev tools — the tab bar and the scenario builder.
+ *
+ * Deliberately plainer than the room. This is a workbench, and it should not look like it is
+ * part of the game: nothing here is ever seen by a player.
+ */
+
+.shell.wide { max-width: 1180px; }
+
+.tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--panel-edge); }
+
+.tabs button {
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  color: var(--ink-dim);
+  font: inherit;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.tabs button.on {
+  color: var(--ink);
+  border-color: var(--panel-edge);
+  background: var(--panel);
+}
+
+.tabs .count {
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 8px;
+  background: var(--her);
+  color: var(--ground);
+  font-size: 11px;
+}
+
+.notice, .alarm {
+  padding: 10px 12px;
+  font-size: 14px;
+  border-left: 2px solid var(--her);
+  background: var(--panel);
+}
+
+.alarm { border-left-color: var(--warn); color: var(--warn); }
+.alarm pre { white-space: pre-wrap; font-size: 12px; margin: 6px 0 0; }
+.alarm ul, .notice ul { margin: 6px 0 0; padding-left: 18px; }
+
+/* --- the builder proper --- */
+
+.builder {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+  align-items: start;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+}
+
+.builder aside { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 12px; }
+.builder aside h2 { margin: 0; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; }
+.builder main { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.builder main.empty { color: var(--ink-dim); }
+.builder h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; }
+
+.builder section { display: flex; flex-direction: column; gap: 10px; }
+
+.packs { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+
+.packs li {
+  padding: 8px;
+  border: 1px solid var(--panel-edge);
+  background: var(--panel);
+}
+
+.packs li.on { border-color: var(--her); }
+.packs li .row { margin-top: 6px; }
+.packs button { font-size: 12px; padding: 3px 7px; }
+
+.builder .card {
+  border: 1px solid var(--panel-edge);
+  background: var(--panel);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cardhead { display: flex; gap: 8px; align-items: center; }
+.cardhead .id { flex: 1; font-family: ui-monospace, monospace; }
+
+.builder label { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.builder label > span:first-child { min-width: 120px; color: var(--ink-dim); }
+.builder label.wide { flex-direction: column; align-items: stretch; }
+.builder label.check { min-width: 0; }
+.builder label.check > input { min-width: 0; }
+
+.builder input, .builder select, .builder textarea {
+  background: var(--ground);
+  color: var(--ink);
+  border: 1px solid var(--panel-edge);
+  font: inherit;
+  padding: 5px 7px;
+  min-width: 0;
+  flex: 1;
+}
+
+.builder input[type="checkbox"] { flex: none; accent-color: var(--her); }
+.builder input[type="number"] { max-width: 90px; }
+.builder textarea { font-family: inherit; resize: vertical; }
+.builder input:focus-visible, .builder select:focus-visible, .builder textarea:focus-visible {
+  outline: 2px solid var(--her);
+  outline-offset: 1px;
+}
+
+.builder button {
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--panel-edge);
+  font: inherit;
+  font-size: 13px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.builder button:hover:not(:disabled) { border-color: var(--her); color: var(--her); }
+.builder button:disabled { opacity: 0.45; cursor: default; }
+.builder button.drop { color: var(--ink-dim); padding: 3px 7px; }
+.builder button.drop:hover:not(:disabled) { border-color: var(--warn); color: var(--warn); }
+
+.builder fieldset {
+  border: 1px solid var(--panel-edge);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.builder legend { color: var(--ink-dim); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+.condition { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.condition > select, .condition > input { flex: 1 1 140px; }
+.condition .hint { flex-basis: 100%; margin: 0; }
+.condition .multi { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+
+.beatrow { display: flex; gap: 6px; }
+.beatrow select { flex: 1; }
+
+.meters { display: flex; flex-wrap: wrap; gap: 10px 18px; }
+.meters label > span:first-child { min-width: 0; }
+
+.flags { display: flex; flex-direction: column; gap: 4px; }
+
+.hint, .muted { color: var(--ink-dim); font-size: 12.5px; margin: 0; }
+
+.rivals { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.rivals li { font-size: 13px; }
+.rivals li.you_win strong { color: var(--ink); }
+.rivals li.they_win strong { color: var(--ink-dim); }
+.rivals li.coin_flip strong { color: var(--warn); }
+
+.warn { color: var(--warn); font-size: 13px; }
+.warn p { margin: 0 0 6px; }
+
+.reads {
+  margin: 0;
+  padding-top: 6px;
+  border-top: 1px solid var(--panel-edge);
+  color: var(--ink-dim);
+  font-size: 13px;
+  font-style: italic;
+}
+
+.builder .footer { border: none; padding-top: 4px; }
+
+@media (max-width: 760px) {
+  .builder { grid-template-columns: 1fr; }
+  .builder aside { position: static; }
+}
+
+.builder details summary { cursor: pointer; color: var(--ink-dim); font-size: 13px; }
+.builder details[open] summary { margin-bottom: 6px; }

@@ -12,7 +12,7 @@
  */
 
 import type { ContentBundle } from '../engine/content.ts';
-import type { GameState } from '../engine/state.ts';
+import type { GameState, KnowledgeId } from '../engine/state.ts';
 import { dueCareNeed } from '../engine/care.ts';
 
 export type MenuEntry = {
@@ -58,6 +58,16 @@ export function buildRoomMenu(state: GameState, content: ContentBundle): RoomMen
   const entry = (label: string, action: string, object: string | null, place: string | null):
     MenuEntry => ({ key: '', label, action, object, place });
 
+  /**
+   * Design doc §19. The one thing left out of the menu that is *not* about the scene fitting:
+   * a question the player has not worked their way to yet. Every other hidden option above is
+   * hidden because offering it would teach nothing; this one is hidden because the player has
+   * not had the thought. Showing it would spoil the thing being asked about before they have
+   * found it, and a greyed-out question is a table of contents for the whole game.
+   */
+  const thoughtOf = (requires: readonly KnowledgeId[] | undefined): boolean =>
+    requires === undefined || requires.every((fact) => state.player.knows.includes(fact));
+
   // Her half of a care scene is hers. It takes no target, which would otherwise land it in the
   // player's own menu as something they could click to be offered dinner — which is exactly
   // backwards: design doc §8 makes these things she does *to* you.
@@ -89,6 +99,7 @@ export function buildRoomMenu(state: GameState, content: ContentBundle): RoomMen
         const isAnswer = def.effect === 'care_accept' || def.effect === 'care_palm';
         if (isAnswer && def.satisfies !== due) continue;
         if (def.effect === 'care_refuse' && due === null) continue;
+        if (!thoughtOf(def.requiresKnown)) continue;
 
         entries.push(entry(def.name, verb, object.id, null));
       }
@@ -108,7 +119,7 @@ export function buildRoomMenu(state: GameState, content: ContentBundle): RoomMen
     }
     for (const verb of object.verbs ?? []) {
       const def = content.actions.find((a) => a.id === verb);
-      if (def !== undefined && def.effect !== 'toggle_on') {
+      if (def !== undefined && def.effect !== 'toggle_on' && thoughtOf(def.requiresKnown)) {
         entries.push(entry(def.name, verb, object.id, null));
       }
     }

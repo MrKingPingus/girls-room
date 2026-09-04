@@ -102,8 +102,28 @@ export function validateContent(raw: unknown): Problem[] {
   collectIds(reactions, 'reactions', add);
   const beatIds = new Set(beats === null ? [] : Object.keys(beats));
 
+  /**
+   * Every fact the player can learn, which is exactly the set some verb teaches.
+   *
+   * Deliberately not declared anywhere else. A separate register of legal knowledge would be a
+   * second list to keep in step with this one, and the failure when they drifted would be the
+   * silent kind: a condition naming knowledge nothing grants matches nothing, forever. Derived
+   * from the content instead, so requiring something ungrantable is impossible by construction.
+   */
+  const knowledgeIds = new Set<string>();
+  eachRecord(actions, 'actions', () => {}, (action) => {
+    const teaches = action['teaches'];
+    if (Array.isArray(teaches)) {
+      for (const fact of teaches) if (typeof fact === 'string' && fact !== '') knowledgeIds.add(fact);
+    }
+  });
+
   /** The id lists a condition can be checked against, when a fact holds an id. */
-  const ids: ContentIds = { actions: actionIds, objects: objectIds, places: placeIds };
+  const knowledgeAsked = new Set<string>();
+  const ids: ContentIds = {
+    actions: actionIds, objects: objectIds, places: placeIds, knowledge: knowledgeIds,
+    knowledgeAsked,
+  };
 
   // --- The eight universal verbs must all exist -------------------------------
   for (const verb of UNIVERSAL_VERBS) {
@@ -188,6 +208,38 @@ export function validateContent(raw: unknown): Problem[] {
       if (typeof produces !== 'string' || !objectIds.has(produces)) {
         add(`${at}.produces`, `"${String(produces)}" is not an object in objects.json`);
       }
+    }
+
+    // Design doc §19. The two halves of the knowledge ladder.
+    for (const key of ['teaches', 'requiresKnown'] as const) {
+      const list = action[key];
+      if (list === undefined) continue;
+      if (!Array.isArray(list)) {
+        add(`${at}.${key}`, 'must be a list of names of things the player can work out');
+        continue;
+      }
+      list.forEach((fact, i) => {
+        if (typeof fact !== 'string' || fact === '') {
+          add(`${at}.${key}[${i}]`, `"${String(fact)}" is not a name`);
+          return;
+        }
+        // The half that can be wrong. Nothing teaches it, so it can never come true, and the
+        // action would be permanently unavailable with nothing anywhere saying why.
+        if (key === 'requiresKnown') knowledgeAsked.add(fact);
+        if (key === 'requiresKnown' && !knowledgeIds.has(fact)) {
+          add(`${at}.${key}[${i}]`,
+            `nothing in the game teaches "${fact}", so this could never become available. `
+            + 'Add it to some action\'s `teaches` first');
+        }
+      });
+    }
+
+    // A universal verb applies to every object in the room, so anything it taught would be
+    // taught by looking at the water glass. Working a thing out is a contextual verb (§13).
+    if (action['universal'] === true && action['teaches'] !== undefined) {
+      add(`${at}.teaches`,
+        `"${String(action['id'])}" is a universal verb, so this would be learned from `
+        + 'every object in the room. Bind the teaching verb to the one thing instead');
     }
     requireOneOf(action, 'target', ['none', 'object', 'object_and_place'] as const, at, add);
 
@@ -378,6 +430,16 @@ export function validateContent(raw: unknown): Problem[] {
     }
   }
 
+  // The same warning for knowledge: something the player can learn that changes nothing is a
+  // dead end, and it looks identical to a name that was misspelt on the asking side.
+  for (const fact of knowledgeIds) {
+    if (!knowledgeAsked.has(fact)) {
+      add('actions',
+        `"${fact}" is taught but nothing ever asks about it — no rule checks it and no action `
+        + 'requires it, so learning it changes nothing', 'warning');
+    }
+  }
+
   // --- schedule ---------------------------------------------------------------
   eachRecord(schedule, 'schedule', add, (day, at) => {
     requireNumber(day, 'day', at, add, 1);
@@ -538,6 +600,12 @@ type ContentIds = {
   actions: Set<string>;
   objects: Set<string>;
   places: Set<string>;
+
+  /** Not a file. Whatever some action teaches — see where this is built in validateContent. */
+  knowledge: Set<string>;
+
+  /** Filled in as conditions are checked, so dead knowledge can be reported like a dead beat. */
+  knowledgeAsked: Set<string>;
 };
 
 /**
@@ -571,6 +639,16 @@ const COMPARISONS = ['gte', 'lte', 'gt', 'lt'] as const;
 function checkCriterion(
   spec: FactSpec, expected: unknown, at: string, add: Add, ids: ContentIds,
 ): void {
+  // A list fact is never equal to anything — it holds several names at once. Asking it the
+  // ordinary way is the mistake to expect, so it gets its own answer rather than a type error.
+  if (spec.kind === 'list' && (!isRecord(expected) || Array.isArray(expected))) {
+    return add(at,
+      `${spec.label} holds several names at once, so nothing is ever equal to it. `
+      + `Ask about one at a time: { "has": ${JSON.stringify(
+        Array.isArray(expected) ? expected[0] ?? '…' : expected,
+      )} }`);
+  }
+
   // A bare list is the mistake an author makes when they mean "any of these".
   if (Array.isArray(expected)) {
     return add(at,
@@ -588,6 +666,12 @@ function checkCriterion(
       const value = expected[key];
 
       if ((COMPARISONS as readonly string[]).includes(key)) {
+        if (spec.kind === 'list') {
+          add(`${at}.${key}`,
+            `${spec.label} is a list of names, so it cannot be compared with `
+            + 'more-than or less-than. Use "has" or "lacks"');
+          continue;
+        }
         if (spec.kind !== 'number') {
           add(`${at}.${key}`,
             `${spec.label} is ${spec.kind === 'flag' ? 'yes or no' : 'a name'}, `
@@ -602,12 +686,38 @@ function checkCriterion(
         continue;
       }
 
+      if (key === 'has' || key === 'lacks') {
+        if (spec.kind !== 'list') {
+          add(`${at}.${key}`,
+            `${spec.label} holds one value, not several, so "${key}" does not apply to it. `
+            + 'Write the value on its own to mean "must be exactly this"');
+          continue;
+        }
+        if (typeof value !== 'string' || value === '') {
+          add(`${at}.${key}`, 'must be the name of one thing the player can work out');
+          continue;
+        }
+        if (spec.domain !== undefined && !ids[spec.domain].has(value)) {
+          add(`${at}.${key}`,
+            `nothing in the game teaches "${value}", so this condition could never hold. `
+            + 'Add it to some action\'s `teaches` first');
+        }
+        ids.knowledgeAsked.add(value);
+        continue;
+      }
+
       if (key === 'ne') {
         checkValue(spec, value, `${at}.ne`, add, ids);
         continue;
       }
 
       if (key === 'in') {
+        if (spec.kind === 'list') {
+          add(`${at}.in`,
+            `${spec.label} is a list of names — "in" asks whether one value is among several, `
+            + 'which is backwards here. Use "has"');
+          continue;
+        }
         if (!Array.isArray(value) || value.length === 0) {
           add(`${at}.in`, 'must be a non-empty list of values');
           continue;
@@ -617,7 +727,7 @@ function checkCriterion(
       }
 
       add(`${at}.${key}`,
-        `"${key}" is not a test. Use one of: gte, lte, gt, lt, ne, in — `
+        `"${key}" is not a test. Use one of: gte, lte, gt, lt, ne, in, has, lacks — `
         + 'or a plain value, which means "must be exactly this"');
     }
     return;
@@ -644,6 +754,12 @@ function checkComparisonRange(
 function checkValue(
   spec: FactSpec, value: unknown, at: string, add: Add, ids: ContentIds,
 ): void {
+  if (spec.kind === 'list') {
+    return add(at,
+      `${spec.label} holds several names at once and is never equal to one of them. `
+      + 'Use "has" or "lacks"');
+  }
+
   if (spec.kind === 'flag') {
     if (typeof value !== 'boolean') {
       add(at, `${spec.label} is yes or no — write true or false, not "${String(value)}"`);

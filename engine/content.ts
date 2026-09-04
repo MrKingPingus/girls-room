@@ -12,7 +12,7 @@
  */
 
 import type {
-  ActionId, BeatId, ObjectId, ObjectLocation, PlaceId, RuleId,
+  ActionId, BeatId, KnowledgeId, ObjectId, ObjectLocation, PlaceId, RuleId,
 } from './state.ts';
 import type { Audio, Criteria, Scene, TimerSpec } from './beat.ts';
 import type {
@@ -133,6 +133,30 @@ export type ActionDef = {
    * so the pill has to become a real thing in the room with a location, not a counter.
    */
   produces?: ObjectId;
+
+  /**
+   * Design doc §19. What doing this teaches the player — the *and now you know…* half of the
+   * connective tissue. Anything named here becomes a legal thing for a rule to ask about and
+   * for another action to require, and the whole legal list is exactly what some action
+   * teaches: there is no separate register to keep in step, and no way to require something
+   * nothing can ever grant.
+   *
+   * Belongs to the verb rather than to the thing, because it is the *doing* that teaches. The
+   * universal eight never carry it — `look` teaches nothing, or it would teach it of every
+   * object in the room. Working a thing out is a contextual verb, and those are free (§13).
+   */
+  teaches?: KnowledgeId[];
+
+  /**
+   * Design doc §19. What the player must already have worked out before this is available —
+   * the *you know…* half. All of them, not any.
+   *
+   * This is what makes knowledge a ladder rather than a branching script: the first question
+   * is what makes the second one askable. A topic gated this way is not a refused action, it
+   * is a thought the player has not had yet, so the menu leaves it out — but VALIDITY still
+   * answers for it in character, because hard rule 8 does not make exceptions.
+   */
+  requiresKnown?: KnowledgeId[];
 
   /** Whether doing this can be concealed from her at all. */
   concealable: boolean;

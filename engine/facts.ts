@@ -40,15 +40,16 @@ import {
  *   `flag`   — yes or no
  *   `number` — a quantity, so it can be compared with at least / at most
  *   `text`   — one of a set of names
+ *   `list`   — several names at once, asked about with `has` / `lacks` rather than compared
  */
-export type FactKind = 'flag' | 'number' | 'text';
+export type FactKind = 'flag' | 'number' | 'text' | 'list';
 
 /**
  * Some facts hold ids from the content files rather than a fixed list — which object was
  * touched, which place it went to. Those can't be enumerated here because they change every
  * time content does, so the fact names where to look them up instead.
  */
-export type FactDomain = 'actions' | 'objects' | 'places';
+export type FactDomain = 'actions' | 'objects' | 'places' | 'knowledge';
 
 export type FactSpec = {
   id: string;
@@ -210,6 +211,13 @@ export const FACTS = [
     id: 'doses_palmed', label: 'doses palmed', kind: 'number',
     about: 'How many times you have appeared to take them and not. Contraband, and evidence.',
   },
+  {
+    id: 'knows', label: 'what you have worked out', kind: 'list', domain: 'knowledge',
+    about:
+      'Everything the player has learned so far, asked about one at a time with "has" or '
+      + '"lacks". The legal names are whatever some verb teaches. Design doc §19 — knowing a '
+      + 'thing is what makes the next question askable.',
+  },
 
   // --- the care loop --------------------------------------------------------
   {
@@ -318,7 +326,7 @@ export const FACT_GROUPS = [
     id: 'you', label: 'you',
     facts: [
       'mobility', 'pain', 'energy', 'medicated', 'hunger', 'thirst', 'wound_care',
-      'doses_taken', 'doses_palmed', 'class',
+      'doses_taken', 'doses_palmed', 'knows', 'class',
     ],
   },
   {

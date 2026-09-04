@@ -25,7 +25,7 @@ const content = loadGameContent();
 function bagFor(options: { deferred?: boolean } = {}) {
   return buildQuery(newGame(content, { seed: 99 }), content, {
     action: 'look', object: 'clock', place: null,
-    deferred: options.deferred ?? false,
+    deferred: options.deferred ?? false, knownBefore: [],
     validity: { ok: true }, noise: null, detection: null,
   });
 }
@@ -68,6 +68,14 @@ test('the values the game produces are the values the catalogue promises', () =>
   for (const fact of ALL_FACTS) {
     const value = bag[fact.id];
     if (value === undefined) continue;
+
+    if (fact.kind === 'list') {
+      assert.ok(Array.isArray(value), `${fact.id} is a list fact but did not come out as a list`);
+      for (const one of value as unknown[]) {
+        assert.equal(typeof one, 'string', `${fact.id} holds something that is not a name`);
+      }
+      continue;
+    }
 
     const expected = fact.kind === 'flag' ? 'boolean' : fact.kind === 'number' ? 'number' : 'string';
     assert.equal(typeof value, expected, `${fact.id} is not ${fact.kind}`);

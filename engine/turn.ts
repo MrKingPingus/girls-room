@@ -103,6 +103,7 @@ export function takeTurn(
     object: subject.object,
     place: input.place,
     deferred: fired !== null,
+    knownBefore: startingState.player.knows,
     validity: validityResult,
     noise: noiseResult,
     detection: detected.result,

@@ -18,7 +18,11 @@ import type { ReactionRule } from './content.ts';
 import type { AlwaysFactId, ContextualFactId } from './facts.ts';
 import { pick } from './random.ts';
 
-export type FactValue = string | number | boolean;
+/**
+ * `string[]` is the odd one out: a fact that holds several names at once rather than one
+ * value. Rules never compare it, they ask whether something is in it — see `has`/`lacks`.
+ */
+export type FactValue = string | number | boolean | string[];
 
 /**
  * Everything true about this instant, flattened. Assembled by `query.ts`.
@@ -45,6 +49,14 @@ export function criterionHolds(expected: CriterionValue, actual: unknown): boole
 
   // A plain value means "must equal this".
   if (typeof expected !== 'object' || expected === null) return expected === actual;
+
+  // Facts that hold several names at once — what the player has worked out. Asked one name at
+  // a time, so a rule stays one readable condition and the specificity count stays honest.
+  if (expected.has !== undefined || expected.lacks !== undefined) {
+    if (!Array.isArray(actual)) return false;
+    if (expected.has !== undefined && !actual.includes(expected.has)) return false;
+    if (expected.lacks !== undefined && actual.includes(expected.lacks)) return false;
+  }
 
   if (expected.ne !== undefined && expected.ne === actual) return false;
   if (expected.in !== undefined) {

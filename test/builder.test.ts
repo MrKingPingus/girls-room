@@ -328,7 +328,7 @@ test('the order on screen is the order the game really uses', () => {
 
   for (let turn = 0; turn < 30; turn += 1) {
     const facts = buildQuery(state, merged, {
-      action: verb, object: 'a_matchbox', place: null, deferred: false,
+      action: verb, object: 'a_matchbox', place: null, deferred: false, knownBefore: [],
       validity: { ok: true }, noise: null, detection: null,
     });
 

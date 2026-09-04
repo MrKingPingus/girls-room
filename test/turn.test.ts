@@ -108,7 +108,7 @@ test('reach gates the hands, not the eyes — the clock is across the room', () 
  */
 function factsFor(state: GameState, action: string, object: string | null) {
   return buildQuery(state, content, {
-    action, object, place: null, deferred: false,
+    action, object, place: null, deferred: false, knownBefore: [],
     validity: { ok: true }, noise: null, detection: null,
   });
 }

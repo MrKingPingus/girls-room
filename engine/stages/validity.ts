@@ -31,6 +31,15 @@ export function run(
     return { ok: false, reason: 'asleep' };
   }
 
+  // Design doc §19. A topic you have not earned is not a refusal of something you tried, it is
+  // a thought you have not had — so the menu leaves it out entirely (see render/menu.ts). This
+  // still answers for it, because a save, a replay or the harness can all name it directly and
+  // hard rule 8 does not allow "nothing happens" as an answer.
+  if (action.requiresKnown !== undefined
+      && !action.requiresKnown.every((fact) => state.player.knows.includes(fact))) {
+    return { ok: false, reason: 'dont_know_that_yet' };
+  }
+
   if (action.target === 'none') return { ok: true };
 
   if (input.object === null) return { ok: false, reason: 'target_required' };

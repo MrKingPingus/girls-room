@@ -141,6 +141,7 @@ export const FAILURE_REASONS = [
   'not_a_thing',      // she is a person. You do not pick her up
   'she_isnt_here',    // nothing to answer, because nobody is in the room
   'nothing_offered',  // she is here, but she is not holding anything out
+  'dont_know_that_yet', // the thought hasn't occurred to you — design doc §19's knowledge gate
 ] as const;
 export type FailureReason = (typeof FAILURE_REASONS)[number];
 

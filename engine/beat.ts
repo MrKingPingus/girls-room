@@ -117,6 +117,16 @@ export type CriterionValue =
       lt?: number;
       ne?: string | number | boolean;
       in?: (string | number)[];
+
+      /**
+       * For facts that hold several names at once rather than one value — today that is only
+       * what the player has worked out. `has` is "this is in there", `lacks` is "it is not".
+       *
+       * Both exist because both are scenes. `has` is the question you can finally ask; `lacks`
+       * is the one where she gets to notice you haven't worked it out yet.
+       */
+      has?: string;
+      lacks?: string;
     };
 
 /**

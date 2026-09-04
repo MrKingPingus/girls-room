@@ -24,7 +24,13 @@ export function run(
 
   const minutesElapsed = state.meta.minutesElapsed + action.timeCost;
   const objects: { [id: string]: ObjectState } = { ...state.objects };
+  // Design doc §19, the *and now you know…* half. Learning a thing is the mechanical result of
+  // having done something, which is why it lands here and nowhere else. Kept unique and in the
+  // order it was learned: it is a set in spirit, and hard rule 2 says state stays plain JSON.
   const knows = [...state.player.knows];
+  for (const fact of action.teaches ?? []) {
+    if (!knows.includes(fact)) knows.push(fact);
+  }
 
   // Palming turns a dose into a physical object in your hand — something with a location, that
   // has to go somewhere, and that she can find. A counter could not be hidden under a mattress.

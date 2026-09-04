@@ -18,6 +18,7 @@
  */
 
 import type { BeatId } from './state.ts';
+import type { FactId } from './facts.ts';
 import type {
   ConfidenceRegister, Light, Mood, Pose, SceneLocation, Speaker, TimeOfDay, Weather,
 } from './vocab.ts';
@@ -118,8 +119,15 @@ export type CriterionValue =
       in?: (string | number)[];
     };
 
-/** A bag of conditions, all of which must pass. An empty bag always passes. */
-export type Criteria = { [fact: string]: CriterionValue };
+/**
+ * A bag of conditions, all of which must pass. An empty bag always passes — that is the
+ * catch-all every action is required to have.
+ *
+ * Keyed by the fact catalogue, so a condition naming something the game has never heard of is
+ * a compile error where it is written in TypeScript, and a startup error where it comes out of
+ * a content file. Silently never matching is not one of the options.
+ */
+export type Criteria = { [K in FactId]?: CriterionValue };
 
 export type Choice = {
   id: ChoiceId;

@@ -14,9 +14,11 @@
  */
 
 import type { ContentBundle } from './content.ts';
+import type { FactSpec } from './facts.ts';
+import { factSpec, nearestFact } from './facts.ts';
 import {
   ACTION_EFFECTS, ACTIVITIES, CARE_NEEDS, CHANGE_TIERS, CONFIDENCE_REGISTERS, HOUSE_LOCATIONS, LIGHTS,
-  MOBILITY_TIERS, MOODS, NOISE_LEVELS, PHASES, POSES, SCENE_LOCATIONS,
+  MOBILITY_TIERS, MOODS, NOISE_LEVELS, OBJECT_LOCATION_KINDS, PHASES, POSES, SCENE_LOCATIONS,
   SPEAKERS, TIMES_OF_DAY, UNIVERSAL_VERBS, WEATHERS,
 } from './vocab.ts';
 
@@ -99,6 +101,9 @@ export function validateContent(raw: unknown): Problem[] {
   const actionIds = collectIds(actions, 'actions', add);
   collectIds(reactions, 'reactions', add);
   const beatIds = new Set(beats === null ? [] : Object.keys(beats));
+
+  /** The id lists a condition can be checked against, when a fact holds an id. */
+  const ids: ContentIds = { actions: actionIds, objects: objectIds, places: placeIds };
 
   // --- The eight universal verbs must all exist -------------------------------
   for (const verb of UNIVERSAL_VERBS) {
@@ -214,6 +219,8 @@ export function validateContent(raw: unknown): Problem[] {
     const when = rule['when'];
     if (when !== undefined && !isRecord(when)) {
       add(`${at}.when`, 'must be an object of conditions');
+    } else if (isRecord(when)) {
+      checkCriteria(when, `${at}.when`, add, ids);
     }
     const criteriaCount = isRecord(when) ? Object.keys(when).length : 0;
     if (criteriaCount === 0 && typeof action === 'string') {
@@ -347,6 +354,11 @@ export function validateContent(raw: unknown): Problem[] {
               if (!isRecord(choice)) return add(cAt, 'must be an object');
               requireString(choice, 'id', cAt, add);
               requireString(choice, 'label', cAt, add);
+              const requires = choice['requires'];
+              if (requires !== undefined) {
+                if (!isRecord(requires)) add(`${cAt}.requires`, 'must be an object of conditions');
+                else checkCriteria(requires, `${cAt}.requires`, add, ids);
+              }
               const cid = choice['id'];
               if (typeof cid === 'string') {
                 if (seen.has(cid)) add(cAt, `duplicate choice id "${cid}" within this prompt`);
@@ -513,6 +525,154 @@ function checkObjectLocation(
     case 'gone':
       return;
     default:
-      add(`${at}.kind`, `"${String(kind)}" is not one of: placed, inside, carried, hidden, gone`);
+      add(`${at}.kind`, `"${String(kind)}" is not one of: ${OBJECT_LOCATION_KINDS.join(', ')}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Conditions
+// ---------------------------------------------------------------------------
+
+/** The id lists a condition can name, for facts that hold an id rather than a fixed value. */
+type ContentIds = {
+  actions: Set<string>;
+  objects: Set<string>;
+  places: Set<string>;
+};
+
+/**
+ * Check a rule's conditions against the fact catalogue.
+ *
+ * This is the check the whole catalogue exists for. A condition naming a fact the game does
+ * not have — `suspicon`, or `her_mood` instead of `mood` — is not a small mistake. It loads
+ * clean, it counts toward the rule's specificity when the game decides which rule wins, and
+ * then it never matches, so the rule is dead and nothing anywhere says so. Hard rule 9.
+ *
+ * The same goes for a legal fact given an impossible value. `"mood": "wrm"` and
+ * `"suspicion": { "gte": 150 }` are both rules that can never fire.
+ */
+function checkCriteria(when: Record<string, unknown>, at: string, add: Add, ids: ContentIds): void {
+  for (const [fact, expected] of Object.entries(when)) {
+    const spec = factSpec(fact);
+    if (spec === null) {
+      const near = nearestFact(fact);
+      add(`${at}.${fact}`,
+        `"${fact}" is not something the game knows about`
+        + (near === null ? '. ' : ` — did you mean "${near}"? `)
+        + 'A condition on it would never match. The full list is in engine/facts.ts');
+      continue;
+    }
+    checkCriterion(spec, expected, `${at}.${fact}`, add, ids);
+  }
+}
+
+const COMPARISONS = ['gte', 'lte', 'gt', 'lt'] as const;
+
+function checkCriterion(
+  spec: FactSpec, expected: unknown, at: string, add: Add, ids: ContentIds,
+): void {
+  // A bare list is the mistake an author makes when they mean "any of these".
+  if (Array.isArray(expected)) {
+    return add(at,
+      'a list on its own is never equal to anything, so this could not match. '
+      + `Did you mean { "in": ${JSON.stringify(expected)} }?`);
+  }
+
+  if (isRecord(expected)) {
+    const keys = Object.keys(expected);
+    if (keys.length === 0) {
+      return add(at, 'has no test in it, so it is always true', 'warning');
+    }
+
+    for (const key of keys) {
+      const value = expected[key];
+
+      if ((COMPARISONS as readonly string[]).includes(key)) {
+        if (spec.kind !== 'number') {
+          add(`${at}.${key}`,
+            `${spec.label} is ${spec.kind === 'flag' ? 'yes or no' : 'a name'}, `
+            + 'so it cannot be compared with more-than or less-than');
+          continue;
+        }
+        if (typeof value !== 'number' || !Number.isFinite(value)) {
+          add(`${at}.${key}`, 'must be a number');
+          continue;
+        }
+        checkComparisonRange(spec, key, value, `${at}.${key}`, add);
+        continue;
+      }
+
+      if (key === 'ne') {
+        checkValue(spec, value, `${at}.ne`, add, ids);
+        continue;
+      }
+
+      if (key === 'in') {
+        if (!Array.isArray(value) || value.length === 0) {
+          add(`${at}.in`, 'must be a non-empty list of values');
+          continue;
+        }
+        value.forEach((one, i) => checkValue(spec, one, `${at}.in[${i}]`, add, ids));
+        continue;
+      }
+
+      add(`${at}.${key}`,
+        `"${key}" is not a test. Use one of: gte, lte, gt, lt, ne, in — `
+        + 'or a plain value, which means "must be exactly this"');
+    }
+    return;
+  }
+
+  checkValue(spec, expected, at, add, ids);
+}
+
+/** A comparison that falls outside what the fact can ever hold is a rule that never fires. */
+function checkComparisonRange(
+  spec: FactSpec, op: string, value: number, at: string, add: Add,
+): void {
+  if (spec.range === undefined) return;
+  const [min, max] = spec.range;
+  const impossible =
+    (op === 'gte' && value > max) || (op === 'gt' && value >= max)
+    || (op === 'lte' && value < min) || (op === 'lt' && value <= min);
+  if (impossible) {
+    add(at, `${spec.label} only ever runs from ${min} to ${max}, so this can never be true`);
+  }
+}
+
+/** One concrete value a fact is being compared against. */
+function checkValue(
+  spec: FactSpec, value: unknown, at: string, add: Add, ids: ContentIds,
+): void {
+  if (spec.kind === 'flag') {
+    if (typeof value !== 'boolean') {
+      add(at, `${spec.label} is yes or no — write true or false, not "${String(value)}"`);
+    }
+    return;
+  }
+
+  if (spec.kind === 'number') {
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+      return add(at, `${spec.label} is a number, and "${String(value)}" is not one`);
+    }
+    if (spec.values !== undefined && !spec.values.includes(value)) {
+      return add(at, `${spec.label} is only ever one of: ${spec.values.join(', ')}`);
+    }
+    if (spec.range !== undefined && (value < spec.range[0] || value > spec.range[1])) {
+      add(at,
+        `${spec.label} only ever runs from ${spec.range[0]} to ${spec.range[1]}, `
+        + `so it is never exactly ${value}`);
+    }
+    return;
+  }
+
+  if (typeof value !== 'string') {
+    return add(at, `${spec.label} is a name, and ${String(value)} is not one`);
+  }
+  if (spec.values !== undefined && !spec.values.includes(value)) {
+    return add(at, `"${value}" is not one of: ${spec.values.join(', ')}`);
+  }
+  if (spec.domain !== undefined && !ids[spec.domain].has(value)) {
+    add(at, `"${value}" is not in ${spec.domain}.json`);
   }
 }

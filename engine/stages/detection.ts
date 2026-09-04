@@ -15,14 +15,12 @@
 
 import type { GameState, ObjectId, PendingConsequence } from './../state.ts';
 import type { ContentBundle } from './../content.ts';
-import type { ChangeTier } from './../vocab.ts';
+import type { ChangeTier, DetectionOutcome } from './../vocab.ts';
 import type { TurnInput } from './../turn.ts';
 import type { NoiseResult } from './noise.ts';
 import type { ValidityResult } from './validity.ts';
 import { chance } from './../random.ts';
 import { leavesEvidence } from './../room.ts';
-
-export type DetectionOutcome = 'unnoticed' | 'noticed_now' | 'noticed_later';
 
 export type DetectionResult = {
   outcome: DetectionOutcome;

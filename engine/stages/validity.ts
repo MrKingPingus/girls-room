@@ -11,26 +11,9 @@
 import type { GameState } from './../state.ts';
 import type { ContentBundle, ObjectDef } from './../content.ts';
 import type { TurnInput } from './../turn.ts';
+import type { FailureReason } from './../vocab.ts';
 import { isHandsOn, reachOf } from './../room.ts';
 import { dueCareNeed } from './../care.ts';
-
-/** Why an action was refused. Each of these is a fact the rule database can answer to. */
-export type FailureReason =
-  | 'unknown_action'
-  | 'no_such_object'
-  | 'object_unknown'      // the player doesn't know it exists yet
-  | 'out_of_reach'        // mobility too low for where it is
-  | 'not_portable'
-  | 'already_held'
-  | 'not_a_container'
-  | 'inside_closed'       // it's in the drawer, and the drawer is shut
-  | 'nowhere_to_hide'
-  | 'nothing_to_hide'
-  | 'target_required'
-  | 'asleep'
-  | 'not_a_thing'      // she is a person. You do not pick her up
-  | 'she_isnt_here'    // nothing to answer, because nobody is in the room
-  | 'nothing_offered'; // she is here, but she is not holding anything out
 
 export type ValidityResult =
   | { ok: true }

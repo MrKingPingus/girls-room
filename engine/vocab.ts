@@ -118,6 +118,43 @@ export const UNIVERSAL_VERBS = [
 ] as const;
 export type UniversalVerb = (typeof UNIVERSAL_VERBS)[number];
 
+/**
+ * Why an action was refused. Hard rule 8 — failure is content, so each of these is a fact the
+ * rule database answers to with a line in character, never an error.
+ *
+ * Lives here rather than in the stage that produces it because the rule database can check it,
+ * which makes it a closed list an author has to get exactly right.
+ */
+export const FAILURE_REASONS = [
+  'unknown_action',
+  'no_such_object',
+  'object_unknown',   // the player doesn't know it exists yet
+  'out_of_reach',     // mobility too low for where it is
+  'not_portable',
+  'already_held',
+  'not_a_container',
+  'inside_closed',    // it's in the drawer, and the drawer is shut
+  'nowhere_to_hide',
+  'nothing_to_hide',
+  'target_required',
+  'asleep',
+  'not_a_thing',      // she is a person. You do not pick her up
+  'she_isnt_here',    // nothing to answer, because nobody is in the room
+  'nothing_offered',  // she is here, but she is not holding anything out
+] as const;
+export type FailureReason = (typeof FAILURE_REASONS)[number];
+
+/**
+ * Design doc §7. What came of her chance to notice: nothing, she saw it now, or she will find
+ * it later. The third is what makes the room tense — the drawer you left open is a debt.
+ */
+export const DETECTION_OUTCOMES = ['unnoticed', 'noticed_now', 'noticed_later'] as const;
+export type DetectionOutcome = (typeof DETECTION_OUTCOMES)[number];
+
+/** The shapes an object's whereabouts can take. `hidden` is the one she has to search for. */
+export const OBJECT_LOCATION_KINDS = ['placed', 'inside', 'carried', 'hidden', 'gone'] as const;
+export type ObjectLocationKind = (typeof OBJECT_LOCATION_KINDS)[number];
+
 export const NOISE_LEVELS = ['silent', 'low', 'medium', 'high'] as const;
 export type NoiseLevel = (typeof NOISE_LEVELS)[number];
 

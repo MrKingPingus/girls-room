@@ -24,6 +24,21 @@ function codeOnly(source: string): string {
     .replace(/^\s*\/\/.*$/gm, '');
 }
 
+/**
+ * Strip the text out of string literals as well, for the checks that hunt for browser calls.
+ *
+ * The fact catalogue is a file of prose sitting in code position — every fact carries a line
+ * of help text — and one of them ends a sentence with the word "window". Same reasoning as
+ * above: a test that fires on the dormer window is a test people learn to ignore. Import paths
+ * are strings too, so this is deliberately not used by the checks that read imports.
+ */
+function withoutText(source: string): string {
+  return codeOnly(source)
+    .replace(/'(?:[^'\\\n]|\\.)*'/g, "''")
+    .replace(/"(?:[^"\\\n]|\\.)*"/g, '""')
+    .replace(/`(?:[^`\\]|\\.)*`/g, '``');
+}
+
 function sourceFiles(dir: string): string[] {
   return readdirSync(dir).flatMap((entry) => {
     const path = join(dir, entry);
@@ -52,7 +67,7 @@ test('engine/ touches nothing outside itself — no disk, no screen, no clock', 
   ] as const;
 
   for (const file of engineFiles) {
-    const source = codeOnly(readFileSync(file, 'utf8'));
+    const source = withoutText(readFileSync(file, 'utf8'));
     for (const [pattern, why] of forbidden) {
       assert.doesNotMatch(source, pattern, `${file} ${why}`);
     }

@@ -10,6 +10,7 @@ import assert from 'node:assert/strict';
 
 import { newGame } from '../engine/newgame.ts';
 import { takeTurn } from '../engine/turn.ts';
+import { buildQuery } from '../engine/query.ts';
 import { buildMenu } from '../render/text.ts';
 import { loadGameContent } from '../app/load.ts';
 import type { GameState } from '../engine/state.ts';
@@ -100,6 +101,18 @@ test('reach gates the hands, not the eyes — the clock is across the room', () 
   assert.deepEqual(taking.trace.validity, { ok: false, reason: 'out_of_reach' });
 });
 
+/**
+ * A real fact bag for a real moment. Built through `buildQuery` rather than by hand so that a
+ * fact added to the catalogue can never leave this test asserting against a bag the game would
+ * never actually produce.
+ */
+function factsFor(state: GameState, action: string, object: string | null) {
+  return buildQuery(state, content, {
+    action, object, place: null, deferred: false,
+    validity: { ok: true }, noise: null, detection: null,
+  });
+}
+
 test('looking makes no sound and leaves no trace, wherever the thing is', () => {
   const turn = takeTurn(start(), content, { action: 'look', object: 'clock', place: null });
   assert.equal(turn.trace.noise.heard, false);
@@ -117,9 +130,8 @@ test('single writer — EFFECTS cannot move a meter', async () => {
 test('single writer — APPRAISAL cannot move an object', async () => {
   const appraisal = await import('../engine/stages/appraisal.ts');
   const before = start();
-  const after = appraisal.run(
-    before, content, 'open', { action: 'open', detected: true }, 2, null,
-  );
+  const facts = { ...factsFor(before, 'open', 'drawer'), detected: true };
+  const after = appraisal.run(before, content, 'open', facts, 2, null);
   assert.deepEqual(after.state.objects, before.objects, 'the meter stage moved something');
   assert.deepEqual(after.state.world, before.world);
 });

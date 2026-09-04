@@ -15,10 +15,29 @@
 
 import type { Criteria, CriterionValue } from './beat.ts';
 import type { ReactionRule } from './content.ts';
+import type { AlwaysFactId, ContextualFactId } from './facts.ts';
 import { pick } from './random.ts';
 
-/** Everything true about this instant, flattened. Assembled by `query.ts`. */
-export type QueryBag = { [fact: string]: string | number | boolean };
+export type FactValue = string | number | boolean;
+
+/**
+ * Everything true about this instant, flattened. Assembled by `query.ts`.
+ *
+ * Keyed by the fact catalogue rather than by any old string, which is what makes it impossible
+ * for `query.ts` and `facts.ts` to drift apart: a fact the catalogue doesn't list can't be put
+ * in the bag, and a fact the catalogue lists as always-present can't be left out of it.
+ */
+export type QueryBag =
+  { [K in AlwaysFactId]: FactValue }
+  & { [K in ContextualFactId]?: FactValue };
+
+/**
+ * Read a fact whose name isn't known until run time — which is every fact a rule asks for,
+ * since rules come out of a JSON file. The validator has already proved the name is real.
+ */
+export function factValue(facts: QueryBag, fact: string): FactValue | undefined {
+  return (facts as Record<string, FactValue | undefined>)[fact];
+}
 
 /** Does one condition hold? */
 export function criterionHolds(expected: CriterionValue, actual: unknown): boolean {
@@ -48,7 +67,8 @@ export function criterionHolds(expected: CriterionValue, actual: unknown): boole
 /** Do all of a rule's conditions hold? An empty set always holds — that's the catch-all. */
 export function ruleMatches(criteria: Criteria, facts: QueryBag): boolean {
   for (const [fact, expected] of Object.entries(criteria)) {
-    if (!criterionHolds(expected, facts[fact])) return false;
+    if (expected === undefined) continue;
+    if (!criterionHolds(expected, factValue(facts, fact))) return false;
   }
   return true;
 }

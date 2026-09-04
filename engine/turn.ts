@@ -27,6 +27,7 @@ import type { Beat } from './beat.ts';
 import type { ContentBundle } from './content.ts';
 import { buildQuery } from './query.ts';
 import { dueCareNeed } from './care.ts';
+import { worldEvents } from './events.ts';
 
 import * as validity from './stages/validity.ts';
 import * as effects from './stages/effects.ts';
@@ -61,6 +62,9 @@ export type TurnResult = {
 
     /** Her half of a care scene, when one was open. */
     offerRuleId: string | null;
+
+    /** What the world said for itself — she reached the stairs, she came in, the day turned. */
+    eventRuleIds: string[];
   };
 };
 
@@ -69,7 +73,7 @@ export function takeTurn(
 ): TurnResult {
   // What she was already holding out before this turn, so her offer plays once when the scene
   // opens rather than every turn until it is answered.
-  const careWasDue = dueCareNeed(startingState);
+  const careWasDue = dueCareNeed(startingState, content);
 
   // 1. VALIDITY — decides only. Writes nothing.
   const validityResult = validity.run(startingState, content, input);
@@ -97,12 +101,18 @@ export function takeTurn(
     ? { action: input.action, object: input.object }
     : { action: fired.cause as string, object: fired.objectId as string | null };
 
+  // What the world did on its own while that was happening — she started up the stairs, she
+  // came in, a day turned over. Worked out by comparing the room before and after rather than
+  // being recorded anywhere, so there is nothing to keep in step (see engine/events.ts).
+  const events = worldEvents(startingState, state);
+
   // Everything true about this instant, flattened, for the rule database to match against.
   const facts = buildQuery(state, content, {
     action: subject.action,
     object: subject.object,
     place: input.place,
     deferred: fired !== null,
+    events,
     knownBefore: startingState.player.knows,
     validity: validityResult,
     noise: noiseResult,
@@ -112,7 +122,7 @@ export function takeTurn(
   // 6. APPRAISAL — the meters. The only stage allowed near them.
   const minutesPassed = state.meta.minutesElapsed - startingState.meta.minutesElapsed;
   const appraised = appraisal.run(
-    state, content, subject.action, facts, minutesPassed, careWasDue,
+    state, content, subject.action, facts, minutesPassed, careWasDue, events,
   );
   state = appraised.state;
 
@@ -131,6 +141,7 @@ export function takeTurn(
       detection: detected.result,
       ruleId: appraised.result.ruleId,
       offerRuleId: appraised.result.offerRuleId,
+      eventRuleIds: appraised.result.eventRuleIds,
     },
   };
 }

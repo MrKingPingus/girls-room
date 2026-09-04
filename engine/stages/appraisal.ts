@@ -14,7 +14,7 @@
 import type { GameState } from './../state.ts';
 import type { ContentBundle } from './../content.ts';
 import type { QueryBag } from './../rules.ts';
-import type { Disposition } from './../vocab.ts';
+import type { Disposition, WorldEvent } from './../vocab.ts';
 import { selectRule } from './../rules.ts';
 import { dueCareNeed } from './../care.ts';
 
@@ -29,6 +29,14 @@ export type AppraisalResult = {
    */
   offerRuleId: string | null;
 
+  /**
+   * What the world said for itself this turn — she reached the stairs, she came in, the day
+   * turned over. The same idea as the offer above, widened: several things can be true of one
+   * moment, and each gets its own rule and its own line rather than being merged into the
+   * answer to whatever the player happened to be doing.
+   */
+  eventRuleIds: string[];
+
   beats: string[];
 };
 
@@ -37,7 +45,7 @@ const LADDER: Disposition[] = ['brittle', 'unsettled', 'content', 'devoted'];
 
 export function run(
   state: GameState, content: ContentBundle, action: string, facts: QueryBag,
-  minutesPassed: number, careWasDue: string | null,
+  minutesPassed: number, careWasDue: string | null, events: readonly WorldEvent[],
 ): { state: GameState; result: AppraisalResult } {
   const rule = selectRule(
     content.reactions, action, facts, state.meta.seed, state.meta.minutesElapsed,
@@ -75,7 +83,7 @@ export function run(
   // would turn the most human thing in the game into a nag, and the menu already shows what
   // is on the table. What is on offer is a fact the player can check by looking at her.
   const answering = content.actions.find((def) => def.id === action)?.satisfies !== undefined;
-  const nowDue = dueCareNeed(state);
+  const nowDue = dueCareNeed(state, content);
   const due = answering || nowDue === careWasDue ? null : nowDue;
   const offerAction = due === null
     ? undefined
@@ -87,12 +95,32 @@ export function run(
         state.meta.seed, state.meta.minutesElapsed,
       );
 
+  // What the world did for itself, in the order events.ts put them in. Each is looked up the
+  // same way her offer is, so a line on the stairs can turn on her mood or the day like any
+  // other line in the game, and adding one is a row in a file.
+  const eventRules = events.flatMap((event) => {
+    const def = content.actions.find((action_) => action_.raisedBy === event);
+    if (def === undefined) return [];
+    const found = selectRule(
+      content.reactions, def.id, facts, state.meta.seed, state.meta.minutesElapsed,
+    );
+    return found === null ? [] : [found];
+  });
+
   return {
     state: { ...state, her: { ...state.her, affection, trust, suspicion, disposition } },
     result: {
       ruleId: rule?.id ?? null,
       offerRuleId: offer?.id ?? null,
-      beats: [...(rule?.beats ?? []), ...(offer?.beats ?? [])],
+      eventRuleIds: eventRules.map((found) => found.id),
+      // What you did, then what the world did, then what she is holding out. That order is
+      // the fiction's: you finish your move, you hear the stairs, and then she is offering
+      // you a bowl.
+      beats: [
+        ...(rule?.beats ?? []),
+        ...eventRules.flatMap((found) => found.beats),
+        ...(offer?.beats ?? []),
+      ],
     },
   };
 }

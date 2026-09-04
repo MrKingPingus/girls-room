@@ -149,6 +149,25 @@ export type FailureReason = (typeof FAILURE_REASONS)[number];
  * Design doc §7. What came of her chance to notice: nothing, she saw it now, or she will find
  * it later. The third is what makes the room tense — the drawer you left open is a debt.
  */
+/**
+ * Moments where the world speaks without the player having asked it anything — she comes up
+ * the stairs, she goes, a day turns over. Closed on purpose: each one is a verb in
+ * `content/actions.json` marked `raisedBy`, so the list of things the world can announce is
+ * the list an author can write lines for. See `engine/events.ts`.
+ */
+export const WORLD_EVENTS = [
+  'day_begins',
+  'she_on_stairs',   // design doc §2b — the staircase is the player's only early warning
+  'she_arrives',
+  'she_leaves',
+  'night_falls',
+] as const;
+export type WorldEvent = (typeof WORLD_EVENTS)[number];
+
+/** Which meal a schedule block is, when it is one. She comes up for all three. */
+export const MEALS = ['breakfast', 'lunch', 'dinner'] as const;
+export type Meal = (typeof MEALS)[number];
+
 export const DETECTION_OUTCOMES = ['unnoticed', 'noticed_now', 'noticed_later'] as const;
 export type DetectionOutcome = (typeof DETECTION_OUTCOMES)[number];
 

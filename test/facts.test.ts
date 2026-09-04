@@ -25,7 +25,7 @@ const content = loadGameContent();
 function bagFor(options: { deferred?: boolean } = {}) {
   return buildQuery(newGame(content, { seed: 99 }), content, {
     action: 'look', object: 'clock', place: null,
-    deferred: options.deferred ?? false, knownBefore: [],
+    deferred: options.deferred ?? false, knownBefore: [], events: [],
     validity: { ok: true }, noise: null, detection: null,
   });
 }

@@ -108,7 +108,7 @@ test('reach gates the hands, not the eyes — the clock is across the room', () 
  */
 function factsFor(state: GameState, action: string, object: string | null) {
   return buildQuery(state, content, {
-    action, object, place: null, deferred: false, knownBefore: [],
+    action, object, place: null, deferred: false, knownBefore: [], events: [],
     validity: { ok: true }, noise: null, detection: null,
   });
 }
@@ -131,7 +131,7 @@ test('single writer — APPRAISAL cannot move an object', async () => {
   const appraisal = await import('../engine/stages/appraisal.ts');
   const before = start();
   const facts = { ...factsFor(before, 'open', 'drawer'), detected: true };
-  const after = appraisal.run(before, content, 'open', facts, 2, null);
+  const after = appraisal.run(before, content, 'open', facts, 2, null, []);
   assert.deepEqual(after.state.objects, before.objects, 'the meter stage moved something');
   assert.deepEqual(after.state.world, before.world);
 });

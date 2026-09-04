@@ -177,7 +177,10 @@ test('and it plays', () => {
   const state = newGame(merged, { seed: 11 });
   const turn = takeTurn(state, merged, { action: 'turn_keepsake', object: 'keepsake', place: null });
   assert.ok(turn.beats.length > 0);
-  assert.ok(turn.beats.every((beat) => beat.id.startsWith('keepsake_')));
+  // The scenario's own line is what has to reach the player. A turn can legitimately carry
+  // other beats alongside it now — the world says its own piece when a day opens or she moves.
+  assert.ok(turn.beats.some((beat) => beat.id.startsWith('keepsake_')),
+    'the scenario is loaded but its line never reached the player');
 });
 
 test('a line that is not the last of its scene does not charge the player time', () => {
@@ -328,7 +331,7 @@ test('the order on screen is the order the game really uses', () => {
 
   for (let turn = 0; turn < 30; turn += 1) {
     const facts = buildQuery(state, merged, {
-      action: verb, object: 'a_matchbox', place: null, deferred: false, knownBefore: [],
+      action: verb, object: 'a_matchbox', place: null, deferred: false, knownBefore: [], events: [],
       validity: { ok: true }, noise: null, detection: null,
     });
 

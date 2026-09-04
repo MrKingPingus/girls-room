@@ -93,7 +93,10 @@ test('and the new verb reaches the player, and plays', () => {
 
   const turn = takeTurn(state, content, { action: 'turn_keepsake', object: 'keepsake', place: null });
   assert.ok(turn.beats.length > 0);
-  assert.ok(turn.beats.every((beat) => beat.id.startsWith('keepsake_')));
+  // The pack's own line has to reach the player. Other beats may ride along on the same turn:
+  // the world says its own piece when a day opens or she moves between floors.
+  assert.ok(turn.beats.some((beat) => beat.id.startsWith('keepsake_')),
+    'the pack loaded but its line never reached the player');
 });
 
 test('the base game is left exactly as it was', () => {

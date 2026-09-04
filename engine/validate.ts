@@ -18,8 +18,8 @@ import type { FactSpec } from './facts.ts';
 import { factSpec, nearestFact } from './facts.ts';
 import {
   ACTION_EFFECTS, ACTIVITIES, CARE_NEEDS, CHANGE_TIERS, CONFIDENCE_REGISTERS, HOUSE_LOCATIONS, LIGHTS,
-  MOBILITY_TIERS, MOODS, NOISE_LEVELS, OBJECT_LOCATION_KINDS, PHASES, POSES, SCENE_LOCATIONS,
-  SPEAKERS, TIMES_OF_DAY, UNIVERSAL_VERBS, WEATHERS,
+  MEALS, MOBILITY_TIERS, MOODS, NOISE_LEVELS, OBJECT_LOCATION_KINDS, PHASES, POSES, SCENE_LOCATIONS,
+  SPEAKERS, TIMES_OF_DAY, UNIVERSAL_VERBS, WEATHERS, WORLD_EVENTS,
 } from './vocab.ts';
 
 export type Problem = {
@@ -195,6 +195,14 @@ export function validateContent(raw: unknown): Problem[] {
     requireOneOf(action, 'effect', ACTION_EFFECTS, at, add);
     if (action['satisfies'] !== undefined) requireOneOf(action, 'satisfies', CARE_NEEDS, at, add);
     if (action['offers'] !== undefined) requireOneOf(action, 'offers', CARE_NEEDS, at, add);
+    if (action['raisedBy'] !== undefined) {
+      requireOneOf(action, 'raisedBy', WORLD_EVENTS, at, add);
+      if (action['target'] !== 'none') {
+        add(`${at}.target`,
+          `"${String(action['id'])}" is something the world does, so there is nothing for the `
+          + 'player to aim it at. Set target to "none"');
+      }
+    }
 
     // A care answer that names no need cannot be applied to anything, and the failure would be
     // silent: the scene would play and the body would not change.
@@ -337,6 +345,36 @@ export function validateContent(raw: unknown): Problem[] {
     offersSeen.set(offers, id);
   });
 
+  // The same two checks for the world's own moments. A second verb claiming "she comes up the
+  // stairs" would silently never be reached, which is the failure hard rule 9 is about.
+  const eventsSeen = new Map<string, string>();
+  eachRecord(actions, 'actions', add, (action, at) => {
+    const raisedBy = action['raisedBy'];
+    const id = action['id'];
+    if (typeof raisedBy !== 'string' || typeof id !== 'string') return;
+    if (boundVerbs.has(id)) {
+      add(`${at}.raisedBy`,
+        `"${id}" is something the world does, but it is bound to an object's verbs, `
+        + 'so it would appear in the player\'s menu');
+    }
+    const already = eventsSeen.get(raisedBy);
+    if (already !== undefined) {
+      add(`${at}.raisedBy`,
+        `both "${already}" and "${id}" answer ${raisedBy} — only one of them can ever fire`);
+    }
+    eventsSeen.set(raisedBy, id);
+  });
+
+  // Every moment the world can raise needs a verb to say it, or it happens in silence — which
+  // is the bug this whole mechanism exists to fix, and it would be invisible.
+  for (const event of WORLD_EVENTS) {
+    if (!eventsSeen.has(event)) {
+      add('actions',
+        `nothing answers "${event}", so it would happen without the game mentioning it. `
+        + 'Add an action with that `raisedBy`', 'warning');
+    }
+  }
+
   // Architecture §6: one catch-all per action, so the game can never produce nothing.
   for (const actionId of actionIds) {
     const count = catchAllsByAction.get(actionId) ?? 0;
@@ -449,17 +487,32 @@ export function validateContent(raw: unknown): Problem[] {
     }
 
     let previousEnd: number | null = null;
+    const mealsToday = new Map<string, number>();
     blocks.forEach((block, i) => {
       const bAt = `${at}.blocks[${i}]`;
       if (!isRecord(block)) return add(bAt, 'must be an object');
       requireNumber(block, 'from', bAt, add, 0);
       requireNumber(block, 'to', bAt, add, 0);
       requireNumber(block, 'attention', bAt, add, 0, 1);
+      const from = block['from'];
       requireOneOf(block, 'location', HOUSE_LOCATIONS, bAt, add);
       requireOneOf(block, 'activity', ACTIVITIES, bAt, add);
       requireOneOf(block, 'phase', PHASES, bAt, add);
+      if (block['meal'] !== undefined) {
+        requireOneOf(block, 'meal', MEALS, bAt, add);
+        // She cannot feed you from the kitchen, and she does not feed you on her way past.
+        if (block['location'] !== 'attic' || block['activity'] !== 'tending_you') {
+          add(bAt,
+            `this is ${String(block['meal'])}, but she is not in the attic tending you, `
+            + 'so the meal could never be offered');
+        }
+        const already = mealsToday.get(String(block['meal']));
+        if (already !== undefined) {
+          add(bAt, `${String(block['meal'])} already happens at minute ${already} today`);
+        }
+        mealsToday.set(String(block['meal']), typeof from === 'number' ? from : 0);
+      }
 
-      const from = block['from'];
       const to = block['to'];
       if (typeof from === 'number' && typeof to === 'number') {
         if (to <= from) add(bAt, `ends at ${to} but starts at ${from}`);
@@ -472,6 +525,14 @@ export function validateContent(raw: unknown): Problem[] {
         previousEnd = to;
       }
     });
+
+    // A day missing a meal is almost always a mistake in a table this size, and the symptom —
+    // she simply never comes up at lunchtime — reads as the schedule being random.
+    for (const meal of MEALS) {
+      if (!mealsToday.has(meal)) {
+        add(at, `no ${meal} on day ${String(day['day'])}`, 'warning');
+      }
+    }
   });
 
   return problems;
@@ -697,12 +758,20 @@ function checkCriterion(
           add(`${at}.${key}`, 'must be the name of one thing the player can work out');
           continue;
         }
+        // A list fact draws its legal names either from a fixed set (what the world can do)
+        // or from the content (what some verb teaches). Either way, a name off the list is a
+        // condition that can never hold, and would say so nowhere.
+        if (spec.values !== undefined && !spec.values.includes(value)) {
+          add(`${at}.${key}`, `"${value}" is not one of: ${spec.values.join(', ')}`);
+          continue;
+        }
         if (spec.domain !== undefined && !ids[spec.domain].has(value)) {
           add(`${at}.${key}`,
             `nothing in the game teaches "${value}", so this condition could never hold. `
             + 'Add it to some action\'s `teaches` first');
+          continue;
         }
-        ids.knowledgeAsked.add(value);
+        if (spec.domain === 'knowledge') ids.knowledgeAsked.add(value);
         continue;
       }
 

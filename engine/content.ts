@@ -17,7 +17,7 @@ import type {
 import type { Audio, Criteria, Scene, TimerSpec } from './beat.ts';
 import type {
   ActionEffect, Activity, CareNeed, ChangeTier, ConfidenceRegister, HouseLocation,
-  MobilityTier, Mood, NoiseLevel, Phase, Pose, Speaker,
+  Meal, MobilityTier, Mood, NoiseLevel, Phase, Pose, Speaker, WorldEvent,
 } from './vocab.ts';
 
 // ---------------------------------------------------------------------------
@@ -126,6 +126,17 @@ export type ActionDef = {
    * everything else, with its own beats and its own catch-all.
    */
   offers?: CareNeed;
+
+  /**
+   * Marks this action as **the world's**, not hers and not the player's: the moment she starts
+   * up the stairs, the moment she leaves, a day turning over. See `engine/events.ts`.
+   *
+   * The same arrangement as `offers` above and for the same reason — it makes what the world
+   * says a row in the rule database rather than a branch in the engine, so a line on the
+   * stairs can depend on her mood or the day like anything else. Never bound to an object's
+   * verbs and never in a menu: the player does not choose to have her come home.
+   */
+  raisedBy?: WorldEvent;
 
   /**
    * An object this action puts into the player's hands. Palming a pill is the case that
@@ -303,6 +314,19 @@ export type ScheduleBlock = {
 
   /** Which part of the day's structure this block belongs to. */
   phase: Phase;
+
+  /**
+   * Marks this block as a meal she has come up to give you.
+   *
+   * Without it, whether she feeds you depends on whether hunger happens to have crossed a
+   * number, so meals land at unpredictable times and some days she never brings one at all.
+   * With it, breakfast is breakfast: she comes up at eight, and there is food. The rhythm is
+   * the thing the player learns the room by, and a rhythm has to be reliable to be learnable.
+   *
+   * It does not force-feed anyone — it puts the offer on the table. Refusing is still design
+   * doc §8's lever on her.
+   */
+  meal?: Meal;
 };
 
 export type ScheduleDay = {

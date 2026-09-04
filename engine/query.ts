@@ -45,6 +45,9 @@ export function buildQuery(
     /** True when this moment is her finding something you did earlier, not reacting to now. */
     deferred: boolean;
 
+    /** What the world did on its own this turn — see `engine/events.ts`. */
+    events: readonly string[];
+
     /**
      * What the player had worked out *coming into* this turn — not counting anything the verb
      * they just used has taught them.
@@ -70,6 +73,11 @@ export function buildQuery(
     action: parts.action,
     valid: parts.validity.ok,
     deferred: parts.deferred,
+
+    // So a line can avoid talking over the world. "Time passes, she doesn't leave" is right up
+    // until the turn she walks in, and a rule saying `lacks: she_arrives` never has to know
+    // why — that is the point of putting it in the bag rather than in the engine.
+    just_happened: [...parts.events],
 
     // Where the run is
     day: dayOf(meta.minutesElapsed),
@@ -114,7 +122,7 @@ export function buildQuery(
     knows: [...parts.knownBefore],
 
     // The care loop. `care_due` is what she is holding out right now, or 'none'
-    care_due: dueCareNeed(state) ?? 'none',
+    care_due: dueCareNeed(state, content) ?? 'none',
 
     // History she can draw on
     times_caught: state.history.filter((entry) => entry.seen).length,

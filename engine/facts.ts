@@ -31,7 +31,7 @@
 import {
   ACTIVITIES, CARE_NEEDS, DETECTION_OUTCOMES, DISPOSITIONS, FAILURE_REASONS, HOUSE_LOCATIONS,
   LIGHTS, MOODS, NOISE_LEVELS, OBJECT_LOCATION_KINDS, PHASES, PLAYER_CLASSES, TEMPERATURES,
-  TIMES_OF_DAY,
+  TIMES_OF_DAY, WORLD_EVENTS,
 } from './vocab.ts';
 
 /**
@@ -98,6 +98,13 @@ export const FACTS = [
   {
     id: 'deferred', label: 'she is finding it late', kind: 'flag',
     about: 'True when this moment is her discovering something you did earlier, not just now.',
+  },
+  {
+    id: 'just_happened', label: 'what the world just did', kind: 'list', values: WORLD_EVENTS,
+    about:
+      'Things that happened this turn for reasons of their own — she came in, she left, a day '
+      + 'turned over. Asked with "has" or "lacks". Mostly you want "lacks", so a line does not '
+      + 'contradict something the world said in the same breath.',
   },
 
   // --- the clock ------------------------------------------------------------
@@ -302,7 +309,7 @@ export type FactId = (typeof FACTS)[number]['id'];
 export const FACT_GROUPS = [
   {
     id: 'moment', label: 'what just happened',
-    facts: ['action', 'valid', 'failure', 'deferred'],
+    facts: ['action', 'valid', 'failure', 'deferred', 'just_happened'],
   },
   {
     id: 'noticed', label: 'whether she noticed',

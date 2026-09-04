@@ -9,7 +9,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { validateContent, loadContent, ContentError } from '../engine/validate.ts';
-import { UNIVERSAL_VERBS } from '../engine/vocab.ts';
+import { UNIVERSAL_VERBS, WORLD_EVENTS } from '../engine/vocab.ts';
 
 /** The smallest bundle that is actually legal: all eight verbs, each with a catch-all rule. */
 function validBundle(): Record<string, unknown> {
@@ -29,15 +29,22 @@ function validBundle(): Record<string, unknown> {
         noise: { open: 'high' },
       },
     ],
-    actions: UNIVERSAL_VERBS.map((id) => ({
-      id, name: id, universal: true, timeCost: 1, noise: 'low',
-      effect: 'none', concealable: false, target: 'object',
-    })),
-    reactions: UNIVERSAL_VERBS.map((id) => ({
+    actions: [
+      ...UNIVERSAL_VERBS.map((id) => ({
+        id, name: id, universal: true, timeCost: 1, noise: 'low',
+        effect: 'none', concealable: false, target: 'object',
+      })),
+      // The world's own moments. Every one needs a verb to say it, or it happens in silence.
+      ...WORLD_EVENTS.map((event) => ({
+        id: `w_${event}`, name: event, universal: false, timeCost: 0, noise: 'silent',
+        effect: 'none', concealable: false, target: 'none', raisedBy: event,
+      })),
+    ],
+    reactions: [...UNIVERSAL_VERBS, ...WORLD_EVENTS.map((event) => `w_${event}`)].map((id) => ({
       id: `fallback_${id}`, action: id, when: {}, beats: [`b_${id}`],
     })),
     beats: Object.fromEntries(
-      UNIVERSAL_VERBS.map((id) => [
+      [...UNIVERSAL_VERBS, ...WORLD_EVENTS.map((event) => `w_${event}`)].map((id) => [
         `b_${id}`,
         { speaker: 'narrator', text: 'placeholder', pose: 'absent', advancesClock: true },
       ]),
@@ -46,8 +53,11 @@ function validBundle(): Record<string, unknown> {
       {
         day: 1,
         blocks: [
-          { from: 0, to: 60, location: 'attic', activity: 'tending_you', attention: 0.8, phase: 'wake' },
-          { from: 60, to: 480, location: 'kitchen', activity: 'cooking', attention: 0.1, phase: 'absence' },
+          { from: 0, to: 60, location: 'attic', activity: 'tending_you', attention: 0.8, phase: 'wake', meal: 'breakfast' },
+          { from: 60, to: 300, location: 'kitchen', activity: 'cooking', attention: 0.1, phase: 'absence' },
+          { from: 300, to: 360, location: 'attic', activity: 'tending_you', attention: 0.8, phase: 'return', meal: 'lunch' },
+          { from: 360, to: 660, location: 'kitchen', activity: 'cooking', attention: 0.1, phase: 'absence' },
+          { from: 660, to: 720, location: 'attic', activity: 'tending_you', attention: 0.8, phase: 'evening', meal: 'dinner' },
         ],
       },
     ],

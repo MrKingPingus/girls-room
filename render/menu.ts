@@ -72,7 +72,9 @@ export function buildRoomMenu(state: GameState, content: ContentBundle): RoomMen
   // player's own menu as something they could click to be offered dinner — which is exactly
   // backwards: design doc §8 makes these things she does *to* you.
   const general = content.actions
-    .filter((action) => action.target === 'none' && action.offers === undefined)
+    .filter((action) => action.target === 'none'
+      && action.offers === undefined
+      && action.raisedBy === undefined)
     .map((action) => entry(action.name, action.id, null, null));
 
   const groups: ObjectGroup[] = [];
@@ -91,7 +93,7 @@ export function buildRoomMenu(state: GameState, content: ContentBundle): RoomMen
 
       // Only the answers that fit the scene she is actually offering. A reach refusal teaches
       // the player a system; "drink it" when she is holding out pills teaches nothing.
-      const due = dueCareNeed(state);
+      const due = dueCareNeed(state, content);
       for (const verb of object.verbs ?? []) {
         const def = content.actions.find((a) => a.id === verb);
         if (def === undefined) continue;

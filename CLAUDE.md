@@ -49,8 +49,10 @@ technical terminology and I'm not going to pick it up from context — assume ze
 Read both before your first change in a session. If a request conflicts with either doc, say so
 rather than silently picking one.
 
-- `docs/scenario-builder.md` — the dev tool for authoring content. Read it before touching
-  `app/builder.ts`, `app/web/builder/`, `engine/facts.ts` or `engine/pack.ts`.
+- `docs/scenario-builder.md` — the dev tool for authoring content. **Currently parked** — §13
+  says where it stopped and why, and §14 is the running list of what the game can say and the
+  builder cannot. Read it before touching `app/builder.ts`, `app/web/builder/`, `engine/facts.ts`
+  or `engine/pack.ts`, and add to §14 whenever you add a system.
 
 ## Stack
 
@@ -161,6 +163,10 @@ is the one failure that would make the tool worse than not having it.
 - **Prefer adding a row over adding a branch.** If a feature can be a rule, a criterion, or a
   content entry rather than code, make it that.
 - **Don't gold-plate.** We're building the POC in §16 of the design doc, not the full game.
+- **When you add a system, add a row to the builder ledger** — `docs/scenario-builder.md` §14,
+  in the same change. The scenario builder is parked, not deleted, and every system built while
+  it is parked is something an author will eventually expect to reach. A row costs one line now;
+  reconstructing the list from the code later costs an afternoon and will miss things.
 
 ## Ask before
 

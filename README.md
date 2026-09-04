@@ -95,7 +95,9 @@ a coin flip *every single time*. That is invisible looking at a rule on its own,
 already caused one real bug here. The builder names the rules that answer the same moment, says
 who takes it and why, and offers to settle a coin flip before it can happen.
 
-`docs/scenario-builder.md` has the whole design, including what is deliberately not in it.
+`docs/scenario-builder.md` has the whole design. **It is currently parked** — it works, but the
+game has no way yet for one scenario to lead to another, so everything you can author with it
+ends where it starts. §13 of that doc says where it stopped; §14 tracks what it owes.
 
 ## Where it is up to
 
@@ -103,9 +105,14 @@ Playable: three days, the eight verbs, her routine, sound, deferred discovery, t
 meals, water, dressings, medication, and palming a dose — talking to her in two ways, saves,
 and exportable test reports that replay move for move.
 
-Not built yet: the mobility 0→1 climb, the journal, the three endings, and talking to her
-properly (designed in design doc §19, not started). The builder's stage 3 — the room's places
-and her routine — is deferred.
+Not built yet: **anything a rule can change other than her meters.** A scenario cannot teach the
+player something, mark the world, or leave anything a later rule could read, so authored content
+dead-ends by construction. `player.knows` is in the state shape with an owning stage already
+assigned and nothing writing it — that is the next thing.
+
+Also not built: the mobility 0→1 climb, the journal, the three endings, and talking to her
+properly (designed in design doc §19). The builder's stage 3 — the room's places and her routine
+— is deferred.
 
 **Every line of text is placeholder.** Design doc §16 calls for the ugly version first;
 `content/README.md` says which files hold it and what replacing it involves.

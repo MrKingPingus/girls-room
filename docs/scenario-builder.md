@@ -3,8 +3,10 @@
 A dev tool: a second tab in the game that lets the designer write new moments for the game
 by filling in forms, test them in the running room, tune them, and export them as a file.
 
-Status: **stages 1 and 2 built, then rebuilt around the ladder** (§11 below, which supersedes the
-screens described in §4 and §5 — the model underneath them is unchanged). Stage 3 (the room's places, her schedule) deferred, as is the
+Status: **PARKED.** Stages 1 and 2 were built, then rebuilt around the ladder (§11, which
+supersedes the screens described in §4 and §5 — the model underneath them is unchanged). Work
+stopped deliberately at §13. Read §13 before touching any of it again, and keep §14 up to date
+even while it is parked. Stage 3 (the room's places, her schedule) deferred, as is the
 choice-and-timer editor, which belongs to the v2 dialogue mode rather than here.
 
 Where it lives: `engine/facts.ts` and `engine/pack.ts` in the engine; `app/builder.ts` for the
@@ -459,3 +461,108 @@ Alongside that:
 The example is built through the ordinary editing functions rather than written out as data, so
 it cannot drift from what the screens produce, and a test asserts it arrives with nothing
 unfinished — an example that needs fixing before it runs teaches exactly the wrong thing.
+
+---
+
+## 13. Parked — where this stopped, and why
+
+Stopped after two sessions of use by the designer. Not abandoned, and not because it does not
+work: it does. Stopped because **the tool outran the game.**
+
+### The reason
+
+A rule can currently change exactly one thing: her meters. It cannot change the world, teach the
+player anything, or leave a mark that a later rule could see. So every scenario an author can
+build is a dead end by construction — as the designer put it, *"I can grab a thing, and she can
+say something about it, and that's that."*
+
+That is not a workflow problem, and no amount of screen work fixes it. More polish on a tool for
+authoring dead ends is the wrong spend. The systems come first; the builder is revisited when
+there is something worth authoring.
+
+### What works, and can be trusted
+
+- Writing a thing, verbs bound to it, a ladder of situations per verb, and the lines she says
+- The ladder's order being the order the game really uses (§11, and the test that proves it)
+- Live validation through the real content validator — never a second opinion (hard rule 10)
+- Switching a scenario on, playing it in the room, exporting it as a file, importing one
+- **New, from an example** — a matchbox that already works, three rungs deep
+- Ideas boxes, carried in the pack file and never seen by `engine/`
+
+### What is known to be wrong, and was not fixed
+
+- **A rung jumps position as you add a condition to it.** Correct — more conditions wins, so the
+  ladder re-sorts — but it moves while you are typing in it. There is a note above the ladder
+  explaining it. If it is still irritating in practice, make it settle rather than jump.
+- **Two conditions in one rung both show their subject dropdown**, which reads as repetition
+  when they are about the same subject.
+- **The scenario name and author sit above the "what is this for?" box**, which is a strange
+  reading order for what is really one header.
+- **Nothing checks that a scenario is balanced.** The validator proves it is legal, never good.
+- **Everything in §14 below** is content the game supports and the builder cannot write.
+
+### The open design question
+
+The designer wants a branching picture — pick up the egg, and branches from there leading to
+consequences. §11 argues against a flowchart and that argument still holds *for one turn*: the
+rule database is not a tree and has no "and then".
+
+But what they were describing is not one turn. It is the scenario's life over time, and that
+genuinely is a graph. It cannot be drawn today because **nothing in a scenario changes state, so
+there is exactly one node.** Once a rung can teach the player something and a condition can read
+it back, the states are real and a map of them becomes honest rather than decorative.
+
+**So: build the connective tissue first, then look again at whether a map earns its place.** Do
+not draw the graph before there is something to draw.
+
+### The first thing to do when picking this up again
+
+`player.knows` — "facts the player has learned" — is already in the state shape, and the
+single-writer table already names EFFECTS as its owner. Nothing writes it and nothing reads it.
+Filling that slot is the smallest change that lets one scenario lead to another:
+
+- a rung can say *and now you know…*
+- a condition can ask *you know…*
+
+Design doc §19 already plans the talking system on top of exactly this. Neither a new state
+field nor a new pipeline stage is needed.
+
+---
+
+## 14. The builder ledger — what the game can say and the builder cannot
+
+**Standing rule: when a system is added to the game, add a row here in the same change.**
+
+The builder is parked, not deleted. Every system built while it is parked is a thing an author
+will eventually expect to reach, and the cost of finding that out later — by an author hitting a
+wall — is what this list exists to avoid. A row costs one line. Reconstructing this list from the
+code costs an afternoon and will miss things.
+
+Say what the system is, and what the builder would need in order to author it.
+
+### Owed as of parking
+
+| System | What the builder would need |
+|---|---|
+| **Places** (`content/places.json`) | Stage 3. Reach tier, concealment, noise modifier. Packs do not carry places at all. |
+| **Her routine** (`content/schedule.json`) | Stage 3. Blocks per day, with the no-gaps-or-overlaps check surfaced as it is typed. |
+| **Contraband** (`action.produces`) | A verb that *makes* a thing — palming a dose is the keystone move of §8 and cannot be authored. |
+| **Her care offers** (`action.offers`) | Her half of a care scene. Deliberately excluded from the player's menu, so it needs its own way in. |
+| **Hidden and nested starts** (`object.startsAt`) | Only `placed` can be written. `hidden`, `inside`, `carried` cannot. |
+| **Per-object noise** (`object.noise`) | A drawer being louder than a glass is authorable in the file and not in the tool. |
+| **People** (`object.person`) | Only she is one today, but the field exists and the builder cannot set it. |
+| **Prompts, choices, timers** (`beat.prompt`) | The v2 dialogue mode. Deliberately deferred — do not build it into the ladder. |
+| **Dream and memory scenes** (`beat.scene`) | Overriding the stamped-on light, weather or location for a beat that is not in the room now. |
+| **Sound** (`beat.audio`) | Nothing reads it yet, but every beat carries it, and one day a VN layer will. |
+| **Confidence register** (`beat.register`) | v2, reserved. Nothing reads it. Listed so it is not forgotten. |
+
+### Owed by systems not yet built
+
+| System | What the builder would need |
+|---|---|
+| **What the player knows** (`player.knows`) | *and now you know…* on a rung, and *you know…* as a condition. The first thing to build (§13). |
+| **Talking to her** (design doc §19) | Topics as contextual verbs on her, with the once-only rule and knowledge gating. Mostly falls out of `knows`. |
+| **Her acting on the world** | A rung causing her to move or take something. A genuine pipeline question, not a small change. |
+| **The journal** (design doc §9) | Writing in it, and her reading it. |
+| **Mobility 0 → 1** | Reach tiers become authorable, which drags Stage 3 with it. |
+| **The three endings** (design doc §11) | Whatever an ending turns out to be, an author will want to write one. |

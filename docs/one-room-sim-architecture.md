@@ -261,7 +261,7 @@ a single writer.
 | `energy` | WORLD | Same |
 | `needs.*` | WORLD | Rise with the clock, fall when she performs the care scene |
 | `medication.*` | WORLD | Dose decays in the body; palming is recorded here, the pill itself in `objects` |
-| `knows[]` | EFFECTS | Learning a fact is the mechanical result of looking or listening |
+| `knows[]` | EFFECTS | Learning a fact is the mechanical result of having done something |
 | `confidence.*` | *(none — v2)* | Reserved. No stage writes it, nothing reads it. Do not implement |
 
 ### `her`
@@ -385,6 +385,46 @@ was meant, and an invented operator.
 **Adding a system means adding a row here.** One row, and every rule ever written can start
 asking about it, with no change to any of them. That is §6's promise, made checkable.
 
+### Facts that hold several names at once
+
+Most facts hold one value and rules compare against it. One — `knows`, what the player has
+worked out — holds a list, and is asked about a name at a time:
+
+```json
+{ "id": "ask_nail_first", "action": "ask_about_nail",
+  "when": { "knows": { "lacks": "nail_recently_emptied" } }, "beats": ["..."] }
+```
+
+`has` and `lacks`, and nothing else: comparing a list with `gte`, or writing it as a plain
+value, is refused at load with the shape that would have worked. Each stays one condition, so
+the specificity count in §6 keeps meaning what it says.
+
+**The legal names are exactly what some action `teaches`.** There is deliberately no separate
+register of them. A second list would be a second thing to keep in step, and the failure when
+they drifted would be the silent kind this section exists to prevent — so requiring or asking
+about knowledge nothing can grant is impossible by construction rather than by checking.
+
+### The knowledge ladder
+
+Design doc §19. Two fields on an action in `content/actions.json`, and no new state field, no
+new stage, no ninth verb:
+
+- **`teaches`** — what doing this makes the player know. Applied by EFFECTS, which owns
+  `player.knows`. Never on a universal verb: `look` teaching something would teach it off every
+  object in the room, so the validator refuses it. Working a thing out is a contextual verb.
+- **`requiresKnown`** — what the player must already know before this is offered. Checked in
+  VALIDITY. The menu leaves an unearned topic out entirely rather than greying it out, because
+  a visible locked question is a table of contents for the game; VALIDITY still answers for it
+  in character, because hard rule 8 has no exceptions and a save or a replay can name it.
+
+**`knows` is read as of the start of the turn.** The only place the fact bag deliberately looks
+backwards, and it has to: EFFECTS grants knowledge before APPRAISAL asks which rule wins, so on
+the current picture the turn a verb teaches something already reads as *they know this* — and
+the scene of working it out becomes impossible to author, silently. Reading it from before the
+turn makes both rungs writable (`lacks` for the moment they learn it, `has` for afterwards) and
+makes it agree exactly with the gate in VALIDITY, which is also asking before anything was
+taught.
+
 ---
 
 ## 7. Content files
@@ -394,7 +434,7 @@ All of it data, none of it code. Content is added without touching `engine/`.
 ```
 content/places.json      id, reach tier, concealment, noise modifier
 content/objects.json     id, where it starts, container/portable, change tier, contextual verbs
-content/actions.json     verbs, time cost, noise, concealability, target shape
+content/actions.json     verbs, time cost, noise, concealability, target shape, knowledge
 content/reactions.json   the rule database (§6)
 content/beats.json       beat id -> text + pose + clock + prompt
 content/schedule.json    her routine per day — where she is, what she's doing, attention level

@@ -3,7 +3,8 @@
 A dev tool: a second tab in the game that lets the designer write new moments for the game
 by filling in forms, test them in the running room, tune them, and export them as a file.
 
-Status: **PARKED.** Stages 1 and 2 were built, then rebuilt around the ladder (§11, which
+Status: **PARKED**, and the reason it was parked is now fixed — see §13. Stages 1 and 2 were
+built, then rebuilt around the ladder (§11, which
 supersedes the screens described in §4 and §5 — the model underneath them is unchanged). Work
 stopped deliberately at §13. Read §13 before touching any of it again, and keep §14 up to date
 even while it is parked. Stage 3 (the room's places, her schedule) deferred, as is the
@@ -515,17 +516,19 @@ it back, the states are real and a map of them becomes honest rather than decora
 **So: build the connective tissue first, then look again at whether a map earns its place.** Do
 not draw the graph before there is something to draw.
 
-### The first thing to do when picking this up again
+### The first thing to do when picking this up again — DONE, in the game
 
-`player.knows` — "facts the player has learned" — is already in the state shape, and the
-single-writer table already names EFFECTS as its owner. Nothing writes it and nothing reads it.
-Filling that slot is the smallest change that lets one scenario lead to another:
+`player.knows` is now live. An action can carry `teaches` (*and now you know…*) and
+`requiresKnown` (*you can only do this if you already know…*), and any rule can ask about a
+name with `knows: { has: … }` or `knows: { lacks: … }`. Architecture §6a has the shape; the
+nail on the wall is the worked example shipping in `content/`.
 
-- a rung can say *and now you know…*
-- a condition can ask *you know…*
+So the premise of this section no longer holds: a scenario **can** now lead to another. What is
+still true is that the builder cannot write any of it — see the `player.knows` row in §14.
 
-Design doc §19 already plans the talking system on top of exactly this. Neither a new state
-field nor a new pipeline stage is needed.
+The design question above is the one to look at next. There are real states now, so a map of a
+scenario's life over time would have something honest to draw. It is worth asking again whether
+it earns its place before drawing it.
 
 ---
 
@@ -555,13 +558,13 @@ Say what the system is, and what the builder would need in order to author it.
 | **Dream and memory scenes** (`beat.scene`) | Overriding the stamped-on light, weather or location for a beat that is not in the room now. |
 | **Sound** (`beat.audio`) | Nothing reads it yet, but every beat carries it, and one day a VN layer will. |
 | **Confidence register** (`beat.register`) | v2, reserved. Nothing reads it. Listed so it is not forgotten. |
+| **What the player knows** (`action.teaches` / `action.requiresKnown`) | *and now you know…* on a verb, and *you know…* / *you don't know…* as a condition. The condition picker needs a fourth shape: the names are not a fixed list, they are whatever some verb in the scenario teaches, so the dropdown has to be built from the pack being edited. Built in the game; unreachable from the tool. |
 
 ### Owed by systems not yet built
 
 | System | What the builder would need |
 |---|---|
-| **What the player knows** (`player.knows`) | *and now you know…* on a rung, and *you know…* as a condition. The first thing to build (§13). |
-| **Talking to her** (design doc §19) | Topics as contextual verbs on her, with the once-only rule and knowledge gating. Mostly falls out of `knows`. |
+| **Talking to her** (design doc §19) | Topics as contextual verbs on her, with the once-only rule. The knowledge gating is built; the topics themselves are not. |
 | **Her acting on the world** | A rung causing her to move or take something. A genuine pipeline question, not a small change. |
 | **The journal** (design doc §9) | Writing in it, and her reading it. |
 | **Mobility 0 → 1** | Reach tiers become authorable, which drags Stage 3 with it. |

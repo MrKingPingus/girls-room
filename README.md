@@ -72,7 +72,7 @@ content/   the game's data. Objects, verbs, her routine, her reactions, every li
 render/    turns beats into something you can see. Swappable
 app/       wiring. Loading, saving, the browser build, and the dev tools
 sim/       the headless harness
-test/      103 tests, written against the hard rules rather than the code
+test/      141 tests, written against the hard rules rather than the code
 ```
 
 Read `docs/one-room-sim-architecture.md` and `docs/girls-room-design-doc.md` before changing
@@ -105,14 +105,20 @@ Playable: three days, the eight verbs, her routine, sound, deferred discovery, t
 meals, water, dressings, medication, and palming a dose — talking to her in two ways, saves,
 and exportable test reports that replay move for move.
 
-Not built yet: **anything a rule can change other than her meters.** A scenario cannot teach the
-player something, mark the world, or leave anything a later rule could read, so authored content
-dead-ends by construction. `player.knows` is in the state shape with an owning stage already
-assigned and nothing writing it — that is the next thing.
+**A moment can now lead to another one.** A verb can teach the player something, and any later
+rule or verb can read it back — so what you author no longer has to end where it starts. The
+nail on the wall is the worked example: look closer at the outline and you learn that whatever
+hung there came down recently, which unlocks a question for her that was not there before. None
+of that is code — two fields on a verb and an ordinary condition. Design doc §19 and
+architecture §6a.
+
+Not built yet: **anything else a rule can change.** Knowledge is the only mark a moment can
+leave. It cannot move an object, and she cannot act on the room herself.
 
 Also not built: the mobility 0→1 climb, the journal, the three endings, and talking to her
-properly (designed in design doc §19). The builder's stage 3 — the room's places and her routine
-— is deferred.
+properly (designed in design doc §19 — the ladder underneath it is in, the topics are not). The
+builder's stage 3 — the room's places and her routine — is deferred, and the builder cannot
+write knowledge either.
 
 **Every line of text is placeholder.** Design doc §16 calls for the ugly version first;
 `content/README.md` says which files hold it and what replacing it involves.

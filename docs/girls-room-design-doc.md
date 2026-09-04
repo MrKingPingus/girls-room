@@ -593,11 +593,20 @@ architecture spec.
 
 ---
 
-## 19. Talking to her — PROPOSED, not built
+## 19. Talking to her — PROPOSED. The ladder underneath it is built
 
 Wanted: an option to simply talk to her whenever she's in the room. Ask questions, get to know
-her. This is the shape proposed for the POC. **Nothing here is built** except the two verbs that
-already exist (`watch_her`, `thank_her`).
+her. This is the shape proposed for the POC.
+
+**What is built:** principle 2's machinery, in full. An action can declare `teaches` and
+`requiresKnown`, `player.knows` records what has been worked out, and any rule can ask about it
+with `has` or `lacks`. One worked example ships — the nail on the wall (§2d): looking closer at
+the outline teaches that whatever hung there came down recently, and that unlocks a question for
+her that did not exist before. Architecture §6a has the mechanics.
+
+**What is not built:** the topics themselves. Two verbs exist (`watch_her`, `thank_her`) plus
+the one on the nail. The three kinds of topic below are still unwritten, and so is any of the
+costing in principle 3.
 
 ### The constraint everything else follows from
 
@@ -615,9 +624,10 @@ already said it. Read off `history`, so nothing new is stored and nothing new is
 
 1. **A topic pays once.** The first time you ask is the content. Asking again is a different,
    flatter beat — and it is *her* noticing, which is characterisation rather than a cooldown.
-2. **Topics unlock from knowledge, not from a tree.** An action can declare
-   `requiresKnown: FactId[]` and `teaches: FactId[]`. Knowing a thing is what makes the next
-   question askable. This is §3's "learning who she is *is* the progression system" made
+2. **Topics unlock from knowledge, not from a tree.** *(Built.)* An action can declare
+   `requiresKnown` and `teaches`. Knowing a thing is what makes the next
+   question askable. An unearned topic is left off the menu rather than greyed out — a visible
+   locked question is a table of contents for the game. This is §3's "learning who she is *is* the progression system" made
    mechanical, and it is a ladder rather than a branching script — no dialogue tree to author,
    maintain, or get lost in.
 3. **Asking is not free.** The interesting questions cost trust or spike suspicion, scaled by
@@ -639,12 +649,13 @@ Asking several in one visit should compound: she notices a direction of travel.
 The second is the progression spine, and it is where §4's per-class knowledge does its work.
 The Family Friend starts able to ask things the Mailman cannot.
 
-### What this needs
+### What this needs — DONE
 
 Two content fields (`requiresKnown`, `teaches`) and one engine branch — the action grants what
 it teaches, checked in VALIDITY, applied in EFFECTS, which already owns `player.knows`. **No new
 state field, no new stage, and no new universal verb.** Topics are contextual verbs bound to her,
-which design doc §13 says are free to add.
+which design doc §13 says are free to add. Built exactly as described, plus one new refusal
+reason so an unearned question is a line rather than an absence.
 
 Answers come out of the rule database keyed on trust, mood and day like everything else, so a
 topic that needs a special moment gets a rule and everything else falls through to a catch-all.
@@ -669,8 +680,10 @@ rather than replacing them.
 
 1. Does asking a probing question at low trust get an **answer** at all, or a deflection that
    still costs? (Deflection is more her, and cheaper to author.)
-2. Do topics reset per day, or per run? Per day makes conversation a daily resource; per run
-   makes knowledge feel like ground gained.
+2. ~~Do topics reset per day, or per run?~~ **Per run — DECIDED.** Knowledge is ground gained,
+   and a daily reset makes her repeat herself. Nothing had to be built for this: knowledge is
+   never taken away, so a topic unlocked stays unlocked for the run, and "a topic pays once"
+   already reads off `history` rather than a counter.
 3. Is there a "just sit with her" that pays a little and costs a little — the intimacy route's
    floor? The §5 tax means the reward is also more attention.
 

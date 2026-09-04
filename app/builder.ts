@@ -49,6 +49,10 @@ export type ConditionRow = {
 };
 
 export function testsFor(spec: FactSpec): readonly TestId[] {
+  // A yes/no fact needs no test at all: "is not yes" and "is no" are the same sentence, and
+  // offering both is two dropdowns doing one dropdown's work.
+  if (spec.kind === 'flag') return ['is'];
+
   return TESTS.filter((test) => (test.kinds as readonly string[]).includes(spec.kind))
     .map((test) => test.id);
 }
@@ -318,6 +322,9 @@ export type DraftAction = {
 
 export type DraftObject = {
   id: string;
+
+  /** True while the id is being kept in step with the name. Editing it by hand stops that. */
+  autoId: boolean;
   name: string;
   place: string;
   container: boolean;
@@ -333,6 +340,9 @@ export type Draft = {
   title: string;
   author: string;
   notes: string;
+
+  /** Things this could be for, whether or not the game can do any of them yet. */
+  ideas: { about: string; text: string }[];
   objects: DraftObject[];
   actions: DraftAction[];
   rules: DraftRule[];
@@ -343,7 +353,7 @@ export type Draft = {
 export function blankDraft(): Draft {
   return {
     pack: '', title: '', author: '', notes: '',
-    objects: [], actions: [], rules: [], beats: [],
+    ideas: [], objects: [], actions: [], rules: [], beats: [],
   };
 }
 
@@ -367,7 +377,7 @@ export function blankAction(): DraftAction {
 
 export function blankObject(place: string): DraftObject {
   return {
-    id: '', name: '', place, container: false, portable: true,
+    id: '', autoId: true, name: '', place, container: false, portable: true,
     togglable: false, knownAtStart: true, changeTier: 2, verbs: [],
   };
 }
@@ -401,6 +411,9 @@ export function toPack(draft: Draft): ScenarioPack {
     ...(draft.author === '' ? {} : { author: draft.author }),
     ...(draft.notes === '' ? {} : { notes: draft.notes }),
     ...(draft.tested === undefined ? {} : { tested: draft.tested }),
+    ...(draft.ideas.length === 0 ? {} : {
+      ideas: draft.ideas.filter((idea) => idea.text.trim() !== ''),
+    }),
   };
 
   if (draft.objects.length > 0) {
@@ -462,9 +475,12 @@ export function toDraft(pack: ScenarioPack): Draft {
     title: pack.title,
     author: pack.author ?? '',
     notes: pack.notes ?? '',
+    ideas: (pack.ideas ?? []).map((idea) => ({ ...idea })),
     ...(pack.tested === undefined ? {} : { tested: pack.tested }),
     objects: (pack.objects ?? []).map((object) => ({
       id: object.id,
+      // A scenario somebody sent has ids that mean something to them. Leave them alone.
+      autoId: false,
       name: object.name,
       place: object.startsAt.kind === 'placed' || object.startsAt.kind === 'hidden'
         ? object.startsAt.place : '',
@@ -516,4 +532,339 @@ export function verbsWithoutFallback(draft: Draft): string[] {
     .filter((action) => !draft.rules.some(
       (rule) => rule.action === action.id && rule.conditions.length === 0))
     .map((action) => action.id);
+}
+
+// ---------------------------------------------------------------------------
+// The ladder
+// ---------------------------------------------------------------------------
+
+/**
+ * One rung: a situation, and what she does in it.
+ *
+ * The ladder is the honest picture of how §6 works. There is no flow in this game and no
+ * branching — every turn, the rule with the most conditions that hold is the one that plays. So
+ * the rungs are shown most specific first, and **the order on screen is the order the game will
+ * actually consider them**. Reading top to bottom tells you exactly what happens and when.
+ *
+ * That is also why rungs cannot be dragged wherever you like. A rung with two conditions always
+ * beats one with a single condition, whatever anybody wants, so the ladder sorts itself and the
+ * surprise of a rung landing lower than expected is the system explaining itself.
+ */
+export type Rung = {
+  rule: DraftRule;
+  lines: DraftBeat[];
+
+  /** How many conditions it has, which is what decides its place. */
+  specificity: number;
+
+  /** The bottom rung — no conditions, so it answers everything the others don't. */
+  otherwise: boolean;
+};
+
+export function verbsOn(draft: Draft, thing: DraftObject): DraftAction[] {
+  return draft.actions.filter((action) => thing.verbs.includes(action.id));
+}
+
+/** Every rung for one verb, in the order the game will consider them. */
+export function ladderFor(draft: Draft, actionId: string): Rung[] {
+  return draft.rules
+    .filter((rule) => rule.action === actionId)
+    .map((rule): Rung => ({
+      rule,
+      lines: rule.beats
+        .map((id) => draft.beats.find((beat) => beat.id === id))
+        .filter((beat): beat is DraftBeat => beat !== undefined),
+
+      // What the game sees: a condition with nothing chosen yet is not a condition.
+      specificity: rule.conditions.filter((row) => row.fact !== '').length,
+
+      // What the author sees: the bottom rung is the one with no conditions on it *at all*.
+      // An exception halfway through being written is not that, however empty it is — conflating
+      // the two hid its condition picker and made it impossible to finish.
+      otherwise: rule.conditions.length === 0,
+    }))
+    .sort((a, b) =>
+      Number(a.otherwise) - Number(b.otherwise)
+      || b.specificity - a.specificity
+      || b.rule.weight - a.rule.weight);
+}
+
+/**
+ * Give rungs that would otherwise tie a weight, so the order on screen is the order that
+ * happens.
+ *
+ * Two rules with the same number of conditions and the same weight are settled by a coin flip,
+ * every time — the bug that let forty thank-yous be farmed for affection. A ladder that showed
+ * one above the other would be lying. Weights are only handed out where there is an actual tie
+ * to break, so a scenario stays as close to the game's own content as it can.
+ */
+export function normaliseLadder(draft: Draft, actionId: string): Draft {
+  const ladder = ladderFor(draft, actionId);
+  const weights = new Map<string, number>();
+
+  const groups = new Map<number, Rung[]>();
+  for (const rung of ladder) {
+    const group = groups.get(rung.specificity) ?? [];
+    group.push(rung);
+    groups.set(rung.specificity, group);
+  }
+
+  for (const group of groups.values()) {
+    if (group.length < 2) {
+      for (const rung of group) weights.set(rung.rule.id, 0);
+      continue;
+    }
+    group.forEach((rung, index) => weights.set(rung.rule.id, (group.length - index) * 10));
+  }
+
+  return {
+    ...draft,
+    rules: draft.rules.map((rule) =>
+      (weights.has(rule.id) ? { ...rule, weight: weights.get(rule.id) ?? 0 } : rule)),
+  };
+}
+
+/** Move a rung up or down among the rungs it is genuinely tied with. */
+export function moveRung(draft: Draft, actionId: string, ruleId: string, by: -1 | 1): Draft {
+  const ladder = ladderFor(draft, actionId);
+  const at = ladder.findIndex((rung) => rung.rule.id === ruleId);
+  const here = ladder[at];
+  const there = ladder[at + by];
+  if (here === undefined || there === undefined) return draft;
+
+  // Only meaningful between equals. Across different numbers of conditions the game decides.
+  if (here.specificity !== there.specificity) return draft;
+
+  const reordered = [...ladder];
+  reordered[at] = there;
+  reordered[at + by] = here;
+
+  const weights = new Map(reordered
+    .filter((rung) => rung.specificity === here.specificity)
+    .map((rung, index, all) => [rung.rule.id, (all.length - index) * 10]));
+
+  return {
+    ...draft,
+    rules: draft.rules.map((rule) =>
+      (weights.has(rule.id) ? { ...rule, weight: weights.get(rule.id) ?? 0 } : rule)),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Names, and the ids made from them
+// ---------------------------------------------------------------------------
+
+export function slug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
+}
+
+/** A rung id nothing else is using. Rungs are internal, so these are never shown to anybody. */
+function freeRuleId(draft: Draft, actionId: string): string {
+  for (let n = 1; ; n += 1) {
+    const id = `${actionId}_${n}`;
+    if (!draft.rules.some((rule) => rule.id === id)) return id;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Editing, from the shape an author thinks in
+// ---------------------------------------------------------------------------
+
+/** A new thing in the room, with nothing on it yet. */
+export function addThing(draft: Draft, place: string): Draft {
+  return { ...draft, objects: [...draft.objects, blankObject(place)] };
+}
+
+/**
+ * Rename a thing, and keep its id in step.
+ *
+ * Ids are the tool's business, not the author's. Nobody writing "a matchbox" should also have
+ * to invent `matchbox` and keep the two in agreement — the whole reason the first version of
+ * this screen had four id fields on it.
+ */
+export function renameThing(draft: Draft, index: number, name: string): Draft {
+  return {
+    ...draft,
+    objects: draft.objects.map((object, i) => {
+      if (i !== index) return object;
+      if (!object.autoId) return { ...object, name };
+      return { ...object, name, id: slug(name) === '' ? `thing_${index + 1}` : slug(name) };
+    }),
+  };
+}
+
+/**
+ * A new verb on a thing, complete with the rung that answers every time.
+ *
+ * That bottom rung is not optional — without one there is a moment the game can reach where she
+ * says nothing at all — so the tool writes it rather than letting an author discover the rule
+ * by tripping over it.
+ */
+export function addVerb(draft: Draft, thingIndex: number): Draft {
+  const thing = draft.objects[thingIndex];
+  if (thing === undefined) return draft;
+
+  const base = slug(thing.name) === '' ? `verb_${draft.actions.length + 1}` : slug(thing.name);
+  let id = `do_${base}`;
+  for (let n = 2; draft.actions.some((action) => action.id === id); n += 1) id = `do_${base}_${n}`;
+
+  const withVerb: Draft = {
+    ...draft,
+    actions: [...draft.actions, { ...blankAction(), id }],
+    objects: draft.objects.map((object, i) =>
+      (i === thingIndex ? { ...object, verbs: [...object.verbs, id] } : object)),
+  };
+  return addRung(withVerb, id);
+}
+
+/** A new situation for a verb. The first one is the catch-all; the rest are exceptions. */
+export function addRung(draft: Draft, actionId: string): Draft {
+  const id = freeRuleId(draft, actionId);
+  const beatId = `${id}_line`;
+  const existing = draft.rules.some((rule) => rule.action === actionId);
+
+  return normaliseLadder({
+    ...draft,
+    rules: [...draft.rules, {
+      ...blankRule(actionId),
+      id,
+      // The first rung answers everything. Every one after it is an exception to it.
+      conditions: existing ? [{ fact: '', test: 'is', values: [] }] : [],
+      beats: [beatId],
+    }],
+    beats: [...draft.beats, { ...blankBeat(), id: beatId, speaker: 'narrator', pose: 'absent' }],
+  }, actionId);
+}
+
+export function removeRung(draft: Draft, actionId: string, ruleId: string): Draft {
+  const rule = draft.rules.find((entry) => entry.id === ruleId);
+  return normaliseLadder({
+    ...draft,
+    rules: draft.rules.filter((entry) => entry.id !== ruleId),
+    beats: draft.beats.filter((beat) => !(rule?.beats ?? []).includes(beat.id)),
+  }, actionId);
+}
+
+export function updateRule(draft: Draft, ruleId: string, patch: Partial<DraftRule>): Draft {
+  const rule = draft.rules.find((entry) => entry.id === ruleId);
+  const next = {
+    ...draft,
+    rules: draft.rules.map((entry) => (entry.id === ruleId ? { ...entry, ...patch } : entry)),
+  };
+  return rule === undefined ? next : normaliseLadder(next, rule.action);
+}
+
+export function updateBeat(draft: Draft, beatId: string, patch: Partial<DraftBeat>): Draft {
+  return {
+    ...draft,
+    beats: draft.beats.map((beat) => (beat.id === beatId ? { ...beat, ...patch } : beat)),
+  };
+}
+
+/** Another line in the same moment, for a scene that needs two beats rather than one. */
+export function addLine(draft: Draft, ruleId: string): Draft {
+  const rule = draft.rules.find((entry) => entry.id === ruleId);
+  if (rule === undefined) return draft;
+  const beatId = `${ruleId}_line${rule.beats.length + 1}`;
+
+  return {
+    ...draft,
+    rules: draft.rules.map((entry) =>
+      (entry.id === ruleId ? { ...entry, beats: [...entry.beats, beatId] } : entry)),
+    beats: [...draft.beats, { ...blankBeat(), id: beatId, speaker: 'her', pose: 'bedside' }],
+  };
+}
+
+export function removeLine(draft: Draft, ruleId: string, beatId: string): Draft {
+  return {
+    ...draft,
+    rules: draft.rules.map((entry) =>
+      (entry.id === ruleId ? { ...entry, beats: entry.beats.filter((id) => id !== beatId) } : entry)),
+    beats: draft.beats.filter((beat) => beat.id !== beatId),
+  };
+}
+
+/** Removing a thing takes its verbs and everything written for them with it. */
+export function removeThing(draft: Draft, thingIndex: number): Draft {
+  const thing = draft.objects[thingIndex];
+  if (thing === undefined) return draft;
+
+  const goneRules = draft.rules.filter((rule) => thing.verbs.includes(rule.action));
+  const goneBeats = new Set(goneRules.flatMap((rule) => rule.beats));
+
+  return {
+    ...draft,
+    objects: draft.objects.filter((_, i) => i !== thingIndex),
+    actions: draft.actions.filter((action) => !thing.verbs.includes(action.id)),
+    rules: draft.rules.filter((rule) => !thing.verbs.includes(rule.action)),
+    beats: draft.beats.filter((beat) => !goneBeats.has(beat.id)),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// What is not finished yet
+// ---------------------------------------------------------------------------
+
+/**
+ * The half-written parts of a scenario, said in plain words.
+ *
+ * The content validator is the authority on what is *legal*, and it stays that way — but it
+ * speaks in file positions, because it is checking a file. `actions[22].name: missing or not a
+ * non-empty string` is the right message for a content pass and the wrong one for somebody who
+ * has just typed the word "matchbox". This reads the draft and says what is missing, in terms
+ * of the thing on screen.
+ */
+export function unfinished(draft: Draft): string[] {
+  const missing: string[] = [];
+  const name = (thing: DraftObject) => (thing.name.trim() === '' ? 'a thing in the room' : thing.name);
+
+  if (draft.title.trim() === '') missing.push('The scenario needs a name.');
+
+  for (const thing of draft.objects) {
+    if (thing.name.trim() === '') missing.push('Something in the room still needs a name.');
+    if (thing.place === '') missing.push(`${name(thing)} needs somewhere to start.`);
+
+    for (const verb of verbsOn(draft, thing)) {
+      if (verb.name.trim() === '') {
+        missing.push(`Something you can do to ${name(thing)} needs a name — it is the text on the button.`);
+      }
+
+      const ladder = ladderFor(draft, verb.id);
+      const label = verb.name.trim() === '' ? `that verb on ${name(thing)}` : `“${verb.name}”`;
+
+      for (const rung of ladder) {
+        if (rung.rule.conditions.some((row) => row.fact === '')) {
+          missing.push(
+            `An exception under ${label} still needs a condition — until it has one it means the `
+            + 'same as “otherwise”.',
+          );
+        }
+        for (const row of rung.rule.conditions) {
+          if (row.fact !== '' && row.values.length === 0) {
+            const spec = factSpec(row.fact);
+            missing.push(`Under ${label}, “${spec?.label ?? row.fact}” needs a value.`);
+          }
+        }
+        if (rung.lines.length === 0) missing.push(`A situation under ${label} has nothing to say.`);
+        for (const line of rung.lines) {
+          if (line.text.trim() === '') missing.push(`A line under ${label} is still blank.`);
+        }
+      }
+    }
+  }
+
+  return [...new Set(missing)];
+}
+
+/**
+ * A line she speaks in a situation where she is not in the room.
+ *
+ * Legal, and almost never meant. Worth pointing at rather than refusing, because there are
+ * moments — a voice up the stairwell — where it is exactly right.
+ */
+export function speakingWhileAway(draft: Draft, rung: Rung): boolean {
+  void draft;
+  const away = rung.rule.conditions.some((row) =>
+    row.fact === 'she_is_here' && row.test === 'is' && row.values[0] === 'false');
+  return away && rung.lines.some((line) => line.speaker === 'her');
 }

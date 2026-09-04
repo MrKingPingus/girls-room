@@ -377,3 +377,114 @@ button:disabled { opacity: 0.4; cursor: default; }
 
 .builder details summary { cursor: pointer; color: var(--ink-dim); font-size: 13px; }
 .builder details[open] summary { margin-bottom: 6px; }
+
+/*
+ * The simple view: a thing, what you can do to it, and the ladder of what she does about it.
+ *
+ * Indentation carries the meaning here. A verb sits inside its thing, and the rungs sit inside
+ * the verb, ordered as the game orders them — so the shape on screen is the shape of the rule.
+ */
+
+.simple { display: flex; flex-direction: column; gap: 20px; }
+
+.simple > .ideas { display: flex; flex-direction: column; gap: 6px; }
+
+.thing-card {
+  border: 1px solid var(--panel-edge);
+  border-left: 2px solid var(--her);
+  background: var(--panel);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.thing-card > header, .verb-card > header { display: flex; gap: 8px; align-items: center; }
+
+.simple input.title {
+  flex: 1;
+  font-size: 17px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--panel-edge);
+  padding: 4px 2px;
+}
+
+.simple input.verbname {
+  flex: 1;
+  font-size: 15px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--panel-edge);
+  padding: 3px 2px;
+}
+
+.simple .line { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.simple .line > span { color: var(--ink-dim); }
+.simple .line > select { flex: 0 1 auto; }
+
+.simple button.quiet {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--ink-dim);
+  padding: 2px 0;
+  font-size: 12.5px;
+  text-decoration: underline;
+  text-decoration-color: var(--panel-edge);
+}
+
+.simple button.quiet:hover { color: var(--her); border-color: transparent; }
+.simple button.quiet.drop:hover { color: var(--warn); }
+
+.simple button.add {
+  align-self: flex-start;
+  background: none;
+  border: 1px dashed var(--panel-edge);
+  color: var(--ink-dim);
+}
+
+.simple button.add:hover { color: var(--her); border-color: var(--her); }
+
+.verb-card {
+  margin-left: 14px;
+  padding: 12px;
+  border-left: 1px solid var(--panel-edge);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ladder-note { margin: 4px 0 0; color: var(--ink-dim); font-size: 12px; font-style: italic; }
+
+.ladder { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.rung {
+  padding: 10px;
+  background: var(--ground);
+  border-left: 2px solid var(--panel-edge);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rung.otherwise { border-left-style: dashed; }
+
+.rung .when { display: flex; gap: 8px; align-items: flex-start; }
+.rung .when .label { color: var(--her); font-style: italic; padding-top: 5px; min-width: 46px; }
+.rung.otherwise .when .label { color: var(--ink-dim); }
+.rung .conds { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.rung-tools { display: flex; gap: 14px; margin-left: auto; }
+
+.rung .say { display: flex; gap: 6px; align-items: flex-start; }
+.rung .say > select { flex: 0 0 auto; }
+.rung .say > textarea { flex: 1; }
+
+.rung-foot { display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; }
+.rung .meters { padding-top: 4px; border-top: 1px solid var(--panel-edge); }
+.rung .reads { border: none; padding: 0; }
+
+.simple label.idea { flex-direction: column; align-items: stretch; gap: 4px; }
+.simple label.idea > span:first-child { min-width: 0; color: var(--her); font-size: 12.5px; }
+
+.builder label.switch { margin-left: auto; }

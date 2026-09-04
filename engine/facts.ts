@@ -285,6 +285,61 @@ export const FACTS = [
 /** Every fact name the game knows. A condition naming anything else is a content error. */
 export type FactId = (typeof FACTS)[number]['id'];
 
+/**
+ * The facts, in the order a person would go looking for them.
+ *
+ * Forty-four names in one flat dropdown is a wall. These are the headings an author actually
+ * thinks in — *whether she noticed* is one thought, and it is the one this game is mostly about.
+ */
+export const FACT_GROUPS = [
+  {
+    id: 'moment', label: 'what just happened',
+    facts: ['action', 'valid', 'failure', 'deferred'],
+  },
+  {
+    id: 'noticed', label: 'whether she noticed',
+    facts: ['detected', 'detection', 'noise', 'noise_heard'],
+  },
+  {
+    id: 'her', label: 'her',
+    facts: [
+      'she_is_here', 'mood', 'disposition', 'her_location', 'her_activity', 'attention',
+      'affection', 'trust', 'suspicion', 'suspicion_tier', 'care_due',
+    ],
+  },
+  {
+    id: 'thing', label: 'the thing you touched',
+    facts: [
+      'object', 'object_open', 'object_known', 'object_searched', 'object_location',
+      'object_change_tier', 'place',
+    ],
+  },
+  {
+    id: 'you', label: 'you',
+    facts: [
+      'mobility', 'pain', 'energy', 'medicated', 'hunger', 'thirst', 'wound_care',
+      'doses_taken', 'doses_palmed', 'class',
+    ],
+  },
+  {
+    id: 'when', label: 'the time, and the room',
+    facts: ['day', 'time_of_day', 'phase', 'minute_of_day', 'light', 'temperature'],
+  },
+  {
+    id: 'before', label: 'what has happened before',
+    facts: ['times_caught', 'repeated'],
+  },
+] as const;
+
+/**
+ * Every fact belongs to exactly one group, proved by the compiler rather than by remembering.
+ * Add a fact above without listing it here and this line stops compiling.
+ */
+type GroupedFact = (typeof FACT_GROUPS)[number]['facts'][number];
+type _EveryFactIsGrouped = Exclude<FactId, GroupedFact> extends never ? true : never;
+const _grouped: _EveryFactIsGrouped = true;
+void _grouped;
+
 /** Facts that only exist on some turns. */
 export type ContextualFactId = Extract<(typeof FACTS)[number], { contextual: true }>['id'];
 

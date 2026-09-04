@@ -43,6 +43,17 @@ export type ScenarioPack = {
   beats?: BeatLibrary;
 
   /**
+   * Design notes: what this thing could be *for*, written down at the moment of having the
+   * idea, whether or not the game can do any of it yet.
+   *
+   * Never validated, never shown in the game, never read by a single line of `engine/`. It
+   * travels with the scenario so that "the matchbox could light a candle" arrives attached to
+   * the matchbox instead of scattered across a conversation, and so somebody can answer which
+   * of them is one row of data and which is a new system.
+   */
+  ideas?: { about: string; text: string }[];
+
+  /**
    * A run that proves it fires. The whole engine is deterministic, so a seed and a list of
    * moves put the scene back on screen exactly — which is how a pack arrives with evidence
    * instead of a promise. Written by the builder when the author tests in the room.
@@ -173,7 +184,24 @@ export function validatePack(raw: unknown): Problem[] {
     }
   }
 
-  const known = new Set<string>([...CARRIES, 'pack', 'title', 'author', 'notes', 'tested']);
+  const ideas = pack['ideas'];
+  if (ideas !== undefined) {
+    if (!Array.isArray(ideas)) {
+      add('pack.ideas', 'must be a list of notes');
+    } else {
+      ideas.forEach((idea, i) => {
+        if (typeof idea !== 'object' || idea === null
+          || typeof (idea as Record<string, unknown>)['about'] !== 'string'
+          || typeof (idea as Record<string, unknown>)['text'] !== 'string') {
+          add(`pack.ideas[${i}]`, 'must be an object with `about` and `text`');
+        }
+      });
+    }
+  }
+
+  const known = new Set<string>([
+    ...CARRIES, 'pack', 'title', 'author', 'notes', 'tested', 'ideas',
+  ]);
   for (const key of Object.keys(pack)) {
     if (!known.has(key) && key !== 'places' && key !== 'schedule') {
       add(`pack.${key}`, `nothing reads "${key}". It would be dropped silently`, 'warning');

@@ -3,7 +3,8 @@
 A dev tool: a second tab in the game that lets the designer write new moments for the game
 by filling in forms, test them in the running room, tune them, and export them as a file.
 
-Status: **stages 1 and 2 built.** Stage 3 (the room's places, her schedule) deferred, as is the
+Status: **stages 1 and 2 built, then rebuilt around the ladder** (§11 below, which supersedes the
+screens described in §4 and §5 — the model underneath them is unchanged). Stage 3 (the room's places, her schedule) deferred, as is the
 choice-and-timer editor, which belongs to the v2 dialogue mode rather than here.
 
 Where it lives: `engine/facts.ts` and `engine/pack.ts` in the engine; `app/builder.ts` for the
@@ -309,3 +310,99 @@ somebody already settled against you.
 
 Still not covered: nothing checks that a pack is *balanced*. The validator proves a scenario is
 legal, never that it is good. `npm run sim` and reading it are the only answers to that.
+
+---
+
+## 11. The ladder — how it actually ended up
+
+The first version of these screens had a form per content file: Things, Verbs, Lines, Rules.
+That is the engine's filing system, not an author's. Getting a matchbox into the room meant
+visiting four sections and inventing four ids by hand, and the part anybody cares about — what
+she does about it — was at the bottom, behind three sections of setup.
+
+Nobody asks for four things. They ask for **a matchbox and some ways she might react to it.**
+
+### Not a flowchart
+
+The obvious suggestion is to draw the reactions as a flowchart. It would be wrong, and wrong in
+a way that costs more than the confusion it solved.
+
+**This game has no flow.** §6 is explicit: her reactions are not a tree. Every turn, the game
+looks at the moment, scores every rule whose conditions hold, and plays the most specific one.
+There is no "and then". A flowchart draws sequence and branching — a shape this engine does not
+have — so an author would learn a false model of the game and then author against it.
+
+The flowchart earns its place when the v2 dialogue mode arrives, because choices and branches
+genuinely are a flow. Not before.
+
+### The ladder
+
+What is honest is a **fallback ladder**, most specific at the top:
+
+```
+THE MATCHBOX                                   on the nightstand
+
+  Take the matches                                        pick it up
+    if  she is in the room · her mood is angry
+        her ⟩ "Put them back. Now."                    +25 suspicion
+    if  she is in the room
+        her ⟩ "Those aren't for you."                  +12 suspicion
+    otherwise
+        the room ⟩ You slide the matchbox into the pillowcase.
+```
+
+Every rung is one situation. Reading top to bottom tells you what happens and in what order of
+priority — and **that order is the order the game really uses**, which is checked by a test that
+walks thirty turns comparing the ladder's topmost matching rung against the engine's own rule
+picker. If it ever disagrees, the picture is lying to an author and the test fails.
+
+Consequences worth stating:
+
+- **A rung's position is which rule wins**, so weight and the rivalry panel mostly stop being
+  something an author has to think about within their own scenario.
+- **Rungs cannot be dragged anywhere.** Two conditions always beat one, whatever anybody wants,
+  so the ladder sorts itself. A rung landing lower than expected is the system explaining
+  itself, and the note above the ladder says so before it happens.
+- **Ties are given weights automatically**, only where a tie actually exists. Two rungs at the
+  same height with the same weight is a coin flip — the thank-you bug — and a ladder that drew
+  one above the other would be lying.
+
+### What else changed
+
+- **A thing owns its verbs, and a verb owns its ladder.** Indentation carries the structure.
+- **Ids are generated from names** and shown only under *show every field*. That is four text
+  fields gone, and the id-and-name-in-agreement bookkeeping with them.
+- **Lines are typed where they are used**, not written elsewhere and picked back by id.
+- **Defaults hide.** How long a verb takes, how loud it is, whether things go inside a thing —
+  all behind one link each. What stays visible is what this game is about: where it starts, and
+  whether she notices if it moves.
+- **A new verb arrives with its catch-all rung already written**, rather than letting an author
+  discover that rule by tripping over it.
+- **A yes/no condition lost its test dropdown.** "is not yes" and "is no" are one sentence.
+- **Problems are said in plain words.** `actions[22].name: missing or not a non-empty string` is
+  the right message for a content pass and the wrong one for somebody naming a matchbox, so
+  `unfinished()` reads the draft and says what is missing in terms of what is on screen. The
+  validator remains the only authority on what is *legal*.
+- **Everything the old screens did is still there**, under *show every field*. Both views edit
+  the same draft, so you can start simple and drop down for something odd.
+
+### Ideas
+
+Every thing has an **Ideas** box: what it could be for, whether or not the game can do any of it
+yet. *Light a candle with it. She smells smoke on you. Burning the journal.*
+
+Never validated, never shown in the game, never read by a line of `engine/` — it rides along in
+the pack file so that an idea arrives attached to the thing it is about instead of scattered
+through a conversation, and so someone can answer which of them is a row of data, which is an
+engine change, and which is a new system worth designing.
+
+### What the browser caught that the tests did not
+
+**A freshly added exception was unfinishable.** "No conditions yet" and "no conditions at all"
+were the same test, so a new exception rendered as the *otherwise* rung with its condition
+picker hidden — a dead end reachable in three clicks. Those are now two different questions: what
+the game sees (conditions with something chosen) and what the author sees (any conditions at
+all).
+
+**Two `×` buttons sat side by side** meaning "remove this condition" and "remove this whole
+situation". The second is now a worded link in the rung's footer.

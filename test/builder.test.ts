@@ -14,9 +14,12 @@ import { loadGameContent } from '../app/load.ts';
 import { loadPacked } from '../engine/pack.ts';
 import { newGame } from '../engine/newgame.ts';
 import { takeTurn } from '../engine/turn.ts';
+import { buildQuery } from '../engine/query.ts';
+import { ruleMatches, selectRule } from '../engine/rules.ts';
 import {
-  blankDraft, canBothMatch, describeCondition, fromCriteria, rivals, toCriteria, toDraft, toPack,
-  verbsWithoutFallback, type Draft,
+  addRung, addThing, addVerb, blankDraft, canBothMatch, describeCondition, fromCriteria,
+  ladderFor, moveRung, removeThing, renameThing, rivals, toCriteria, toDraft, toPack, updateBeat,
+  updateRule, verbsWithoutFallback, type ConditionRow, type Draft,
 } from '../app/builder.ts';
 
 const content = loadGameContent();
@@ -140,7 +143,7 @@ const SILL: Draft = {
   pack: 'sill',
   title: 'The thing on the sill',
   objects: [{
-    id: 'keepsake', name: 'a small carved thing', place: 'nightstand',
+    id: 'keepsake', autoId: false, name: 'a small carved thing', place: 'nightstand',
     container: false, portable: true, togglable: false, knownAtStart: true,
     changeTier: 2, verbs: ['turn_keepsake'],
   }],
@@ -199,4 +202,162 @@ test('a new verb with no catch-all is named before the validator has to refuse i
     verbsWithoutFallback({ ...SILL, rules: SILL.rules.filter((rule) => rule.id !== 'keepsake_any') }),
     ['turn_keepsake'],
   );
+});
+
+// ---------------------------------------------------------------------------
+// The ladder
+// ---------------------------------------------------------------------------
+
+/** A matchbox with one named verb on it, built the way the ladder screen builds one. */
+function built(): { draft: Draft; verb: string } {
+  let draft = renameThing(
+    addThing({ ...blankDraft(), pack: 'matches', title: 'Matches' }, 'nightstand'), 0, 'a matchbox',
+  );
+  draft = addVerb(draft, 0);
+  const verb = draft.actions[0]?.id ?? '';
+  draft = {
+    ...draft,
+    actions: draft.actions.map((action) => ({ ...action, name: 'Take the matches' })),
+  };
+  draft = updateBeat(draft, draft.beats[0]?.id ?? '', { text: 'You pick them up.' });
+  return { draft, verb };
+}
+
+/** Add one exception to a verb: some conditions, and a line for when they hold. */
+function exception(
+  draft: Draft, verb: string, conditions: ConditionRow[], text: string,
+): Draft {
+  const before = new Set(draft.rules.map((rule) => rule.id));
+  let next = addRung(draft, verb);
+  const added = next.rules.find((rule) => !before.has(rule.id));
+  next = updateRule(next, added?.id ?? '', { conditions });
+  return updateBeat(next, added?.beats[0] ?? '', { text });
+}
+
+test('a new thing names itself, so nobody has to invent an id', () => {
+  const { draft } = built();
+  assert.equal(draft.objects[0]?.id, 'a_matchbox');
+  assert.equal(draft.objects[0]?.name, 'a matchbox');
+});
+
+test('and an id somebody chose on purpose is left alone', () => {
+  const { draft } = built();
+  const chosen = draft.objects.map((object) => ({ ...object, autoId: false, id: 'matches' }));
+  const locked = renameThing({ ...draft, objects: chosen }, 0, 'a box of matches');
+  assert.equal(locked.objects[0]?.id, 'matches');
+  assert.equal(locked.objects[0]?.name, 'a box of matches');
+});
+
+test('a new verb arrives with the rung that answers every time', () => {
+  const { draft, verb } = built();
+  const ladder = ladderFor(draft, verb);
+  assert.equal(ladder.length, 1);
+  assert.equal(ladder[0]?.otherwise, true,
+    'without one there is a moment the game can reach where she says nothing');
+});
+
+test('the ladder is ordered most specific first, catch-all last', () => {
+  const { draft, verb } = built();
+  let next = exception(draft, verb, [
+    { fact: 'she_is_here', test: 'is', values: ['true'] },
+    { fact: 'mood', test: 'is', values: ['angry'] },
+  ], '"Put those down."');
+  next = exception(next, verb, [
+    { fact: 'she_is_here', test: 'is', values: ['true'] },
+  ], '"Those are not for you."');
+
+  assert.deepEqual(ladderFor(next, verb).map((rung) => rung.specificity), [2, 1, 0]);
+  assert.equal(ladderFor(next, verb).at(-1)?.otherwise, true);
+});
+
+test('rungs that would tie are given weights, so the order on screen is the real one', () => {
+  const { draft, verb } = built();
+  let next = exception(draft, verb, [{ fact: 'mood', test: 'is', values: ['warm'] }], '"Oh."');
+  next = exception(next, verb, [{ fact: 'mood', test: 'is', values: ['angry'] }], '"Don\u2019t."');
+
+  const tied = ladderFor(next, verb).filter((rung) => rung.specificity === 1);
+  assert.equal(tied.length, 2);
+  assert.notEqual(tied[0]?.rule.weight, tied[1]?.rule.weight,
+    'two rungs at the same height is a coin flip, and the picture would be a lie');
+});
+
+test('a rung only moves among the rungs it is genuinely tied with', () => {
+  const { draft, verb } = built();
+  const next = exception(draft, verb,
+    [{ fact: 'she_is_here', test: 'is', values: ['true'] }], '"Those are not for you."');
+  const target = ladderFor(next, verb).find((rung) => !rung.otherwise)?.rule.id ?? '';
+
+  // One condition cannot be pushed below none. The game decides that, not the author.
+  const same = moveRung(next, verb, target, 1);
+  assert.deepEqual(
+    ladderFor(same, verb).map((rung) => rung.rule.id),
+    ladderFor(next, verb).map((rung) => rung.rule.id),
+  );
+});
+
+test('and does move among its equals', () => {
+  const { draft, verb } = built();
+  let next = exception(draft, verb, [{ fact: 'mood', test: 'is', values: ['warm'] }], '"Oh."');
+  next = exception(next, verb, [{ fact: 'mood', test: 'is', values: ['angry'] }], '"Don\u2019t."');
+
+  const before = ladderFor(next, verb).map((rung) => rung.rule.id);
+  const moved = moveRung(next, verb, before[0] ?? '', 1);
+  const after = ladderFor(moved, verb).map((rung) => rung.rule.id);
+  assert.deepEqual(after, [before[1], before[0], before[2]]);
+});
+
+test('removing a thing takes its verbs and everything written for them', () => {
+  const { draft } = built();
+  const empty = removeThing(draft, 0);
+  assert.deepEqual(empty.objects, []);
+  assert.deepEqual(empty.actions, []);
+  assert.deepEqual(empty.rules, []);
+  assert.deepEqual(empty.beats, []);
+});
+
+test('the order on screen is the order the game really uses', () => {
+  // The whole claim the ladder makes. If this fails, the picture is lying to an author.
+  const { draft, verb } = built();
+  const next = exception(draft, verb,
+    [{ fact: 'she_is_here', test: 'is', values: ['true'] }], '"Those are not for you."');
+
+  const merged = loadPacked(content, [toPack(next)]);
+  let state = newGame(merged, { seed: 3131 });
+
+  for (let turn = 0; turn < 30; turn += 1) {
+    const facts = buildQuery(state, merged, {
+      action: verb, object: 'a_matchbox', place: null, deferred: false,
+      validity: { ok: true }, noise: null, detection: null,
+    });
+
+    const topmost = ladderFor(next, verb)
+      .find((rung) => ruleMatches(toCriteria(rung.rule.conditions), facts));
+    const chosen = selectRule(
+      merged.reactions, verb, facts, state.meta.seed, state.meta.minutesElapsed,
+    );
+
+    assert.equal(chosen?.id, topmost?.rule.id,
+      `turn ${turn}: the ladder showed ${topmost?.rule.id} but the game played ${chosen?.id}`);
+
+    state = takeTurn(state, merged, { action: 'wait', object: null, place: null }).state;
+  }
+});
+
+test('a scenario built entirely through the ladder loads and plays', () => {
+  const { draft, verb } = built();
+  const merged = loadPacked(content, [toPack(draft)]);
+  const turn = takeTurn(newGame(merged, { seed: 8 }), merged,
+    { action: verb, object: 'a_matchbox', place: null });
+  assert.equal(turn.beats[0]?.text, 'You pick them up.');
+});
+
+test('ideas ride along with the scenario and never reach the game', () => {
+  const { draft } = built();
+  const note = { about: 'a_matchbox', text: 'could light a candle. she smells smoke on you.' };
+  const pack = toPack({ ...draft, ideas: [note] });
+  assert.deepEqual(pack.ideas, [note]);
+
+  const merged = loadPacked(content, [pack]);
+  const thing = merged.objects.find((object) => object.id === 'a_matchbox') ?? {};
+  assert.equal('ideas' in thing, false, 'a design note is not something the engine should see');
 });

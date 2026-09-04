@@ -8,11 +8,9 @@
  */
 
 import type { ContentBundle } from '../../../engine/content.ts';
-import type { ConditionRow, DraftRule } from '../../builder.ts';
-import { ALL_FACTS, factSpec } from '../../../engine/facts.ts';
-import {
-  TESTS, choicesFor, describeCondition, rivals, testsFor, toCriteria,
-} from '../../builder.ts';
+import type { DraftRule } from '../../builder.ts';
+import { describeCondition, rivals, toCriteria } from '../../builder.ts';
+import Conditions from './Conditions.tsx';
 
 type Props = {
   rule: DraftRule;
@@ -36,10 +34,6 @@ export default function RuleForm({ rule, content, ownBeats, onChange, onRemove }
   const outweighed = beaten.filter((rival) => rival.reason === 'weight');
   const won = competing.filter((rival) => rival.outcome === 'you_win');
   const heaviest = Math.max(0, ...outweighed.map((rival) => rival.rule.weight ?? 0));
-
-  function setCondition(index: number, patch: Partial<ConditionRow>) {
-    set({ conditions: rule.conditions.map((row, i) => (i === index ? { ...row, ...patch } : row)) });
-  }
 
   return (
     <div className="card rule">
@@ -70,96 +64,11 @@ export default function RuleForm({ rule, content, ownBeats, onChange, onRemove }
             do, and what every other rule beats.
           </p>
         )}
-
-        {rule.conditions.map((row, index) => {
-          const spec = factSpec(row.fact);
-          const choices = spec === null ? [] : choicesFor(spec, content);
-          return (
-            <div className="condition" key={index}>
-              <select
-                value={row.fact}
-                onChange={(event) => {
-                  const next = factSpec(event.target.value);
-                  setCondition(index, {
-                    fact: event.target.value,
-                    test: next === null ? 'is' : (testsFor(next)[0] ?? 'is'),
-                    values: [],
-                  });
-                }}
-              >
-                <option value="">choose something to check…</option>
-                {ALL_FACTS.map((fact) => (
-                  <option key={fact.id} value={fact.id}>{fact.label}</option>
-                ))}
-              </select>
-
-              <select
-                value={row.test}
-                disabled={spec === null}
-                onChange={(event) =>
-                  setCondition(index, { test: event.target.value as ConditionRow['test'] })}
-              >
-                {(spec === null ? [] : testsFor(spec)).map((test) => (
-                  <option key={test} value={test}>
-                    {TESTS.find((entry) => entry.id === test)?.label}
-                  </option>
-                ))}
-              </select>
-
-              {row.test === 'one_of' ? (
-                <div className="multi">
-                  {choices.map((choice) => (
-                    <label key={choice} className="check">
-                      <input
-                        type="checkbox"
-                        checked={row.values.includes(choice)}
-                        onChange={(event) => setCondition(index, {
-                          values: event.target.checked
-                            ? [...row.values, choice]
-                            : row.values.filter((value) => value !== choice),
-                        })}
-                      />
-                      {choice}
-                    </label>
-                  ))}
-                </div>
-              ) : choices.length > 0 ? (
-                <select
-                  value={row.values[0] ?? ''}
-                  onChange={(event) => setCondition(index, { values: [event.target.value] })}
-                >
-                  <option value="">choose…</option>
-                  {choices.map((choice) => (
-                    <option key={choice} value={choice}>{choice}</option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type={spec?.kind === 'number' ? 'number' : 'text'}
-                  value={row.values[0] ?? ''}
-                  onChange={(event) => setCondition(index, { values: [event.target.value] })}
-                />
-              )}
-
-              <button
-                className="drop"
-                onClick={() => set({
-                  conditions: rule.conditions.filter((_, i) => i !== index),
-                })}
-              >
-                &times;
-              </button>
-
-              {spec !== null && <p className="hint">{spec.about}</p>}
-            </div>
-          );
-        })}
-
-        <button
-          onClick={() => set({ conditions: [...rule.conditions, { fact: '', test: 'is', values: [] }] })}
-        >
-          Add a condition
-        </button>
+        <Conditions
+          rows={rule.conditions}
+          content={content}
+          onChange={(conditions) => set({ conditions })}
+        />
       </fieldset>
 
       <fieldset>

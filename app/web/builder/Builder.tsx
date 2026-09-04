@@ -15,12 +15,13 @@ import type { PackShelf } from '../../packs.ts';
 import { applyPacks, overriddenBy, validatePack } from '../../../engine/pack.ts';
 import { validateContent, type Problem } from '../../../engine/validate.ts';
 import {
-  blankAction, blankBeat, blankDraft, blankObject, blankRule, toDraft, toPack,
+  blankAction, blankBeat, blankDraft, blankObject, blankRule, toDraft, toPack, unfinished,
   verbsWithoutFallback,
 } from '../../builder.ts';
 import {
   download, packFromFile, packToFile, putPack, removePack, setEnabled,
 } from '../../packs.ts';
+import Simple from './Simple.tsx';
 import RuleForm from './RuleForm.tsx';
 import BeatForm from './BeatForm.tsx';
 import { ActionForm, ObjectForm } from './ThingForm.tsx';
@@ -37,6 +38,7 @@ type Props = {
 
 export default function Builder({ base, content, shelf, onChange }: Props) {
   const [editing, setEditing] = useState<Draft | null>(null);
+  const [advanced, setAdvanced] = useState(false);
   const [imported, setImported] = useState<Problem[] | null>(null);
   const file = useRef<HTMLInputElement>(null);
 
@@ -60,6 +62,13 @@ export default function Builder({ base, content, shelf, onChange }: Props) {
   }, [base, pack, editing]);
 
   const errors = problems.filter((problem) => problem.level === 'error');
+
+  /**
+   * What is half-written, in plain words. The validator remains the authority on what is legal;
+   * this is the same news said in terms of what is on screen, because `actions[22].name` is the
+   * right message for a content pass and the wrong one for somebody naming a matchbox.
+   */
+  const todo = editing === null ? [] : unfinished(editing);
   const overrides = pack === null ? null : overriddenBy(base, pack);
   const missingFallback = editing === null ? [] : verbsWithoutFallback(editing);
 
@@ -177,16 +186,18 @@ export default function Builder({ base, content, shelf, onChange }: Props) {
                 onChange={(event) => commit({ ...editing, title: event.target.value })}
               />
             </label>
-            <label>
-              <span>Filed under</span>
-              <input
-                value={editing.pack}
-                onChange={(event) => commit({
-                  ...editing,
-                  pack: event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
-                })}
-              />
-            </label>
+            {advanced && (
+              <label>
+                <span>Filed under</span>
+                <input
+                  value={editing.pack}
+                  onChange={(event) => commit({
+                    ...editing,
+                    pack: event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'),
+                  })}
+                />
+              </label>
+            )}
             <label>
               <span>By</span>
               <input
@@ -194,14 +205,13 @@ export default function Builder({ base, content, shelf, onChange }: Props) {
                 onChange={(event) => commit({ ...editing, author: event.target.value })}
               />
             </label>
-            <label className="wide">
-              <span>What this is meant to do</span>
-              <textarea
-                rows={2}
-                value={editing.notes}
-                placeholder="In your own words. Never shown in the game — this is for whoever reads the scenario."
-                onChange={(event) => commit({ ...editing, notes: event.target.value })}
+            <label className="check switch">
+              <input
+                type="checkbox"
+                checked={advanced}
+                onChange={(event) => setAdvanced(event.target.checked)}
               />
+              show every field
             </label>
           </section>
 
@@ -217,120 +227,133 @@ export default function Builder({ base, content, shelf, onChange }: Props) {
             </div>
           )}
 
-          {errors.length > 0 && (
-            <div className="alarm">
+          {todo.length > 0 && (
+            <div className="notice">
               <strong>Not finished yet:</strong>
+              <ul>{todo.map((what, i) => <li key={i}>{what}</li>)}</ul>
+            </div>
+          )}
+
+          {errors.length > 0 && todo.length === 0 && (
+            <div className="alarm">
+              <strong>Something is wrong with this scenario:</strong>
               <ul>{errors.map((problem, i) => <li key={i}>{problem.where}: {problem.what}</li>)}</ul>
             </div>
           )}
 
-          {missingFallback.length > 0 && (
+          {advanced && missingFallback.length > 0 && (
             <div className="notice">
               {missingFallback.join(', ')} needs one rule with no conditions at all, or the game
               can reach a moment where she says nothing.
             </div>
           )}
 
-          <section>
-            <h3>Things</h3>
-            {editing.objects.map((object, index) => (
-              <ObjectForm
-                key={index}
-                object={object}
-                content={withDraft}
-                verbs={editing.actions}
-                onChange={(next) => commit({
-                  ...editing,
-                  objects: editing.objects.map((o, i) => (i === index ? next : o)),
-                })}
-                onRemove={() => commit({
-                  ...editing, objects: editing.objects.filter((_, i) => i !== index),
-                })}
-              />
-            ))}
-            <button
-              onClick={() => commit({
-                ...editing,
-                objects: [...editing.objects, blankObject(base.places[0]?.id ?? '')],
-              })}
-            >
-              Add a thing
-            </button>
-          </section>
+          {advanced ? (
+            <>
+              <section>
+                <h3>Things</h3>
+                {editing.objects.map((object, index) => (
+                  <ObjectForm
+                    key={index}
+                    object={object}
+                    content={withDraft}
+                    verbs={editing.actions}
+                    onChange={(next) => commit({
+                      ...editing,
+                      objects: editing.objects.map((o, i) => (i === index ? next : o)),
+                    })}
+                    onRemove={() => commit({
+                      ...editing, objects: editing.objects.filter((_, i) => i !== index),
+                    })}
+                  />
+                ))}
+                <button
+                  onClick={() => commit({
+                    ...editing,
+                    objects: [...editing.objects, blankObject(base.places[0]?.id ?? '')],
+                  })}
+                >
+                  Add a thing
+                </button>
+              </section>
 
-          <section>
-            <h3>Verbs</h3>
-            {editing.actions.map((action, index) => (
-              <ActionForm
-                key={index}
-                action={action}
-                onChange={(next) => commit({
-                  ...editing,
-                  actions: editing.actions.map((a, i) => (i === index ? next : a)),
-                })}
-                onRemove={() => commit({
-                  ...editing, actions: editing.actions.filter((_, i) => i !== index),
-                })}
-              />
-            ))}
-            <button onClick={() => commit({ ...editing, actions: [...editing.actions, blankAction()] })}>
-              Add a verb
-            </button>
-          </section>
+              <section>
+                <h3>Verbs</h3>
+                {editing.actions.map((action, index) => (
+                  <ActionForm
+                    key={index}
+                    action={action}
+                    onChange={(next) => commit({
+                      ...editing,
+                      actions: editing.actions.map((a, i) => (i === index ? next : a)),
+                    })}
+                    onRemove={() => commit({
+                      ...editing, actions: editing.actions.filter((_, i) => i !== index),
+                    })}
+                  />
+                ))}
+                <button onClick={() => commit({ ...editing, actions: [...editing.actions, blankAction()] })}>
+                  Add a verb
+                </button>
+              </section>
 
-          <section>
-            <h3>Lines</h3>
-            {editing.beats.map((beat, index) => (
-              <BeatForm
-                key={index}
-                beat={beat}
-                onChange={(next) => commit({
-                  ...editing,
-                  beats: editing.beats.map((b, i) => (i === index ? next : b)),
-                })}
-                onRemove={() => commit({
-                  ...editing, beats: editing.beats.filter((_, i) => i !== index),
-                })}
-              />
-            ))}
-            <button onClick={() => commit({ ...editing, beats: [...editing.beats, blankBeat()] })}>
-              Add a line
-            </button>
-          </section>
+              <section>
+                <h3>Lines</h3>
+                {editing.beats.map((beat, index) => (
+                  <BeatForm
+                    key={index}
+                    beat={beat}
+                    onChange={(next) => commit({
+                      ...editing,
+                      beats: editing.beats.map((b, i) => (i === index ? next : b)),
+                    })}
+                    onRemove={() => commit({
+                      ...editing, beats: editing.beats.filter((_, i) => i !== index),
+                    })}
+                  />
+                ))}
+                <button onClick={() => commit({ ...editing, beats: [...editing.beats, blankBeat()] })}>
+                  Add a line
+                </button>
+              </section>
 
-          <section>
-            <h3>Rules</h3>
-            {editing.rules.map((rule, index) => (
-              <RuleForm
-                key={index}
-                rule={rule}
-                content={withDraft}
-                ownBeats={editing.beats.map((beat) => beat.id).filter((id) => id !== '')}
-                onChange={(next) => commit({
-                  ...editing,
-                  rules: editing.rules.map((r, i) => (i === index ? next : r)),
-                })}
-                onRemove={() => commit({
-                  ...editing, rules: editing.rules.filter((_, i) => i !== index),
-                })}
-              />
-            ))}
-            <button
-              onClick={() => commit({
-                ...editing,
-                rules: [...editing.rules, blankRule(editing.actions[0]?.id ?? 'look')],
-              })}
-            >
-              Add a rule
-            </button>
-          </section>
+              <section>
+                <h3>Rules</h3>
+                {editing.rules.map((rule, index) => (
+                  <RuleForm
+                    key={index}
+                    rule={rule}
+                    content={withDraft}
+                    ownBeats={editing.beats.map((beat) => beat.id).filter((id) => id !== '')}
+                    onChange={(next) => commit({
+                      ...editing,
+                      rules: editing.rules.map((r, i) => (i === index ? next : r)),
+                    })}
+                    onRemove={() => commit({
+                      ...editing, rules: editing.rules.filter((_, i) => i !== index),
+                    })}
+                  />
+                ))}
+                <button
+                  onClick={() => commit({
+                    ...editing,
+                    rules: [...editing.rules, blankRule(editing.actions[0]?.id ?? 'look')],
+                  })}
+                >
+                  Add a rule
+                </button>
+              </section>
+            </>
+          ) : (
+            <Simple draft={editing} content={withDraft} base={base} onChange={commit} />
+          )}
 
           <div className="footer">
             <button
               disabled={errors.length > 0}
               onClick={() => onChange(setEnabled(putPack(shelf, toPack(editing)), editing.pack, true))}
             >
-              {errors.length > 0 ? 'Fix the problems above first' : 'Switch it on and play it'}
+              {errors.length > 0 ? 'Finish it above first' : 'Switch it on and play it'}
             </button>
             <button
               disabled={errors.length > 0}

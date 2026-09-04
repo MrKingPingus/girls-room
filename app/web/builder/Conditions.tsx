@@ -1,0 +1,126 @@
+/**
+ * The "only when…" rows, shared by both views of the builder.
+ *
+ * The fact list is grouped rather than flat: forty-four names in one dropdown is a wall, and
+ * *whether she noticed* is a single thought an author has, not four scattered entries.
+ */
+
+import type { ContentBundle } from '../../../engine/content.ts';
+import type { ConditionRow } from '../../builder.ts';
+import { FACT_GROUPS, factSpec } from '../../../engine/facts.ts';
+import { TESTS, choicesFor, testsFor } from '../../builder.ts';
+
+type Props = {
+  rows: ConditionRow[];
+  content: ContentBundle;
+  onChange: (rows: ConditionRow[]) => void;
+};
+
+export default function Conditions({ rows, content, onChange }: Props) {
+  function set(index: number, patch: Partial<ConditionRow>) {
+    onChange(rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+  }
+
+  return (
+    <>
+      {rows.map((row, index) => {
+        const spec = factSpec(row.fact);
+        const choices = spec === null ? [] : choicesFor(spec, content);
+        const tests = spec === null ? [] : testsFor(spec);
+
+        return (
+          <div className="condition" key={index}>
+            <select
+              value={row.fact}
+              onChange={(event) => {
+                const next = factSpec(event.target.value);
+                set(index, {
+                  fact: event.target.value,
+                  test: next === null ? 'is' : (testsFor(next)[0] ?? 'is'),
+                  values: [],
+                });
+              }}
+            >
+              <option value="">choose something to check…</option>
+              {FACT_GROUPS.map((group) => (
+                <optgroup key={group.id} label={group.label}>
+                  {group.facts.map((id) => (
+                    <option key={id} value={id}>{factSpec(id)?.label ?? id}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+
+            {tests.length > 1 && (
+              <select
+                value={row.test}
+                onChange={(event) =>
+                  set(index, { test: event.target.value as ConditionRow['test'], values: [] })}
+              >
+                {tests.map((test) => (
+                  <option key={test} value={test}>
+                    {TESTS.find((entry) => entry.id === test)?.label}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {row.test === 'one_of' ? (
+              <div className="multi">
+                {choices.map((choice) => (
+                  <label key={choice} className="check">
+                    <input
+                      type="checkbox"
+                      checked={row.values.includes(choice)}
+                      onChange={(event) => set(index, {
+                        values: event.target.checked
+                          ? [...row.values, choice]
+                          : row.values.filter((value) => value !== choice),
+                      })}
+                    />
+                    {choice}
+                  </label>
+                ))}
+              </div>
+            ) : choices.length > 0 ? (
+              <select
+                value={row.values[0] ?? ''}
+                onChange={(event) => set(index, { values: [event.target.value] })}
+              >
+                <option value="">choose…</option>
+                {choices.map((choice) => (
+                  <option key={choice} value={choice}>
+                    {spec?.kind === 'flag' ? (choice === 'true' ? 'yes' : 'no') : choice}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type={spec?.kind === 'number' ? 'number' : 'text'}
+                value={row.values[0] ?? ''}
+                onChange={(event) => set(index, { values: [event.target.value] })}
+              />
+            )}
+
+            <button
+              className="drop"
+              title="remove this condition"
+              onClick={() => onChange(rows.filter((_, i) => i !== index))}
+            >
+              &times;
+            </button>
+
+            {spec !== null && row.values.length === 0 && <p className="hint">{spec.about}</p>}
+          </div>
+        );
+      })}
+
+      <button
+        className="quiet"
+        onClick={() => onChange([...rows, { fact: '', test: 'is', values: [] }])}
+      >
+        + another condition
+      </button>
+    </>
+  );
+}

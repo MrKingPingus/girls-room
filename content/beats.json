@@ -478,5 +478,41 @@
     "text": "She's doing what she was doing before.",
     "pose": "turned_away",
     "advancesClock": true
+  },
+  "nail_outline_first": {
+    "speaker": "narrator",
+    "text": "A nail, and around it a patch of wallpaper a shade lighter than the rest. Whatever hung there hung there a long time, and came down recently.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "nail_outline_again": {
+    "speaker": "narrator",
+    "text": "The same nail. The same clean rectangle around it.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "nail_ask_deflect": {
+    "speaker": "her",
+    "text": "\"Oh — that's been there for ages. I keep meaning to fill it in.\"",
+    "pose": "chair",
+    "advancesClock": true
+  },
+  "nail_ask_again": {
+    "speaker": "her",
+    "text": "\"You asked me that already.\"",
+    "pose": "chair",
+    "advancesClock": true
+  },
+  "nail_ask_irritated": {
+    "speaker": "her",
+    "text": "\"Does it matter?\"",
+    "pose": "standing",
+    "advancesClock": true
+  },
+  "f_dont_know_that_yet": {
+    "speaker": "narrator",
+    "text": "You don't have a reason to ask that.",
+    "pose": "absent",
+    "advancesClock": false
   }
 }

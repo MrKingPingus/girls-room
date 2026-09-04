@@ -1836,5 +1836,113 @@
       "watch_again"
     ],
     "weight": 10
+  },
+  {
+    "id": "study_nail_any",
+    "action": "study_nail",
+    "when": {},
+    "beats": [
+      "nail_outline_first"
+    ]
+  },
+  {
+    "id": "study_nail_known",
+    "action": "study_nail",
+    "when": {
+      "knows": {
+        "has": "nail_recently_emptied"
+      }
+    },
+    "beats": [
+      "nail_outline_again"
+    ]
+  },
+  {
+    "id": "fail_study_nail_asleep",
+    "action": "study_nail",
+    "when": {
+      "valid": false,
+      "failure": "asleep"
+    },
+    "beats": [
+      "f_asleep"
+    ]
+  },
+  {
+    "id": "fail_study_nail_any",
+    "action": "study_nail",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "ask_nail_any",
+    "action": "ask_about_nail",
+    "when": {},
+    "beats": [
+      "nail_ask_deflect"
+    ],
+    "effects": {
+      "suspicion": 4
+    }
+  },
+  {
+    "id": "ask_nail_irritated",
+    "action": "ask_about_nail",
+    "when": {
+      "mood": "irritated"
+    },
+    "beats": [
+      "nail_ask_irritated"
+    ],
+    "effects": {
+      "suspicion": 8
+    }
+  },
+  {
+    "id": "ask_nail_repeat",
+    "action": "ask_about_nail",
+    "when": {
+      "repeated": true
+    },
+    "beats": [
+      "nail_ask_again"
+    ],
+    "weight": 10
+  },
+  {
+    "id": "fail_ask_about_nail_dont_know",
+    "action": "ask_about_nail",
+    "when": {
+      "valid": false,
+      "failure": "dont_know_that_yet"
+    },
+    "beats": [
+      "f_dont_know_that_yet"
+    ]
+  },
+  {
+    "id": "fail_ask_about_nail_she_isnt_here",
+    "action": "ask_about_nail",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_ask_about_nail_any",
+    "action": "ask_about_nail",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
   }
 ]

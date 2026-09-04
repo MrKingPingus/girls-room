@@ -14,6 +14,7 @@
     "verbs": [
       "watch_her",
       "thank_her",
+      "ask_about_nail",
       "eat",
       "drink",
       "swallow_pill",
@@ -138,5 +139,20 @@
       "take": "silent",
       "hide": "silent"
     }
+  },
+  {
+    "id": "nail",
+    "name": "the nail",
+    "container": false,
+    "portable": false,
+    "changeTier": 1,
+    "knownAtStart": true,
+    "startsAt": {
+      "kind": "placed",
+      "place": "across_room"
+    },
+    "verbs": [
+      "study_nail"
+    ]
   }
 ]

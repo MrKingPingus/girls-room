@@ -228,5 +228,31 @@
     "effect": "talk",
     "concealable": false,
     "target": "object"
+  },
+  {
+    "id": "study_nail",
+    "name": "Look closer at the outline",
+    "universal": false,
+    "timeCost": 3,
+    "noise": "silent",
+    "effect": "inspect",
+    "concealable": true,
+    "target": "object",
+    "teaches": [
+      "nail_recently_emptied"
+    ]
+  },
+  {
+    "id": "ask_about_nail",
+    "name": "Ask what used to hang there",
+    "universal": false,
+    "timeCost": 4,
+    "noise": "silent",
+    "effect": "talk",
+    "concealable": false,
+    "target": "object",
+    "requiresKnown": [
+      "nail_recently_emptied"
+    ]
   }
 ]

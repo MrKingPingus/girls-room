@@ -8,10 +8,17 @@ Design doc §16: *"Build the ugly version first. Clickable text boxes, object an
 descriptions, no prose. If that loop isn't tense at this scale, no quantity of additional
 systems will fix it — and that's the question the POC exists to answer."*
 
-Every line in `beats.json` is functional placeholder written to make the loop run and to give
-the reaction rules something to point at. **None of it is the game's voice.** It is deliberately
-flat so that it reads as scaffolding rather than as a draft, and so that replacing it is
-obviously the next job rather than an optional polish pass.
+Most of `beats.json` is functional placeholder written to make the loop run and to give the
+reaction rules something to point at. It is deliberately flat so that it reads as scaffolding
+rather than as a draft, and so that replacing it is obviously the next job rather than an
+optional polish pass.
+
+**The exception, and it is a real one.** Her explanation on day 1 (`expl_*`), what the world
+says when she comes and goes (`enters_*`, `goes_*`, `stairs_*`, `night_*`, `d1_wake_*`), the
+three questions you can ask her, and the two details you can work out — the nail and the
+trauma kit — are *drafted*. They are a proposal about who she is, written to be argued with.
+Cut them, rewrite them, or keep them, but do not treat them as stand-in text that nobody
+intended.
 
 Rewriting a line can never break logic: rules reference beats by id, so the text and the
 simulation are only ever connected by a name.
@@ -25,7 +32,7 @@ simulation are only ever connected by a name.
 | `actions.json` | What the verbs cost in time and noise, and what they mechanically do |
 | `reactions.json` | The rule database. Most matching conditions wins |
 | `beats.json` | Every line, by id |
-| `schedule.json` | Her routine, per day. Where she is, what she's doing, how closely she's watching |
+| `schedule.json` | Her routine, per day. Where she is, what she's doing, how closely she's watching, and which blocks are meals |
 
 ## Adding to it
 
@@ -36,6 +43,8 @@ simulation are only ever connected by a name.
   answer for it. Design doc §13.
 - A **new reaction** is one row. Add conditions to make it more specific than the catch-all and
   it wins automatically.
+- A **new line for a moment the world raises** — she comes up, she goes, the day turns — is
+  also one row, against the verb in `actions.json` carrying that `raisedBy`. Architecture §5b.
 
 Everything is checked when the game starts. A typo'd id refuses to load and says where it is.
 Run `npm run sim` after any change here: it reports beats that nothing can reach, which is what

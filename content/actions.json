@@ -254,5 +254,106 @@
     "requiresKnown": [
       "nail_recently_emptied"
     ]
+  },
+  {
+    "id": "day_opens",
+    "name": "The day begins",
+    "universal": false,
+    "timeCost": 0,
+    "noise": "silent",
+    "effect": "none",
+    "concealable": false,
+    "target": "none",
+    "raisedBy": "day_begins"
+  },
+  {
+    "id": "on_stairs",
+    "name": "She is on the stairs",
+    "universal": false,
+    "timeCost": 0,
+    "noise": "silent",
+    "effect": "none",
+    "concealable": false,
+    "target": "none",
+    "raisedBy": "she_on_stairs"
+  },
+  {
+    "id": "she_enters",
+    "name": "She comes in",
+    "universal": false,
+    "timeCost": 0,
+    "noise": "silent",
+    "effect": "none",
+    "concealable": false,
+    "target": "none",
+    "raisedBy": "she_arrives"
+  },
+  {
+    "id": "she_goes",
+    "name": "She goes",
+    "universal": false,
+    "timeCost": 0,
+    "noise": "silent",
+    "effect": "none",
+    "concealable": false,
+    "target": "none",
+    "raisedBy": "she_leaves"
+  },
+  {
+    "id": "night_comes",
+    "name": "Night",
+    "universal": false,
+    "timeCost": 0,
+    "noise": "silent",
+    "effect": "none",
+    "concealable": false,
+    "target": "none",
+    "raisedBy": "night_falls"
+  },
+  {
+    "id": "study_kit",
+    "name": "Look closer at the kit",
+    "universal": false,
+    "timeCost": 3,
+    "noise": "silent",
+    "effect": "inspect",
+    "concealable": true,
+    "target": "object",
+    "teaches": [
+      "kit_is_professional"
+    ]
+  },
+  {
+    "id": "ask_about_kit",
+    "name": "Ask where she got the kit",
+    "universal": false,
+    "timeCost": 4,
+    "noise": "silent",
+    "effect": "talk",
+    "concealable": false,
+    "target": "object",
+    "requiresKnown": [
+      "kit_is_professional"
+    ]
+  },
+  {
+    "id": "ask_how_long",
+    "name": "Ask how long you'll be here",
+    "universal": false,
+    "timeCost": 4,
+    "noise": "silent",
+    "effect": "talk",
+    "concealable": false,
+    "target": "object"
+  },
+  {
+    "id": "ask_who_knows",
+    "name": "Ask if anyone knows you're here",
+    "universal": false,
+    "timeCost": 5,
+    "noise": "silent",
+    "effect": "talk",
+    "concealable": false,
+    "target": "object"
   }
 ]

@@ -985,7 +985,10 @@
     "id": "wait_watched",
     "action": "wait",
     "when": {
-      "she_is_here": true
+      "she_is_here": true,
+      "just_happened": {
+        "lacks": "she_arrives"
+      }
     },
     "beats": [
       "w_watched"
@@ -1944,5 +1947,412 @@
     "beats": [
       "f_unknown_action"
     ]
+  },
+  {
+    "id": "day_open_any",
+    "action": "day_opens",
+    "when": {},
+    "beats": [
+      "day_open_any"
+    ]
+  },
+  {
+    "id": "day_open_first",
+    "action": "day_opens",
+    "when": {
+      "day": 1
+    },
+    "beats": [
+      "d1_wake_1",
+      "d1_wake_2",
+      "d1_wake_3"
+    ]
+  },
+  {
+    "id": "day_open_third",
+    "action": "day_opens",
+    "when": {
+      "day": 3
+    },
+    "beats": [
+      "day_open_3"
+    ]
+  },
+  {
+    "id": "stairs_any",
+    "action": "on_stairs",
+    "when": {},
+    "beats": [
+      "stairs_any"
+    ]
+  },
+  {
+    "id": "stairs_angry",
+    "action": "on_stairs",
+    "when": {
+      "mood": "angry"
+    },
+    "beats": [
+      "stairs_angry"
+    ]
+  },
+  {
+    "id": "stairs_excited",
+    "action": "on_stairs",
+    "when": {
+      "mood": "excited"
+    },
+    "beats": [
+      "stairs_excited"
+    ]
+  },
+  {
+    "id": "enters_any",
+    "action": "she_enters",
+    "when": {},
+    "beats": [
+      "enters_any"
+    ]
+  },
+  {
+    "id": "enters_warm",
+    "action": "she_enters",
+    "when": {
+      "mood": "warm"
+    },
+    "beats": [
+      "enters_warm"
+    ]
+  },
+  {
+    "id": "enters_irritated",
+    "action": "she_enters",
+    "when": {
+      "mood": "irritated"
+    },
+    "beats": [
+      "enters_irritated"
+    ]
+  },
+  {
+    "id": "enters_angry",
+    "action": "she_enters",
+    "when": {
+      "mood": "angry"
+    },
+    "beats": [
+      "enters_angry"
+    ]
+  },
+  {
+    "id": "enters_explains",
+    "action": "she_enters",
+    "when": {
+      "day": 1,
+      "phase": "wake"
+    },
+    "beats": [
+      "enters_warm",
+      "expl_1",
+      "expl_2",
+      "expl_3",
+      "expl_4",
+      "expl_5",
+      "expl_6",
+      "expl_7"
+    ],
+    "weight": 5
+  },
+  {
+    "id": "goes_any",
+    "action": "she_goes",
+    "when": {},
+    "beats": [
+      "goes_any"
+    ]
+  },
+  {
+    "id": "goes_warm",
+    "action": "she_goes",
+    "when": {
+      "mood": "warm"
+    },
+    "beats": [
+      "goes_warm"
+    ]
+  },
+  {
+    "id": "goes_irritated",
+    "action": "she_goes",
+    "when": {
+      "mood": "irritated"
+    },
+    "beats": [
+      "goes_irritated"
+    ]
+  },
+  {
+    "id": "night_any",
+    "action": "night_comes",
+    "when": {},
+    "beats": [
+      "night_any"
+    ]
+  },
+  {
+    "id": "night_first",
+    "action": "night_comes",
+    "when": {
+      "day": 1
+    },
+    "beats": [
+      "night_any",
+      "night_d1"
+    ]
+  },
+  {
+    "id": "kit_any",
+    "action": "study_kit",
+    "when": {},
+    "beats": [
+      "kit_first"
+    ]
+  },
+  {
+    "id": "kit_known",
+    "action": "study_kit",
+    "when": {
+      "knows": {
+        "has": "kit_is_professional"
+      }
+    },
+    "beats": [
+      "kit_again"
+    ]
+  },
+  {
+    "id": "fail_study_kit_asleep",
+    "action": "study_kit",
+    "when": {
+      "valid": false,
+      "failure": "asleep"
+    },
+    "beats": [
+      "f_asleep"
+    ]
+  },
+  {
+    "id": "fail_study_kit_any",
+    "action": "study_kit",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "ask_kit_any",
+    "action": "ask_about_kit",
+    "when": {},
+    "beats": [
+      "kit_ask"
+    ],
+    "effects": {
+      "suspicion": 5
+    }
+  },
+  {
+    "id": "ask_kit_repeat",
+    "action": "ask_about_kit",
+    "when": {
+      "repeated": true
+    },
+    "beats": [
+      "kit_ask_again"
+    ],
+    "weight": 10
+  },
+  {
+    "id": "fail_ask_kit_dont_know",
+    "action": "ask_about_kit",
+    "when": {
+      "valid": false,
+      "failure": "dont_know_that_yet"
+    },
+    "beats": [
+      "f_dont_know_that_yet"
+    ]
+  },
+  {
+    "id": "fail_ask_kit_she_isnt_here",
+    "action": "ask_about_kit",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_ask_kit_any",
+    "action": "ask_about_kit",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "howlong_any",
+    "action": "ask_how_long",
+    "when": {},
+    "beats": [
+      "howlong_any"
+    ],
+    "effects": {
+      "suspicion": 2,
+      "trust": -1
+    }
+  },
+  {
+    "id": "howlong_repeat",
+    "action": "ask_how_long",
+    "when": {
+      "repeated": true
+    },
+    "beats": [
+      "howlong_again"
+    ],
+    "weight": 10
+  },
+  {
+    "id": "fail_howlong_she_isnt_here",
+    "action": "ask_how_long",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_howlong_any",
+    "action": "ask_how_long",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "whoknows_any",
+    "action": "ask_who_knows",
+    "when": {},
+    "beats": [
+      "whoknows_any"
+    ],
+    "effects": {
+      "suspicion": 9,
+      "trust": -3
+    }
+  },
+  {
+    "id": "whoknows_irritated",
+    "action": "ask_who_knows",
+    "when": {
+      "mood": "irritated"
+    },
+    "beats": [
+      "whoknows_irritated"
+    ],
+    "effects": {
+      "suspicion": 14,
+      "trust": -4
+    }
+  },
+  {
+    "id": "whoknows_repeat",
+    "action": "ask_who_knows",
+    "when": {
+      "repeated": true
+    },
+    "beats": [
+      "whoknows_again"
+    ],
+    "weight": 10
+  },
+  {
+    "id": "fail_whoknows_she_isnt_here",
+    "action": "ask_who_knows",
+    "when": {
+      "valid": false,
+      "failure": "she_isnt_here"
+    },
+    "beats": [
+      "f_she_isnt_here"
+    ]
+  },
+  {
+    "id": "fail_whoknows_any",
+    "action": "ask_who_knows",
+    "when": {
+      "valid": false
+    },
+    "beats": [
+      "f_unknown_action"
+    ]
+  },
+  {
+    "id": "look_stairwell",
+    "action": "look",
+    "when": {
+      "object": "stairwell"
+    },
+    "beats": [
+      "l_stairwell"
+    ],
+    "weight": 1
+  },
+  {
+    "id": "look_stairwell_dark",
+    "action": "look",
+    "when": {
+      "object": "stairwell",
+      "light": "dark"
+    },
+    "beats": [
+      "l_stairwell_dark"
+    ],
+    "weight": 1
+  },
+  {
+    "id": "look_leg",
+    "action": "look",
+    "when": {
+      "object": "your_leg"
+    },
+    "beats": [
+      "l_leg"
+    ],
+    "weight": 1
+  },
+  {
+    "id": "look_leg_pain",
+    "action": "look",
+    "when": {
+      "object": "your_leg",
+      "pain": {
+        "gte": 60
+      }
+    },
+    "beats": [
+      "l_leg_pain"
+    ],
+    "weight": 1
   }
 ]

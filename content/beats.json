@@ -493,7 +493,7 @@
   },
   "nail_ask_deflect": {
     "speaker": "her",
-    "text": "\"Oh — that's been there for ages. I keep meaning to fill it in.\"",
+    "text": "\"Oh \u2014 that's been there for ages. I keep meaning to fill it in.\"",
     "pose": "chair",
     "advancesClock": true
   },
@@ -514,5 +514,227 @@
     "text": "You don't have a reason to ask that.",
     "pose": "absent",
     "advancesClock": false
+  },
+  "d1_wake_1": {
+    "speaker": "narrator",
+    "text": "You come up out of it slowly. Bare rafters close overhead, and a ceiling that slopes away on both sides to meet a floor you can't see the edge of.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "d1_wake_2": {
+    "speaker": "narrator",
+    "text": "Your left leg is splinted from the ankle to above the knee and packed straight. You try to move it. You get about an inch.",
+    "pose": "absent",
+    "advancesClock": false
+  },
+  "d1_wake_3": {
+    "speaker": "narrator",
+    "text": "At the far end of the room the floor simply stops. Stairs go down into the gap. No door at the top, no rail, no gate \u2014 just the opening and the drop.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "day_open_any": {
+    "speaker": "narrator",
+    "text": "You surface. The light through the dormer has moved.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "day_open_3": {
+    "speaker": "narrator",
+    "text": "Third morning. You know the shape of the ceiling now without looking at it.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "stairs_any": {
+    "speaker": "narrator",
+    "text": "Below you, the staircase takes her weight. One step, then another, in no hurry.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "stairs_angry": {
+    "speaker": "narrator",
+    "text": "The stairs go fast under her, and she isn't being quiet about it.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "stairs_excited": {
+    "speaker": "narrator",
+    "text": "She comes up quick and light, two at a time by the sound of it.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "enters_any": {
+    "speaker": "narrator",
+    "text": "Her head clears the stairwell, and she is looking at the bed before the rest of her is in the room.",
+    "pose": "stairwell",
+    "advancesClock": true
+  },
+  "enters_warm": {
+    "speaker": "narrator",
+    "text": "She comes up, and stops at the top for a moment to look at you before she says anything.",
+    "pose": "stairwell",
+    "advancesClock": true
+  },
+  "enters_irritated": {
+    "speaker": "narrator",
+    "text": "She's in the room before you've finished hearing her. She looks the room over first, and you second.",
+    "pose": "standing",
+    "advancesClock": true
+  },
+  "enters_angry": {
+    "speaker": "narrator",
+    "text": "She comes off the last step and stands there. She hasn't said anything yet.",
+    "pose": "standing",
+    "advancesClock": true
+  },
+  "expl_1": {
+    "speaker": "her",
+    "text": "\"You're awake. Don't sit up \u2014 I mean it. Don't.\"",
+    "pose": "bedside",
+    "advancesClock": false
+  },
+  "expl_2": {
+    "speaker": "her",
+    "text": "\"You broke your leg. Badly. I've set it and splinted it and it will hold, but not if you go walking around on it.\"",
+    "pose": "chair",
+    "advancesClock": false
+  },
+  "expl_3": {
+    "speaker": "her",
+    "text": "\"I found you. That's all there is to it. Nobody else had stopped.\"",
+    "pose": "chair",
+    "advancesClock": false
+  },
+  "expl_4": {
+    "speaker": "her",
+    "text": "\"I'm a nurse. Fifteen years of it. You've had better luck than you know.\"",
+    "pose": "chair",
+    "advancesClock": false
+  },
+  "expl_5": {
+    "speaker": "her",
+    "text": "\"And before you ask \u2014 you could go to a hospital. They'd bill you for the ambulance before they got as far as the bed.\"",
+    "pose": "chair",
+    "advancesClock": false
+  },
+  "expl_6": {
+    "speaker": "her",
+    "text": "\"I'm not charging you anything, and I'm not going to.\"",
+    "pose": "chair",
+    "advancesClock": false
+  },
+  "expl_7": {
+    "speaker": "her",
+    "text": "\"Give it a few weeks. When you can stand on it, you walk out of here on your own two feet.\"",
+    "pose": "bedside",
+    "advancesClock": true
+  },
+  "goes_any": {
+    "speaker": "narrator",
+    "text": "She goes down. The sound of her thins out, floor by floor, and then the house is quiet.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "goes_warm": {
+    "speaker": "her",
+    "text": "\"I won't be long.\" And the stairs take her.",
+    "pose": "stairwell",
+    "advancesClock": true
+  },
+  "goes_irritated": {
+    "speaker": "narrator",
+    "text": "She goes without saying anything. The stairs are loud on the way down.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "night_any": {
+    "speaker": "narrator",
+    "text": "She turns the light off at the top of the stairs, and the room goes.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "night_d1": {
+    "speaker": "narrator",
+    "text": "She said she found you in the road. There is no dirt on you anywhere. Somebody washed you.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "kit_first": {
+    "speaker": "narrator",
+    "text": "It isn't a household first aid box. It's a proper trauma kit \u2014 the sort that gets carried to people rather than kept in a cupboard. Half of it has been used.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "kit_again": {
+    "speaker": "narrator",
+    "text": "The same kit, open, with the same gap in it.",
+    "pose": "absent",
+    "advancesClock": true
+  },
+  "kit_ask": {
+    "speaker": "her",
+    "text": "\"Work. They throw things out when they're near the date. I'd be mad not to take them.\"",
+    "pose": "chair",
+    "advancesClock": true
+  },
+  "kit_ask_again": {
+    "speaker": "her",
+    "text": "\"I've told you where it came from.\"",
+    "pose": "chair",
+    "advancesClock": true
+  },
+  "howlong_any": {
+    "speaker": "her",
+    "text": "\"Six weeks for the bone. Longer before I'd trust you on those stairs.\"",
+    "pose": "chair",
+    "advancesClock": true
+  },
+  "howlong_again": {
+    "speaker": "her",
+    "text": "\"It hasn't changed since you asked.\"",
+    "pose": "chair",
+    "advancesClock": true
+  },
+  "whoknows_any": {
+    "speaker": "her",
+    "text": "She thinks about it a moment. \"I don't know who'd be looking. Do you?\"",
+    "pose": "chair",
+    "advancesClock": true
+  },
+  "whoknows_irritated": {
+    "speaker": "her",
+    "text": "\"Why? Are you expecting somebody?\"",
+    "pose": "chair",
+    "advancesClock": true
+  },
+  "whoknows_again": {
+    "speaker": "her",
+    "text": "\"You've asked me that.\"",
+    "pose": "chair",
+    "advancesClock": true
+  },
+  "l_stairwell": {
+    "speaker": "narrator",
+    "pose": "absent",
+    "advancesClock": true,
+    "text": "An opening in the floor with a steep run of steps going down out of it. No door, no gate, nothing across it. For a leg like yours it isn't a way out, it's a fall."
+  },
+  "l_stairwell_dark": {
+    "speaker": "narrator",
+    "pose": "absent",
+    "advancesClock": true,
+    "text": "You can make out where the floor ends, and nothing past it."
+  },
+  "l_leg": {
+    "speaker": "narrator",
+    "pose": "absent",
+    "advancesClock": true,
+    "text": "Splinted straight from the ankle to above the knee, and strapped. The work is neat. Whoever did it had done it before."
+  },
+  "l_leg_pain": {
+    "speaker": "narrator",
+    "pose": "absent",
+    "advancesClock": true,
+    "text": "It has its own pulse today, and it is louder than yours."
   }
 }

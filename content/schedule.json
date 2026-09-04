@@ -4,30 +4,47 @@
     "blocks": [
       {
         "from": 0,
-        "to": 45,
-        "location": "attic",
-        "activity": "tending_you",
-        "attention": 0.85,
+        "to": 20,
+        "location": "kitchen",
+        "activity": "cooking",
+        "attention": 0.1,
         "phase": "wake"
       },
       {
-        "from": 45,
-        "to": 120,
+        "from": 20,
+        "to": 40,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
+        "phase": "wake"
+      },
+      {
+        "from": 40,
+        "to": 100,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.85,
+        "phase": "wake",
+        "meal": "breakfast"
+      },
+      {
+        "from": 100,
+        "to": 160,
         "location": "attic",
         "activity": "sitting_with_you",
         "attention": 0.7,
         "phase": "morning"
       },
       {
-        "from": 120,
-        "to": 150,
+        "from": 160,
+        "to": 180,
         "location": "stairs",
         "activity": "away",
         "attention": 0.3,
         "phase": "absence"
       },
       {
-        "from": 150,
+        "from": 180,
         "to": 300,
         "location": "kitchen",
         "activity": "cooking",
@@ -36,46 +53,72 @@
       },
       {
         "from": 300,
-        "to": 360,
-        "location": "living_room",
-        "activity": "watching_tv",
-        "attention": 0.05,
-        "phase": "absence"
-      },
-      {
-        "from": 360,
-        "to": 420,
-        "location": "attic",
-        "activity": "tending_you",
-        "attention": 0.75,
+        "to": 320,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
         "phase": "return"
       },
       {
-        "from": 420,
+        "from": 320,
+        "to": 380,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.75,
+        "phase": "return",
+        "meal": "lunch"
+      },
+      {
+        "from": 380,
+        "to": 400,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
+        "phase": "absence"
+      },
+      {
+        "from": 400,
         "to": 540,
-        "location": "bathroom",
-        "activity": "washing",
+        "location": "living_room",
+        "activity": "watching_tv",
         "attention": 0.05,
         "phase": "absence"
       },
       {
         "from": 540,
         "to": 660,
-        "location": "living_room",
-        "activity": "watching_tv",
-        "attention": 0.1,
+        "location": "bathroom",
+        "activity": "washing",
+        "attention": 0.05,
         "phase": "absence"
       },
       {
         "from": 660,
-        "to": 780,
-        "location": "attic",
-        "activity": "sitting_with_you",
-        "attention": 0.8,
+        "to": 680,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
         "phase": "evening"
       },
       {
-        "from": 780,
+        "from": 680,
+        "to": 740,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.8,
+        "phase": "evening",
+        "meal": "dinner"
+      },
+      {
+        "from": 740,
+        "to": 820,
+        "location": "attic",
+        "activity": "sitting_with_you",
+        "attention": 0.75,
+        "phase": "evening"
+      },
+      {
+        "from": 820,
         "to": 840,
         "location": "her_bedroom",
         "activity": "cleaning",
@@ -97,62 +140,113 @@
     "blocks": [
       {
         "from": 0,
-        "to": 60,
-        "location": "attic",
-        "activity": "tending_you",
-        "attention": 0.8,
+        "to": 20,
+        "location": "kitchen",
+        "activity": "cooking",
+        "attention": 0.1,
         "phase": "wake"
       },
       {
-        "from": 60,
-        "to": 180,
+        "from": 20,
+        "to": 40,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
+        "phase": "wake"
+      },
+      {
+        "from": 40,
+        "to": 100,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.8,
+        "phase": "wake",
+        "meal": "breakfast"
+      },
+      {
+        "from": 100,
+        "to": 160,
         "location": "attic",
         "activity": "sitting_with_you",
         "attention": 0.7,
         "phase": "morning"
       },
       {
+        "from": 160,
+        "to": 180,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
+        "phase": "absence"
+      },
+      {
         "from": 180,
-        "to": 420,
+        "to": 290,
         "location": "outside",
         "activity": "away",
         "attention": 0.0,
         "phase": "absence"
       },
       {
-        "from": 420,
-        "to": 480,
-        "location": "attic",
-        "activity": "tending_you",
-        "attention": 0.8,
+        "from": 290,
+        "to": 310,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
         "phase": "return"
       },
       {
-        "from": 480,
-        "to": 540,
-        "location": "kitchen",
-        "activity": "cooking",
-        "attention": 0.1,
+        "from": 310,
+        "to": 370,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.8,
+        "phase": "return",
+        "meal": "lunch"
+      },
+      {
+        "from": 370,
+        "to": 390,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
         "phase": "absence"
       },
       {
-        "from": 540,
+        "from": 390,
         "to": 600,
-        "location": "living_room",
-        "activity": "on_phone",
-        "attention": 0.05,
+        "location": "outside",
+        "activity": "away",
+        "attention": 0.0,
         "phase": "absence"
       },
       {
         "from": 600,
-        "to": 720,
-        "location": "attic",
-        "activity": "sitting_with_you",
-        "attention": 0.75,
+        "to": 620,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
         "phase": "evening"
       },
       {
-        "from": 720,
+        "from": 620,
+        "to": 680,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.8,
+        "phase": "evening",
+        "meal": "dinner"
+      },
+      {
+        "from": 680,
+        "to": 780,
+        "location": "attic",
+        "activity": "sitting_with_you",
+        "attention": 0.8,
+        "phase": "evening"
+      },
+      {
+        "from": 780,
         "to": 840,
         "location": "living_room",
         "activity": "watching_tv",
@@ -174,54 +268,129 @@
     "blocks": [
       {
         "from": 0,
-        "to": 60,
-        "location": "attic",
-        "activity": "tending_you",
-        "attention": 0.8,
+        "to": 20,
+        "location": "kitchen",
+        "activity": "cooking",
+        "attention": 0.1,
         "phase": "wake"
       },
       {
-        "from": 60,
-        "to": 150,
+        "from": 20,
+        "to": 40,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
+        "phase": "wake"
+      },
+      {
+        "from": 40,
+        "to": 100,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.85,
+        "phase": "wake",
+        "meal": "breakfast"
+      },
+      {
+        "from": 100,
+        "to": 180,
+        "location": "attic",
+        "activity": "sitting_with_you",
+        "attention": 0.8,
+        "phase": "morning"
+      },
+      {
+        "from": 180,
+        "to": 200,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
+        "phase": "absence"
+      },
+      {
+        "from": 200,
+        "to": 290,
         "location": "kitchen",
         "activity": "cleaning",
         "attention": 0.15,
-        "phase": "morning"
+        "phase": "absence"
       },
       {
-        "from": 150,
-        "to": 240,
-        "location": "her_bedroom",
-        "activity": "on_phone",
-        "attention": 0.05,
-        "phase": "morning"
+        "from": 290,
+        "to": 310,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
+        "phase": "return"
       },
       {
-        "from": 240,
-        "to": 480,
+        "from": 310,
+        "to": 370,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.85,
+        "phase": "return",
+        "meal": "lunch"
+      },
+      {
+        "from": 370,
+        "to": 390,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
+        "phase": "absence"
+      },
+      {
+        "from": 390,
+        "to": 540,
         "location": "outside",
         "activity": "away",
         "attention": 0.0,
         "phase": "absence"
       },
       {
-        "from": 480,
+        "from": 540,
         "to": 600,
-        "location": "attic",
-        "activity": "tending_you",
-        "attention": 0.85,
-        "phase": "return"
+        "location": "her_bedroom",
+        "activity": "on_phone",
+        "attention": 0.05,
+        "phase": "absence"
       },
       {
         "from": 600,
-        "to": 780,
+        "to": 620,
+        "location": "stairs",
+        "activity": "away",
+        "attention": 0.3,
+        "phase": "evening"
+      },
+      {
+        "from": 620,
+        "to": 680,
+        "location": "attic",
+        "activity": "tending_you",
+        "attention": 0.85,
+        "phase": "evening",
+        "meal": "dinner"
+      },
+      {
+        "from": 680,
+        "to": 820,
         "location": "attic",
         "activity": "sitting_with_you",
         "attention": 0.9,
         "phase": "evening"
       },
       {
-        "from": 780,
+        "from": 820,
+        "to": 840,
+        "location": "her_bedroom",
+        "activity": "cleaning",
+        "attention": 0.1,
+        "phase": "evening"
+      },
+      {
+        "from": 840,
         "to": 1440,
         "location": "her_bedroom",
         "activity": "sleeping",

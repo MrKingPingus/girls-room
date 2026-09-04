@@ -20,7 +20,10 @@
       "swallow_pill",
       "palm_pill",
       "accept_dressing",
-      "refuse_care"
+      "refuse_care",
+      "ask_about_kit",
+      "ask_how_long",
+      "ask_who_knows"
     ]
   },
   {
@@ -154,5 +157,44 @@
     "verbs": [
       "study_nail"
     ]
+  },
+  {
+    "id": "trauma_kit",
+    "name": "the trauma kit",
+    "container": true,
+    "portable": false,
+    "changeTier": 2,
+    "knownAtStart": true,
+    "startsAt": {
+      "kind": "placed",
+      "place": "across_room"
+    },
+    "verbs": [
+      "study_kit"
+    ]
+  },
+  {
+    "id": "stairwell",
+    "name": "the stairwell",
+    "container": false,
+    "portable": false,
+    "changeTier": 4,
+    "knownAtStart": true,
+    "startsAt": {
+      "kind": "placed",
+      "place": "across_room"
+    }
+  },
+  {
+    "id": "your_leg",
+    "name": "your leg",
+    "container": false,
+    "portable": false,
+    "changeTier": 1,
+    "knownAtStart": true,
+    "startsAt": {
+      "kind": "placed",
+      "place": "bed"
+    }
   }
 ]

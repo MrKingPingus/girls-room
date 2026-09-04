@@ -65,9 +65,12 @@ export function newGame(
       mood: 'warm',        // design doc §14: the baseline every future mood is read against
       disposition: 'content',
       stress: 20,
-      attention: 0.8,
-      location: 'attic',
-      activity: 'tending_you',
+      // Design doc §14 beats 1-3: you wake alone, you take the room in, and *then* she comes
+      // up. Starting her at the bedside would spend the game's first scene before the player
+      // has pressed anything, and the arrival is the beat the rest of the day is read against.
+      attention: 0.1,
+      location: 'kitchen',
+      activity: 'cooking',
       statedReturnAt: null,
       believes: [],
       claims: [],

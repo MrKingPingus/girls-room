@@ -24,7 +24,12 @@ import { pick, roll } from '../engine/random.ts';
 const args = process.argv.slice(2);
 const runs = Number(args[args.indexOf('--runs') + 1]) || 500;
 const policyName = args.indexOf('--policy') === -1 ? 'random' : args[args.indexOf('--policy') + 1];
-const maxTurns = Number(args[args.indexOf('--turns') + 1]) || 1200;
+// Enough that a run reaches the end of day 3 rather than being cut off inside day 2. The
+// number is turns, not minutes, so it has to be generous: the cheapest verbs cost a minute,
+// and a random player takes a lot of them. If day 3's row in the report ever comes back with
+// far fewer runs than day 1's, this is the first thing to check — the game did not get
+// shorter, the runs stopped early and the last day went untested.
+const maxTurns = Number(args[args.indexOf('--turns') + 1]) || 3000;
 
 const content = loadGameContent();
 

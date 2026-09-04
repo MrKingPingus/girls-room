@@ -182,6 +182,9 @@ each other and do not know each other exists. Adding a system = adding a stage.
 6. APPRAISAL    Convert what happened into affection / trust / suspicion / disposition deltas.
                 Runs the rule query (§6) and applies the winning rule's `effects`, then hands
                 the winning rule id forward. The ONLY stage allowed to move a meter.
+                Also runs the *other* lookups for this moment — her care offer, and anything
+                the world did for itself (§5b) — because several things can be true of one
+                turn, and merging them would lose whichever came second.
 
 7. REACTION     Resolve the winning rule id into her response. May return nothing.
 
@@ -203,6 +206,49 @@ Three rules that keep this clean:
   discovery *is* the dread.
 - **Rules propose, owners dispose.** A reaction rule's `effects` block is applied by APPRAISAL,
   which owns the meters — never by REACTION. REACTION only turns the selected rule into beats.
+
+---
+
+## 5b. What the world says for itself
+
+Her schedule has always been real. What the game did not do was **mention it**: she moved
+between floors in silence, and the only way to know she had walked into the attic was that the
+menu quietly grew a section. A rhythm the player cannot hear is not a rhythm, and it is why she
+read as wandering in and out at random.
+
+So there is a closed list of moments where the world speaks without being spoken to —
+`engine/events.ts`, and `WORLD_EVENTS` in `vocab.ts`:
+
+```
+day_begins · she_on_stairs · she_arrives · she_leaves · night_falls
+```
+
+Three things about the shape of this, each of which was the alternative not taken:
+
+- **Derived, never stored.** Every one is a difference between the room at the top of the turn
+  and the room now, which the turn already has in front of it. A `justArrived` field would need
+  an owner in §5a and could disagree with where she actually is.
+- **Not a stage.** It answers a question and writes nothing. `care.ts` is the same, for the
+  same reason.
+- **A row, not a branch.** Each event is answered by a verb in `actions.json` marked
+  `raisedBy`, with rules in the database like anything else — so what she says on the stairs
+  can turn on her mood, the day, or how suspicious she is, and adding a line is editing a file.
+  This is exactly the arrangement her care offers already used (`offers`), widened.
+
+A verb marked `raisedBy` is never in the player's menu and never bound to an object, both
+checked at load. And every event in the list must have a verb answering it, or the moment
+happens in silence — which is the bug this exists to fix, and it would be invisible.
+
+`just_happened` puts the turn's events in the fact bag, so a line can avoid talking over the
+world: *"Time passes. She doesn't leave"* is right up until the turn she walks in, and the rule
+that says it now carries `{ "just_happened": { "lacks": "she_arrives" } }`. The fix lives in
+content, which is the test of whether a mechanism is the right one.
+
+**The stairs are only raised on the way up.** She crosses them in both directions, but going
+down is already the departure, and raising both gave her a line about climbing unhurriedly
+followed immediately by a line about walking out. Design doc §2b makes the staircase the
+player's only early warning, so the blocks in her schedule are wide enough that an ordinary
+turn cannot step over one — a warning you can miss by blinking is not a warning.
 
 ---
 
@@ -434,10 +480,12 @@ All of it data, none of it code. Content is added without touching `engine/`.
 ```
 content/places.json      id, reach tier, concealment, noise modifier
 content/objects.json     id, where it starts, container/portable, change tier, contextual verbs
-content/actions.json     verbs, time cost, noise, concealability, target shape, knowledge
+content/actions.json     verbs, time cost, noise, concealability, target shape, knowledge,
+                         and the moments the world raises for itself (§5b)
 content/reactions.json   the rule database (§6)
 content/beats.json       beat id -> text + pose + clock + prompt
-content/schedule.json    her routine per day — where she is, what she's doing, attention level
+content/schedule.json    her routine per day — where she is, what she's doing, attention
+                         level, and which blocks are meals
 ```
 
 Keep `beats.json` separate from `reactions.json`. Rules reference beats by id. This means
@@ -462,7 +510,8 @@ stopping at the first, and additionally proves:
 - all eight universal verbs exist, and nothing else claims to be universal
 - every action has exactly one catch-all rule, so the game can never produce nothing (§6)
 - every condition names a real fact, and gives it a value that fact can actually hold (§6a)
-- her schedule has no gaps or overlaps
+- her schedule has no gaps or overlaps, and each day carries all three meals
+- every moment the world can raise has exactly one verb answering it
 - no beat is unreachable by any rule (a warning — it is usually a typo'd criterion)
 
 ### 7a. Scenario packs

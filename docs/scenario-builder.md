@@ -548,7 +548,10 @@ Say what the system is, and what the builder would need in order to author it.
 | System | What the builder would need |
 |---|---|
 | **Places** (`content/places.json`) | Stage 3. Reach tier, concealment, noise modifier. Packs do not carry places at all. |
-| **Her routine** (`content/schedule.json`) | Stage 3. Blocks per day, with the no-gaps-or-overlaps check surfaced as it is typed. |
+| **Her routine** (`content/schedule.json`) | Stage 3. Blocks per day, with the no-gaps-or-overlaps check surfaced as it is typed, and the three meals marked. |
+| **What the world says** (`action.raisedBy`) | The moments the world raises for itself — she comes up the stairs, she goes, a day turns over (architecture §5b). An author will want to write her arrival lines before almost anything else, and the tool has no way to reach them. Needs a sixth kind of rung: not "when the player does X" but "when the world does X". |
+| **Meals** (`schedule.block.meal`) | Part of stage 3, but worth its own row: which blocks are breakfast, lunch and dinner is the single most legible thing about her day. |
+| **What just happened** (`just_happened`) | A condition on the world's own moments, so a line can avoid talking over one. Same list shape as `knows` below, and it falls out of the same picker work. |
 | **Contraband** (`action.produces`) | A verb that *makes* a thing — palming a dose is the keystone move of §8 and cannot be authored. |
 | **Her care offers** (`action.offers`) | Her half of a care scene. Deliberately excluded from the player's menu, so it needs its own way in. |
 | **Hidden and nested starts** (`object.startsAt`) | Only `placed` can be written. `hidden`, `inside`, `carried` cannot. |

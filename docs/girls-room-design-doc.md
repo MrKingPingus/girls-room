@@ -415,7 +415,7 @@ hidden meters. Revisit after the POC is playable.
 
 ---
 
-## 12. Time and the daily cycle
+## 12. Time and the daily cycle — BUILT
 
 ```
 WAKE        she's present. Care loop. Mood established via tells.
@@ -425,6 +425,18 @@ RETURN      warnings escalate. Detection resolves. Consequences land.
 EVENING     care loop, conversation, the day's emotional summary.
 SLEEP       forced. Time skip. She may act unobserved.
 ```
+
+**Her day is now audible.** The schedule was always in `content/schedule.json` and the game
+never mentioned any of it — she moved between floors in silence, which read as wandering in
+and out at random. Architecture §5b is the fix: she is heard on the stairs, seen coming in,
+heard going, and the day opens and closes with a line.
+
+**Three meals, at the same three times every day.** Breakfast, lunch and dinner are marked on
+the schedule, and a marked meal *is* the care scene — she comes up, and there is food. Left to
+the hunger threshold alone, whether she fed you depended on whether a number happened to cross
+this hour, so meals landed at a different time daily and some days never came. The player
+learns this room by its rhythm and a rhythm has to be reliable before it can be read. The
+validator now refuses a meal she is not in the room for, and warns about a day missing one.
 
 **Sleep is a horror device.** Waking to a moved object, a new lock, a bandage you don't
 remember, or her asleep in the chair costs almost nothing to author and is among the strongest
@@ -488,7 +500,21 @@ over your head · pry the window · look under the mattress
 
 ## 14. Legibility and onboarding
 
-### Day 1 — beat sheet
+### Day 1 — beat sheet — MOSTLY BUILT
+
+Built: the waking (1-2), her arrival (3), her explanation (4), the care loop at three meals
+(5), medication and palming (7), her leaving and `listen` locating her (8), the interaction
+window (9), and the wrong detail at the end of the night (11).
+
+Not built: the explanation is currently a run of lines rather than a conversation with
+response prompts (4) — the beat schema reserves `prompt` and nothing reads it yet. The journal
+(6) does not exist. The scripted free failure (10) is not authored, though the detection it
+teaches works and will catch the player on its own.
+
+The one wrong detail (11) is: she said she found you in the road, and there is no dirt on you
+anywhere. Somebody washed you. Open question 7 — what used to hang on the nail — is still open
+and deliberately unanswered in the content.
+
 
 Day 1 is the only place every system can be taught while mistakes are free. **Teach by doing,
 never by telling.** The fiction is that the PC wakes and she explains what happened and that
@@ -604,9 +630,11 @@ with `has` or `lacks`. One worked example ships — the nail on the wall (§2d):
 the outline teaches that whatever hung there came down recently, and that unlocks a question for
 her that did not exist before. Architecture §6a has the mechanics.
 
-**What is not built:** the topics themselves. Two verbs exist (`watch_her`, `thank_her`) plus
-the one on the nail. The three kinds of topic below are still unwritten, and so is any of the
-costing in principle 3.
+**What is not built:** most of the topics. Five exist now — `watch_her`, `thank_her`, and
+three questions with the game in them: *how long am I here*, *does anyone know I'm here*, and
+*where did the kit come from* (gated on noticing what the kit is). All three cost suspicion,
+and asking about who might be looking for you costs the most — principle 3, in a small way.
+Small talk and the "about her" ladder are still unwritten.
 
 ### The constraint everything else follows from
 

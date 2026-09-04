@@ -72,7 +72,7 @@ content/   the game's data. Objects, verbs, her routine, her reactions, every li
 render/    turns beats into something you can see. Swappable
 app/       wiring. Loading, saving, the browser build, and the dev tools
 sim/       the headless harness
-test/      141 tests, written against the hard rules rather than the code
+test/      160 tests, written against the hard rules rather than the code
 ```
 
 Read `docs/one-room-sim-architecture.md` and `docs/girls-room-design-doc.md` before changing
@@ -101,9 +101,15 @@ ends where it starts. §13 of that doc says where it stopped; §14 tracks what i
 
 ## Where it is up to
 
-Playable: three days, the eight verbs, her routine, sound, deferred discovery, the care loop —
-meals, water, dressings, medication, and palming a dose — talking to her in two ways, saves,
-and exportable test reports that replay move for move.
+Playable: three days with a shape you can hear, the eight verbs, sound, deferred discovery, the
+care loop, saves, and exportable test reports that replay move for move.
+
+**Her day is legible now.** You wake alone. You hear her on the stairs before you see her, she
+comes up and tells you what happened to you and what she intends, and there is breakfast. She
+goes, and you hear the house empty out under you. She is back at one, and at seven. At night
+she turns the light off at the top of the stairs, and on the first night you are left with one
+detail that does not fit. Her schedule was always in the content files — what it was missing
+was any way for the player to hear it happening.
 
 **A moment can now lead to another one.** A verb can teach the player something, and any later
 rule or verb can read it back — so what you author no longer has to end where it starts. The
@@ -112,13 +118,21 @@ hung there came down recently, which unlocks a question for her that was not the
 of that is code — two fields on a verb and an ordinary condition. Design doc §19 and
 architecture §6a.
 
+You can ask her three things that have the game in them — how long you are here, whether anyone
+knows where you are, and where a trauma kit like that came from — and each one costs you
+something. Two of the room's details can be worked out and then asked about: the nail, and the
+kit.
+
 Not built yet: **anything else a rule can change.** Knowledge is the only mark a moment can
-leave. It cannot move an object, and she cannot act on the room herself.
+leave. It cannot move an object, and she cannot act on the room herself. She never comes up
+off-schedule, so nothing you do can bring her.
 
-Also not built: the mobility 0→1 climb, the journal, the three endings, and talking to her
-properly (designed in design doc §19 — the ladder underneath it is in, the topics are not). The
-builder's stage 3 — the room's places and her routine — is deferred, and the builder cannot
-write knowledge either.
+Also not built: the mobility 0→1 climb, the journal, the three endings, response prompts in
+dialogue, and sleep as a time skip — the night currently passes fifteen minutes at a time. The
+builder's stage 3 is deferred, and the builder cannot write knowledge or the world's own lines.
 
-**Every line of text is placeholder.** Design doc §16 calls for the ugly version first;
-`content/README.md` says which files hold it and what replacing it involves.
+**Most of the text is still placeholder.** Her explanation on day 1, the arrival and departure
+lines, the three questions and the two details you can work out are drafted rather than
+stand-in — they are meant to be argued with, not kept. Everything else is stand-in. Design doc
+§16 calls for the ugly version first; `content/README.md` says which files hold it and what
+replacing it involves.

@@ -68,6 +68,14 @@ export default function Conditions({ rows, content, onChange }: Props) {
               >
                 <option value="">which…</option>
                 {(FACT_GROUPS.find((group) => group.id === groupOf(row.fact))?.facts ?? [])
+                  // Facts the tool has no way to write yet are left out rather than offered
+                  // and then half-working. Hard rule 10 — the builder is never a second
+                  // opinion about what is legal, so it only ever offers what it can finish.
+                  // The debt is tracked in docs/scenario-builder.md §14.
+                  .filter((id) => {
+                    const spec = factSpec(id);
+                    return spec !== null && testsFor(spec).length > 0;
+                  })
                   .map((id) => (
                     <option key={id} value={id}>{factSpec(id)?.label ?? id}</option>
                   ))}

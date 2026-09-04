@@ -16,8 +16,10 @@ import { newGame } from '../engine/newgame.ts';
 import { takeTurn } from '../engine/turn.ts';
 import { buildQuery } from '../engine/query.ts';
 import { ruleMatches, selectRule } from '../engine/rules.ts';
+import { ACTION_EFFECTS } from '../engine/vocab.ts';
 import {
-  addRung, addThing, addVerb, blankDraft, canBothMatch, describeCondition, fromCriteria,
+  EFFECTS, addRung, addThing, addVerb, blankDraft, canBothMatch, describeCondition,
+  exampleDraft, fromCriteria, unfinished,
   ladderFor, moveRung, removeThing, renameThing, rivals, toCriteria, toDraft, toPack, updateBeat,
   updateRule, verbsWithoutFallback, type ConditionRow, type Draft,
 } from '../app/builder.ts';
@@ -360,4 +362,42 @@ test('ideas ride along with the scenario and never reach the game', () => {
   const merged = loadPacked(content, [pack]);
   const thing = merged.objects.find((object) => object.id === 'a_matchbox') ?? {};
   assert.equal('ideas' in thing, false, 'a design note is not something the engine should see');
+});
+
+// ---------------------------------------------------------------------------
+// The example you start from
+// ---------------------------------------------------------------------------
+
+test('the scenario you start from is finished, valid, and in the room', () => {
+  const draft = exampleDraft('nightstand');
+
+  assert.deepEqual(unfinished(draft), [],
+    'the example is what teaches the screen — arriving half-written teaches the wrong thing');
+
+  const merged = loadPacked(content, [toPack(draft)]);
+  const state = newGame(merged, { seed: 202 });
+  assert.ok(merged.objects.some((object) => object.id === 'a_matchbox'));
+
+  const verb = draft.actions[0]?.id ?? '';
+  const turn = takeTurn(state, merged, { action: verb, object: 'a_matchbox', place: null });
+  assert.ok(turn.beats.length > 0);
+  assert.ok((turn.beats[0]?.text ?? '').length > 0, 'every line in the example says something');
+});
+
+test('and it demonstrates the ladder rather than just one situation', () => {
+  const draft = exampleDraft('nightstand');
+  const ladder = ladderFor(draft, draft.actions[0]?.id ?? '');
+
+  assert.equal(ladder.length, 3);
+  assert.deepEqual(ladder.map((rung) => rung.specificity), [2, 1, 0]);
+  assert.equal(ladder.at(-1)?.otherwise, true);
+});
+
+test('every mechanic a verb can have is offered, and each is explained', () => {
+  for (const effect of ACTION_EFFECTS) {
+    const entry = EFFECTS.find((option) => option.id === effect);
+    assert.ok(entry !== undefined, `the builder offers no way to write a "${effect}" verb`);
+    assert.ok(entry.note.length > 0, `"${effect}" is offered with no explanation of what it does`);
+    assert.ok(entry.does.length > 0, `"${effect}" has nothing to complete "clicking it …" with`);
+  }
 });

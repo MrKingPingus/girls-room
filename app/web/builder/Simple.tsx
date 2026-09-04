@@ -15,7 +15,7 @@
  * plays. A flowchart would draw a shape this engine does not have.
  */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { ContentBundle } from '../../../engine/content.ts';
 import type { Draft, DraftObject, Rung } from '../../builder.ts';
@@ -86,6 +86,13 @@ function Thing({ thing, index, draft, content, base, onChange }: {
   onChange: (draft: Draft) => void;
 }) {
   const [more, setMore] = useState(false);
+  const nameBox = useRef<HTMLInputElement>(null);
+
+  // A new thing arrives with the cursor already in the box that has to be filled in.
+  useEffect(() => {
+    if (thing.name === '') nameBox.current?.focus();
+  }, [thing.name]);
+
   const set = (patch: Partial<DraftObject>) => onChange({
     ...draft,
     objects: draft.objects.map((object, i) => (i === index ? { ...object, ...patch } : object)),
@@ -97,13 +104,20 @@ function Thing({ thing, index, draft, content, base, onChange }: {
     <section className="thing-card">
       <header>
         <input
-          className="title"
+          ref={nameBox}
+          className={thing.name.trim() === '' ? 'title needed' : 'title'}
           value={thing.name}
-          placeholder="a matchbox"
+          placeholder="name it — a matchbox, a hairpin…"
           onChange={(event) => onChange(renameThing(draft, index, event.target.value))}
         />
         <button className="drop" onClick={() => onChange(removeThing(draft, index))}>Remove</button>
       </header>
+      {thing.name.trim() === '' && (
+        <p className="warn">
+          This needs a name before the scenario will run. The faint words above are an example of
+          what to write, not something you wrote.
+        </p>
+      )}
 
       <div className="line">
         <span>It starts</span>
@@ -157,6 +171,7 @@ function Thing({ thing, index, draft, content, base, onChange }: {
         <Verb
           key={verb.id}
           verbId={verb.id}
+          thingName={thing.name.trim() === '' ? 'it' : thing.name}
           draft={draft}
           content={content}
           onChange={onChange}
@@ -192,8 +207,11 @@ function Thing({ thing, index, draft, content, base, onChange }: {
 
 // ---------------------------------------------------------------------------
 
-function Verb({ verbId, draft, content, onChange }: {
+function Verb({ verbId, thingName, draft, content, onChange }: {
   verbId: string;
+
+  /** What it is a verb on, so the sentence below can name it. */
+  thingName: string;
   draft: Draft;
   content: ContentBundle;
   onChange: (draft: Draft) => void;
@@ -214,16 +232,38 @@ function Verb({ verbId, draft, content, onChange }: {
     <div className="verb-card">
       <header>
         <input
-          className="verbname"
+          className={verb.name.trim() === '' ? 'verbname needed' : 'verbname'}
           value={verb.name}
-          placeholder="Take the matches"
+          placeholder="what the button says — Take the matches…"
           onChange={(event) => set({ name: event.target.value })}
         />
         <select value={verb.effect} onChange={(event) => set({ effect: event.target.value })}>
-          {EFFECTS.map((entry) => <option key={entry.id} value={entry.id}>{entry.label}</option>)}
+          <optgroup label="what it does">
+            {EFFECTS.filter((entry) => entry.group === 'common').map((entry) => (
+              <option key={entry.id} value={entry.id}>{entry.label}</option>
+            ))}
+          </optgroup>
+          <optgroup label="only for her care scenes">
+            {EFFECTS.filter((entry) => entry.group === 'care').map((entry) => (
+              <option key={entry.id} value={entry.id}>{entry.label}</option>
+            ))}
+          </optgroup>
         </select>
       </header>
-      {effect !== undefined && <p className="hint">{effect.note}</p>}
+      {verb.name.trim() === '' ? (
+        <p className="warn">
+          This needs a name — it is the words on the button the player clicks. The faint words
+          above are an example, not something you wrote.
+        </p>
+      ) : (
+        <>
+          <p className="hint">
+            In the room this is a button on <strong>{thingName}</strong> reading{' '}
+            <strong>{verb.name}</strong>. Clicking it {effect?.does}.
+          </p>
+          {effect !== undefined && <p className="hint">{effect.note}</p>}
+        </>
+      )}
 
       <button className="quiet" onClick={() => setMore(!more)}>
         {more ? 'fewer details' : 'how long, how loud'}
@@ -256,10 +296,17 @@ function Verb({ verbId, draft, content, onChange }: {
         </div>
       )}
 
-      <p className="ladder-note">
-        The game plays the topmost situation whose conditions all hold. Adding a condition moves
-        a situation up the list, because more conditions always wins.
-      </p>
+      {ladder.length > 1 ? (
+        <p className="ladder-note">
+          The game plays the topmost situation whose conditions all hold. Adding a condition moves
+          a situation up the list, because more conditions always wins.
+        </p>
+      ) : (
+        <p className="ladder-note">
+          What happens when the player clicks it. Add an exception below for the times it should
+          go differently — if she is watching, if she is angry.
+        </p>
+      )}
 
       <ol className="ladder">
         {ladder.map((rung, index) => (
@@ -272,6 +319,7 @@ function Verb({ verbId, draft, content, onChange }: {
             draft={draft}
             content={content}
             onChange={onChange}
+            alone={ladder.length === 1}
           />
         ))}
       </ol>
@@ -285,7 +333,7 @@ function Verb({ verbId, draft, content, onChange }: {
 
 // ---------------------------------------------------------------------------
 
-function RungRow({ rung, above, below, verbId, draft, content, onChange }: {
+function RungRow({ rung, above, below, verbId, draft, content, onChange, alone }: {
   rung: Rung;
   above: Rung | undefined;
   below: Rung | undefined;
@@ -293,6 +341,9 @@ function RungRow({ rung, above, below, verbId, draft, content, onChange }: {
   draft: Draft;
   content: ContentBundle;
   onChange: (draft: Draft) => void;
+
+  /** The only situation there is, in which case "otherwise" is a word about nothing. */
+  alone: boolean;
 }) {
   const [showMeters, setShowMeters] = useState(false);
   const meters = ([
@@ -311,7 +362,7 @@ function RungRow({ rung, above, below, verbId, draft, content, onChange }: {
     <li className={rung.otherwise ? 'rung otherwise' : 'rung'}>
       <div className="when">
         {rung.otherwise ? (
-          <span className="label">otherwise</span>
+          <span className="label">{alone ? 'always' : 'otherwise'}</span>
         ) : (
           <>
             <span className="label">if</span>
@@ -369,7 +420,7 @@ function RungRow({ rung, above, below, verbId, draft, content, onChange }: {
           + another line
         </button>
         <button className="quiet" onClick={() => setShowMeters(!showMeters)}>
-          {set.length === 0 ? 'changes nothing' : set.join(', ')}
+          {set.length === 0 ? 'changes nothing about her — adjust' : `changes ${set.join(', ')}`}
         </button>
 
         <div className="rung-tools">

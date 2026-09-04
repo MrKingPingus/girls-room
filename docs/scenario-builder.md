@@ -406,3 +406,56 @@ all).
 
 **Two `×` buttons sat side by side** meaning "remove this condition" and "remove this whole
 situation". The second is now a worded link in the rung's footer.
+
+---
+
+## 12. What the first tester hit
+
+Two problems, from somebody trying to add a matchbox and take it.
+
+### "I'm getting errors and I don't know why"
+
+The scenario said *Not finished yet: something in the room still needs a name*, on a screen
+where the thing plainly appeared to be called "a matchbox".
+
+It was not. That was the **placeholder**. The placeholders were example content — `a matchbox`,
+`Take the matches` — and on a dark ground, in the field's own font, an example is
+indistinguishable from something you typed. The tester filled in the lines, left the names
+alone because they looked filled, and then read an error about a missing name while looking
+straight at what appeared to be one.
+
+Fixed at the cause, not the symptom:
+
+- placeholders are instructions now — *name it — a matchbox, a hairpin…* — set in italic at half
+  opacity, so they cannot be mistaken for content
+- a required field that is empty gets a warm dashed underline and a tinted ground
+- underneath it, a line saying in as many words that the faint text is an example
+- adding a thing or a verb puts the cursor in the box that must be filled in
+- the messages point at the box: *"type one in the big box at the top of its card"*
+
+### "I barely understand what the options do"
+
+The honest reading: **a blank form is the worst possible way to explain a system.** Every
+control was asking for a decision before there was anything to see, and the meaning of each one
+only becomes clear once something is running.
+
+So **New, from an example** is now the first button. It creates a matchbox that already works —
+a thing on the nightstand, a verb that picks it up, and three rungs including one for her being
+angry. Zero problems on arrival, playable before a word is changed. The way to find out what
+"pick it up" or a condition or a rung does is to change it and play it, not to read about it.
+**New, empty** is still there for when the shape is already known.
+
+Alongside that:
+
+- the mechanics dropdown is grouped, with her care-scene mechanics out of the way of the seven
+  an author will actually reach for
+- each verb says what it becomes: *"In the room this is a button on a matchbox reading Take the
+  matches. Clicking it puts it in your hands."*
+- **"otherwise" is called "always" when it is the only situation**, because otherwise-than-what
+  is a question with no answer until there is a second rung. The ladder's explanation of
+  precedence only appears once there is precedence to explain.
+- the empty screen says what a scenario *is*, in one sentence, before offering to make one
+
+The example is built through the ordinary editing functions rather than written out as data, so
+it cannot drift from what the screens produce, and a test asserts it arrives with nothing
+unfinished — an example that needs fixing before it runs teaches exactly the wrong thing.

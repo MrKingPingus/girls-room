@@ -15,8 +15,8 @@ import type { PackShelf } from '../../packs.ts';
 import { applyPacks, overriddenBy, validatePack } from '../../../engine/pack.ts';
 import { validateContent, type Problem } from '../../../engine/validate.ts';
 import {
-  blankAction, blankBeat, blankDraft, blankObject, blankRule, toDraft, toPack, unfinished,
-  verbsWithoutFallback,
+  blankAction, blankBeat, blankDraft, blankObject, blankRule, exampleDraft, toDraft, toPack,
+  unfinished, verbsWithoutFallback,
 } from '../../builder.ts';
 import {
   download, packFromFile, packToFile, putPack, removePack, setEnabled,
@@ -82,9 +82,16 @@ export default function Builder({ base, content, shelf, onChange }: Props) {
     onChange(broken ? setEnabled(next, draft.pack, false) : next);
   }
 
-  function start() {
-    setEditing({ ...blankDraft(), pack: `scenario-${shelf.packs.length + 1}` });
+  function start(from: 'example' | 'empty') {
+    const id = `scenario-${shelf.packs.length + 1}`;
+    const place = base.places.find((entry) => entry.id === 'nightstand') ?? base.places[0];
+    const draft = from === 'example'
+      ? { ...exampleDraft(place?.id ?? ''), pack: id }
+      : { ...blankDraft(), pack: id };
+
+    setEditing(draft);
     setImported(null);
+    commit(draft);
   }
 
   function open(id: string) {
@@ -143,7 +150,8 @@ export default function Builder({ base, content, shelf, onChange }: Props) {
         </ul>
 
         <div className="row">
-          <button onClick={start}>New scenario</button>
+          <button onClick={() => start('example')}>New, from an example</button>
+          <button onClick={() => start('empty')}>New, empty</button>
           <button onClick={() => file.current?.click()}>Import</button>
           <input
             ref={file}
@@ -168,11 +176,21 @@ export default function Builder({ base, content, shelf, onChange }: Props) {
 
       {editing === null ? (
         <main className="empty">
-          <p>Pick a scenario to edit, or start a new one.</p>
+          <h3>What a scenario is</h3>
+          <p>
+            <strong>A thing in the room</strong>, <strong>something you can do to it</strong>, and{' '}
+            <strong>what she does about that</strong>. Nothing else. It comes out as one file you
+            can hand to somebody.
+          </p>
           <p className="muted">
-            A scenario is a moment you want the game to have: a thing in the room, a verb for
-            doing something to it, and what she does about it. It comes out as one file you can
-            hand to somebody.
+            <strong>New, from an example</strong> gives you a matchbox that already works —
+            switch it on and it is in the room before you have changed a word. Change the words,
+            delete the parts you do not want, play it again. That is a faster way to find out
+            what any of this does than reading about it.
+          </p>
+          <p className="muted">
+            <strong>New, empty</strong> starts from nothing, for when you already know the shape
+            of what you want.
           </p>
         </main>
       ) : (

@@ -257,18 +257,64 @@ function bound(inclusive: number | undefined, exclusive: number | undefined, end
  * Every mechanic a verb can have, said in a way an author can choose between. The ids are what
  * the engine switches on; these are what a person reads.
  */
-export const EFFECTS: readonly { id: ActionEffect; label: string; note: string }[] = [
-  { id: 'none', label: 'nothing — it just produces a scene', note: 'For talking, waiting, looking out of the window.' },
-  { id: 'inspect', label: 'look at it', note: 'Marks it known and searched, and reveals what is inside if it is open.' },
-  { id: 'open_close', label: 'open or shut it', note: 'Containers only.' },
-  { id: 'toggle_on', label: 'switch it on or off', note: 'Things that have an on and an off, like the lamp.' },
-  { id: 'take', label: 'pick it up', note: 'Into your hands. Portable things only.' },
-  { id: 'relocate', label: 'move it somewhere', note: 'To a place you name, in the open where she can see it.' },
-  { id: 'conceal', label: 'hide it somewhere', note: 'To a place you name, out of sight. How well depends on the place.' },
-  { id: 'care_accept', label: 'take what she is offering', note: 'Answers the need this verb names. Her half of a care scene.' },
-  { id: 'care_refuse', label: 'turn her down', note: 'Nothing happens to your body, which is the point of it.' },
-  { id: 'care_palm', label: 'appear to take it, and not', note: 'The keystone move. Makes real contraband that she can find.' },
-  { id: 'talk', label: 'say something to her', note: 'No mechanical result at all — the whole effect is social.' },
+export const EFFECTS: readonly {
+  id: ActionEffect;
+
+  /** What the option says on the dropdown. */
+  label: string;
+
+  /** Completes the sentence "clicking it …", so it reads as one line to a person. */
+  does: string;
+
+  /** The catch, where there is one. Shown underneath, dim. */
+  note: string;
+
+  group: 'common' | 'care';
+}[] = [
+  {
+    id: 'none', group: 'common', label: 'nothing — it is just a scene',
+    does: 'plays whichever line below fits', note: 'Nothing moves and nothing changes hands. Most verbs are this one.',
+  },
+  {
+    id: 'inspect', group: 'common', label: 'look at it',
+    does: 'marks it as something you have looked at', note: 'Also reveals what is inside, if it is open.',
+  },
+  {
+    id: 'take', group: 'common', label: 'pick it up',
+    does: 'puts it in your hands', note: 'Only works on a thing that can be picked up — see “more about this thing”.',
+  },
+  {
+    id: 'conceal', group: 'common', label: 'hide it somewhere',
+    does: 'hides it somewhere the player picks', note: 'How well hidden depends on the place. Under the bed beats the nightstand.',
+  },
+  {
+    id: 'relocate', group: 'common', label: 'move it somewhere',
+    does: 'moves it somewhere the player picks', note: 'In the open, where she can see it.',
+  },
+  {
+    id: 'open_close', group: 'common', label: 'open or shut it',
+    does: 'opens it, or shuts it', note: 'Only for things that other things go inside.',
+  },
+  {
+    id: 'toggle_on', group: 'common', label: 'switch it on or off',
+    does: 'switches it on, or off', note: 'Only for things with an on and an off, like the lamp.',
+  },
+  {
+    id: 'talk', group: 'common', label: 'say something to her',
+    does: 'says it to her, and nothing else changes', note: 'The whole effect is social — no object moves.',
+  },
+  {
+    id: 'care_accept', group: 'care', label: 'take what she is offering',
+    does: 'takes what she is holding out', note: 'Her half of a care scene. Needs to name which need it answers.',
+  },
+  {
+    id: 'care_refuse', group: 'care', label: 'turn her down',
+    does: 'turns her down', note: 'Nothing happens to your body, which is the point of it.',
+  },
+  {
+    id: 'care_palm', group: 'care', label: 'appear to take it, and not',
+    does: 'appears to take it, and does not', note: 'The keystone move. Makes real contraband she can find.',
+  },
 ];
 
 export function describeEffect(effect: ActionEffect): string {
@@ -820,13 +866,18 @@ export function unfinished(draft: Draft): string[] {
 
   if (draft.title.trim() === '') missing.push('The scenario needs a name.');
 
-  for (const thing of draft.objects) {
-    if (thing.name.trim() === '') missing.push('Something in the room still needs a name.');
+  draft.objects.forEach((thing, index) => {
+    const which = draft.objects.length === 1 ? 'The thing' : `Thing ${index + 1}`;
+    if (thing.name.trim() === '') {
+      missing.push(`${which} has no name yet — type one in the big box at the top of its card. `
+        + 'The faint grey words in there are an example, not something you typed.');
+    }
     if (thing.place === '') missing.push(`${name(thing)} needs somewhere to start.`);
 
     for (const verb of verbsOn(draft, thing)) {
       if (verb.name.trim() === '') {
-        missing.push(`Something you can do to ${name(thing)} needs a name — it is the text on the button.`);
+        missing.push(`One of the things you can do to ${name(thing)} has no name yet — that is `
+          + 'the words on the button the player clicks. Again, the grey words are an example.');
       }
 
       const ladder = ladderFor(draft, verb.id);
@@ -851,7 +902,7 @@ export function unfinished(draft: Draft): string[] {
         }
       }
     }
-  }
+  });
 
   return [...new Set(missing)];
 }
@@ -867,4 +918,76 @@ export function speakingWhileAway(draft: Draft, rung: Rung): boolean {
   const away = rung.rule.conditions.some((row) =>
     row.fact === 'she_is_here' && row.test === 'is' && row.values[0] === 'false');
   return away && rung.lines.some((line) => line.speaker === 'her');
+}
+
+/**
+ * A complete, working scenario to start from.
+ *
+ * A blank form is the worst possible way to explain a system to somebody. This is a matchbox
+ * that already works: switch it on and it is in the room before a word has been changed. Every
+ * control on the screen is filled in with something that does a real thing, so what the options
+ * mean can be found out by changing them and playing, rather than by being told.
+ *
+ * Built through the ordinary editing functions rather than written out as data, so it cannot
+ * drift away from what the screens produce.
+ */
+export function exampleDraft(place: string): Draft {
+  let draft: Draft = {
+    ...blankDraft(),
+    pack: 'matchbox',
+    title: 'A matchbox',
+    notes: 'An example to cut down. Change the words, delete what you do not want, play it.',
+  };
+
+  draft = renameThing(addThing(draft, place), 0, 'a matchbox');
+  draft = {
+    ...draft,
+    objects: draft.objects.map((thing) => ({ ...thing, changeTier: 2 })),
+    ideas: [{
+      about: 'a_matchbox',
+      text: 'Light a candle with it. She smells smoke on you. Burning the journal.',
+    }],
+  };
+
+  draft = addVerb(draft, 0);
+  const verb = draft.actions[0]?.id ?? '';
+  draft = {
+    ...draft,
+    actions: draft.actions.map((action) => ({ ...action, name: 'Take the matches', effect: 'take' })),
+  };
+
+  // The rung that answers when nothing more specific does.
+  draft = updateBeat(draft, draft.beats[0]?.id ?? '', {
+    speaker: 'narrator', pose: 'absent',
+    text: 'You slide the matchbox under the blanket, against your leg.',
+  });
+
+  // Sharpest first, so nothing has to overtake anything on the way in.
+  draft = exampleRung(draft, verb,
+    [
+      { fact: 'she_is_here', test: 'is', values: ['true'] },
+      { fact: 'mood', test: 'is', values: ['angry'] },
+    ],
+    'her', '"Put those back. Now."', { suspicion: 25 });
+
+  draft = exampleRung(draft, verb,
+    [{ fact: 'she_is_here', test: 'is', values: ['true'] }],
+    'her', '"Those aren’t for you."', { suspicion: 12 });
+
+  return draft;
+}
+
+function exampleRung(
+  draft: Draft, verb: string, conditions: ConditionRow[],
+  speaker: string, text: string, meters: Partial<DraftRule>,
+): Draft {
+  const before = new Set(draft.rules.map((rule) => rule.id));
+  let next = addRung(draft, verb);
+  const added = next.rules.find((rule) => !before.has(rule.id));
+  if (added === undefined) return draft;
+
+  next = updateRule(next, added.id, { conditions, ...meters });
+  return updateBeat(next, added.beats[0] ?? '', {
+    speaker, text, pose: speaker === 'her' ? 'bedside' : 'absent',
+  });
 }

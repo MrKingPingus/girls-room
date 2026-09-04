@@ -488,3 +488,26 @@ button:disabled { opacity: 0.4; cursor: default; }
 .simple label.idea > span:first-child { min-width: 0; color: var(--her); font-size: 12.5px; }
 
 .builder label.switch { margin-left: auto; }
+
+/*
+ * Empty is allowed to look empty.
+ *
+ * The first version used example text as the placeholder — "a matchbox", "Take the matches" —
+ * which on a dark ground reads exactly like something somebody typed. A tester filled in the
+ * lines, left the names untouched because they looked filled, and got errors about names being
+ * missing while looking straight at what appeared to be a name.
+ */
+.builder ::placeholder {
+  color: var(--ink-dim);
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.builder .needed {
+  border-bottom: 1px dashed var(--warn);
+  background: color-mix(in srgb, var(--warn) 7%, transparent);
+}
+
+.builder main.empty h3 { color: var(--ink); }
+.builder main.empty p { max-width: 60ch; }
+.builder main.empty strong { color: var(--her); font-weight: normal; }

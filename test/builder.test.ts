@@ -20,7 +20,7 @@ import { ACTION_EFFECTS } from '../engine/vocab.ts';
 import {
   EFFECTS, addRung, addThing, addVerb, blankDraft, canBothMatch, describeCondition,
   exampleDraft, fromCriteria, unfinished,
-  ladderFor, moveRung, removeThing, renameThing, rivals, toCriteria, toDraft, toPack, updateBeat,
+  ladderFor, moveRung, removeRung, removeThing, removeVerb, renameThing, rivals, toCriteria, toDraft, toPack, updateBeat,
   updateRule, verbsWithoutFallback, type ConditionRow, type Draft,
 } from '../app/builder.ts';
 
@@ -400,4 +400,55 @@ test('every mechanic a verb can have is offered, and each is explained', () => {
     assert.ok(entry.note.length > 0, `"${effect}" is offered with no explanation of what it does`);
     assert.ok(entry.does.length > 0, `"${effect}" has nothing to complete "clicking it …" with`);
   }
+});
+
+// ---------------------------------------------------------------------------
+// The trap a tester fell into
+// ---------------------------------------------------------------------------
+
+test('deleting an exception’s last condition does not turn it into a second “otherwise”', () => {
+  // The bug: "which rung is the catch-all" was inferred from "has no conditions". Deleting an
+  // exception's last condition therefore promoted it to a catch-all — and the catch-all is the
+  // rung with no remove button. Scenarios collected undeletable rungs and could not be finished.
+  const { draft, verb } = built();
+  let next = exception(draft, verb,
+    [{ fact: 'she_is_here', test: 'is', values: ['true'] }], '"Those are not for you."');
+
+  const target = ladderFor(next, verb).find((rung) => !rung.otherwise)?.rule.id ?? '';
+  next = updateRule(next, target, { conditions: [] });
+
+  const stripped = ladderFor(next, verb).find((rung) => rung.rule.id === target);
+  assert.equal(stripped?.otherwise, false, 'it became a second catch-all');
+  assert.equal(ladderFor(next, verb).filter((rung) => rung.otherwise).length, 1);
+
+  const after = removeRung(next, verb, target);
+  assert.equal(ladderFor(after, verb).length, 1, 'and it could not be got rid of');
+});
+
+test('and the real catch-all cannot be removed by accident', () => {
+  const { draft, verb } = built();
+  const catchAll = ladderFor(draft, verb)[0]?.rule.id ?? '';
+  assert.equal(ladderFor(removeRung(draft, verb, catchAll), verb).length, 1,
+    'losing it leaves a moment where she says nothing at all');
+});
+
+test('an exception with no conditions left is named as unfinished', () => {
+  const { draft, verb } = built();
+  let next = exception(draft, verb,
+    [{ fact: 'mood', test: 'is', values: ['warm'] }], '"Oh."');
+  const target = ladderFor(next, verb).find((rung) => !rung.otherwise)?.rule.id ?? '';
+  next = updateRule(next, target, { conditions: [] });
+
+  assert.ok(unfinished(next).some((what) => /no conditions on it/.test(what)));
+});
+
+test('a verb can be got rid of, and takes its ladder with it', () => {
+  const { draft, verb } = built();
+  const gone = removeVerb(exception(draft, verb,
+    [{ fact: 'mood', test: 'is', values: ['warm'] }], '"Oh."'), verb);
+
+  assert.deepEqual(gone.actions, []);
+  assert.deepEqual(gone.rules, []);
+  assert.deepEqual(gone.beats, []);
+  assert.deepEqual(gone.objects[0]?.verbs, [], 'the thing still lists a verb that is gone');
 });

@@ -22,7 +22,7 @@ import type { Draft, DraftObject, Rung } from '../../builder.ts';
 import { CHANGE_TIERS } from '../../../engine/vocab.ts';
 import {
   EFFECTS, addLine, addRung, addThing, addVerb, ladderFor, moveRung, removeLine, removeRung,
-  removeThing, renameThing, speakingWhileAway, updateBeat, updateRule, verbsOn,
+  removeThing, removeVerb, renameThing, speakingWhileAway, updateBeat, updateRule, verbsOn,
 } from '../../builder.ts';
 import Conditions from './Conditions.tsx';
 
@@ -120,7 +120,7 @@ function Thing({ thing, index, draft, content, base, onChange }: {
       )}
 
       <div className="line">
-        <span>It starts</span>
+        <span>It starts on</span>
         <select value={thing.place} onChange={(event) => set({ place: event.target.value })}>
           <option value="">somewhere…</option>
           {base.places.map((place) => (
@@ -237,7 +237,11 @@ function Verb({ verbId, thingName, draft, content, onChange }: {
           placeholder="what the button says — Take the matches…"
           onChange={(event) => set({ name: event.target.value })}
         />
-        <select value={verb.effect} onChange={(event) => set({ effect: event.target.value })}>
+        <select
+          className="doesbox"
+          value={verb.effect}
+          onChange={(event) => set({ effect: event.target.value })}
+        >
           <optgroup label="what it does">
             {EFFECTS.filter((entry) => entry.group === 'common').map((entry) => (
               <option key={entry.id} value={entry.id}>{entry.label}</option>
@@ -249,6 +253,7 @@ function Verb({ verbId, thingName, draft, content, onChange }: {
             ))}
           </optgroup>
         </select>
+        <button className="drop" onClick={() => onChange(removeVerb(draft, verbId))}>Remove</button>
       </header>
       {verb.name.trim() === '' ? (
         <p className="warn">
@@ -378,8 +383,10 @@ function RungRow({ rung, above, below, verbId, draft, content, onChange, alone }
 
       </div>
 
-      {rung.lines.map((line) => (
+      {rung.lines.map((line, index) => (
         <div className="say" key={line.id}>
+          {index === 0 && <span className="label">say</span>}
+          {index > 0 && <span className="label">then</span>}
           <select
             value={line.speaker}
             onChange={(event) => onChange(updateBeat(draft, line.id, {

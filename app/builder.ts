@@ -46,6 +46,13 @@ export type ConditionRow = {
 
   /** One value for most tests; several for "is one of". Text, until it is turned into a value. */
   values: string[];
+
+  /**
+   * Which subject was picked, while no fact under it has been chosen yet. Only ever a note to
+   * the screen about where somebody is up to — `toCriteria` never looks at it, so it cannot
+   * reach a content file.
+   */
+  group?: string;
 };
 
 export function testsFor(spec: FactSpec): readonly TestId[] {
@@ -612,7 +619,26 @@ export function verbsOn(draft: Draft, thing: DraftObject): DraftAction[] {
 }
 
 /** Every rung for one verb, in the order the game will consider them. */
+/**
+ * Which rung is the one that answers when nothing else does.
+ *
+ * Deliberately *designated* rather than inferred from "has no conditions". Inferring it was a
+ * bug with teeth: deleting an exception's last condition turned that exception into a second
+ * "otherwise", and the otherwise rung is the one with no remove button — so the scenario
+ * accumulated undeletable rungs and could not be finished or recovered.
+ */
+function defaultRungId(draft: Draft, actionId: string): string | null {
+  const forAction = draft.rules.filter((rule) => rule.action === actionId);
+  const empty = forAction.filter((rule) => rule.conditions.length === 0);
+
+  // The first conditionless rung is the real one. Any others are a mistake, and stay removable.
+  if (empty.length > 0) return empty[0]?.id ?? null;
+  return forAction[0]?.id ?? null;
+}
+
 export function ladderFor(draft: Draft, actionId: string): Rung[] {
+  const catchAll = defaultRungId(draft, actionId);
+
   return draft.rules
     .filter((rule) => rule.action === actionId)
     .map((rule): Rung => ({
@@ -624,10 +650,9 @@ export function ladderFor(draft: Draft, actionId: string): Rung[] {
       // What the game sees: a condition with nothing chosen yet is not a condition.
       specificity: rule.conditions.filter((row) => row.fact !== '').length,
 
-      // What the author sees: the bottom rung is the one with no conditions on it *at all*.
-      // An exception halfway through being written is not that, however empty it is — conflating
-      // the two hid its condition picker and made it impossible to finish.
-      otherwise: rule.conditions.length === 0,
+      // What the author sees: exactly one rung per verb is the catch-all, and it is the one
+      // that cannot be deleted. Everything else is an exception and can always be got rid of.
+      otherwise: rule.id === catchAll,
     }))
     .sort((a, b) =>
       Number(a.otherwise) - Number(b.otherwise)
@@ -783,6 +808,9 @@ export function addRung(draft: Draft, actionId: string): Draft {
 }
 
 export function removeRung(draft: Draft, actionId: string, ruleId: string): Draft {
+  // Losing the catch-all leaves a moment the game can reach where she says nothing at all.
+  if (defaultRungId(draft, actionId) === ruleId) return draft;
+
   const rule = draft.rules.find((entry) => entry.id === ruleId);
   return normaliseLadder({
     ...draft,
@@ -827,6 +855,23 @@ export function removeLine(draft: Draft, ruleId: string, beatId: string): Draft 
     rules: draft.rules.map((entry) =>
       (entry.id === ruleId ? { ...entry, beats: entry.beats.filter((id) => id !== beatId) } : entry)),
     beats: draft.beats.filter((beat) => beat.id !== beatId),
+  };
+}
+
+/** Removing a verb takes its whole ladder with it, and unbinds it from the thing it was on. */
+export function removeVerb(draft: Draft, actionId: string): Draft {
+  const gone = draft.rules.filter((rule) => rule.action === actionId);
+  const goneBeats = new Set(gone.flatMap((rule) => rule.beats));
+
+  return {
+    ...draft,
+    actions: draft.actions.filter((action) => action.id !== actionId),
+    objects: draft.objects.map((object) => ({
+      ...object,
+      verbs: object.verbs.filter((verb) => verb !== actionId),
+    })),
+    rules: draft.rules.filter((rule) => rule.action !== actionId),
+    beats: draft.beats.filter((beat) => !goneBeats.has(beat.id)),
   };
 }
 
@@ -884,6 +929,10 @@ export function unfinished(draft: Draft): string[] {
       const label = verb.name.trim() === '' ? `that verb on ${name(thing)}` : `“${verb.name}”`;
 
       for (const rung of ladder) {
+        if (!rung.otherwise && rung.rule.conditions.length === 0) {
+          missing.push(`An exception under ${label} has no conditions on it, so it means the same `
+            + 'as “otherwise”. Give it one, or remove the situation.');
+        }
         if (rung.rule.conditions.some((row) => row.fact === '')) {
           missing.push(
             `An exception under ${label} still needs a condition — until it has one it means the `

@@ -292,14 +292,27 @@ button:disabled { opacity: 0.4; cursor: default; }
 .builder label.check > input { min-width: 0; }
 
 .builder input, .builder select, .builder textarea {
-  background: var(--ground);
+  /* Lighter than whatever they sit on, with a real edge. On a dark ground a field that is the
+     same colour as the panel behind it does not read as somewhere you can type — which is how
+     a tester came to leave two names blank while believing they were filled in. */
+  background: #241f1b;
   color: var(--ink);
-  border: 1px solid var(--panel-edge);
+  border: 1px solid #3d3630;
+  border-radius: 3px;
   font: inherit;
-  padding: 5px 7px;
+  padding: 6px 8px;
   min-width: 0;
   flex: 1;
 }
+
+.builder select {
+  /* A dropdown should not look like a text box. */
+  background-color: #1f1b18;
+  border-style: solid;
+  cursor: pointer;
+}
+
+.builder input:hover, .builder select:hover, .builder textarea:hover { border-color: #574e45; }
 
 .builder input[type="checkbox"] { flex: none; accent-color: var(--her); }
 .builder input[type="number"] { max-width: 90px; }
@@ -511,3 +524,34 @@ button:disabled { opacity: 0.4; cursor: default; }
 .builder main.empty h3 { color: var(--ink); }
 .builder main.empty p { max-width: 60ch; }
 .builder main.empty strong { color: var(--her); font-weight: normal; }
+
+/* --- fields, and the labels that name them --- */
+
+.builder .field { display: flex; flex-direction: column; gap: 3px; align-items: stretch; }
+
+.builder .field > .label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+}
+
+.simple input.title, .simple input.verbname {
+  background: #241f1b;
+  border: 1px solid #3d3630;
+  border-radius: 3px;
+  padding: 7px 9px;
+}
+
+/* The subject half of a condition, kept visibly the narrower question of the two. */
+.condition select.subject { flex: 0 1 190px; color: var(--her); }
+
+/* Lines she says are the content of a scenario. They get the most contrast. */
+.rung .say > textarea { background: #2a2420; border-color: #4a4239; }
+
+.rung .say > .label {
+  min-width: 34px;
+  padding-top: 8px;
+  color: var(--ink-dim);
+  font-style: italic;
+}

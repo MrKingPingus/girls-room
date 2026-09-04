@@ -21,6 +21,13 @@ export default function Conditions({ rows, content, onChange }: Props) {
     onChange(rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
   }
 
+  /** Which subject a row is about — the fact's own group, or one picked but not yet narrowed. */
+  function groupOf(fact: string): string {
+    const holding = rows.find((row) => row.fact === fact);
+    if (fact === '') return holding?.group ?? '';
+    return FACT_GROUPS.find((group) => (group.facts as readonly string[]).includes(fact))?.id ?? '';
+  }
+
   return (
     <>
       {rows.map((row, index) => {
@@ -30,26 +37,42 @@ export default function Conditions({ rows, content, onChange }: Props) {
 
         return (
           <div className="condition" key={index}>
+            {/*
+              * Two small dropdowns rather than one of forty-four. Pick the subject first — her,
+              * whether she noticed, the thing you touched — and only then what about it. Every
+              * list is short enough to read, and the subject stays on screen as a label for
+              * what you are looking at.
+              */}
             <select
-              value={row.fact}
-              onChange={(event) => {
-                const next = factSpec(event.target.value);
-                set(index, {
-                  fact: event.target.value,
-                  test: next === null ? 'is' : (testsFor(next)[0] ?? 'is'),
-                  values: [],
-                });
-              }}
+              className="subject"
+              value={groupOf(row.fact)}
+              onChange={(event) => set(index, { fact: '', test: 'is', values: [], group: event.target.value })}
             >
-              <option value="">choose something to check…</option>
+              <option value="">about…</option>
               {FACT_GROUPS.map((group) => (
-                <optgroup key={group.id} label={group.label}>
-                  {group.facts.map((id) => (
-                    <option key={id} value={id}>{factSpec(id)?.label ?? id}</option>
-                  ))}
-                </optgroup>
+                <option key={group.id} value={group.id}>{group.label}</option>
               ))}
             </select>
+
+            {groupOf(row.fact) !== '' && (
+              <select
+                value={row.fact}
+                onChange={(event) => {
+                  const next = factSpec(event.target.value);
+                  set(index, {
+                    fact: event.target.value,
+                    test: next === null ? 'is' : (testsFor(next)[0] ?? 'is'),
+                    values: [],
+                  });
+                }}
+              >
+                <option value="">which…</option>
+                {(FACT_GROUPS.find((group) => group.id === groupOf(row.fact))?.facts ?? [])
+                  .map((id) => (
+                    <option key={id} value={id}>{factSpec(id)?.label ?? id}</option>
+                  ))}
+              </select>
+            )}
 
             {tests.length > 1 && (
               <select

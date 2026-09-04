@@ -50,7 +50,7 @@ export function run(
       || action.effect === 'care_palm' || action.effect === 'talk') {
     if (state.her.location !== 'attic') return { ok: false, reason: 'she_isnt_here' };
     if (action.effect !== 'talk') {
-      const due = dueCareNeed(state);
+      const due = dueCareNeed(state, content);
       if (due === null) return { ok: false, reason: 'nothing_offered' };
       if (action.satisfies !== undefined && action.satisfies !== due) {
         return { ok: false, reason: 'nothing_offered' };

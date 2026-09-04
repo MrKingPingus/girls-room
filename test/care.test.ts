@@ -22,11 +22,22 @@ const start = (seed = 909) => newGame(content, { seed });
 const wait = (state: GameState) =>
   takeTurn(state, content, { action: 'wait', object: null, place: null }).state;
 
+/**
+ * Wind forward until she is in the room. The run now opens with her downstairs — design doc
+ * §14 wants the player awake and alone before she comes up — so anything about talking to her
+ * or being tended has to get her here first.
+ */
+function untilSheIsHere(state: GameState = start()): GameState {
+  let current = state;
+  for (let i = 0; i < 400 && current.her.location !== 'attic'; i += 1) current = wait(current);
+  return current;
+}
+
 /** Wind forward until she is holding something out, or give up. */
 function untilSheOffers(want?: string): { state: GameState; need: string } {
   let state = start();
   for (let i = 0; i < 400; i++) {
-    const need = dueCareNeed(state);
+    const need = dueCareNeed(state, content);
     if (need !== null && (want === undefined || need === want)) return { state, need };
     state = wait(state);
   }
@@ -62,7 +73,7 @@ test('refusing her costs you, and she says something about it', () => {
 test('she only offers while she is in the room and tending you', () => {
   let state = start();
   for (let i = 0; i < 400; i++) {
-    if (dueCareNeed(state) !== null) {
+    if (dueCareNeed(state, content) !== null) {
       assert.equal(state.her.location, 'attic');
       assert.equal(state.her.activity, 'tending_you');
     }
@@ -71,8 +82,12 @@ test('she only offers while she is in the room and tending you', () => {
 });
 
 test('you cannot answer a scene she has not started', () => {
-  const state = start();
-  assert.equal(dueCareNeed(state), null, 'the game opens mid-care-scene');
+  // She has to be in the room for this to be the *right* refusal — otherwise the game answers
+  // "she isn't here", which is true but is not the thing this test is about.
+  let state = untilSheIsHere();
+  for (let i = 0; i < 400 && dueCareNeed(state, content) !== null; i += 1) state = wait(state);
+  assert.equal(state.her.location, 'attic', 'the fixture needs her in the room');
+  assert.equal(dueCareNeed(state, content), null, 'she is still holding something out');
   const after = takeTurn(state, content, { action: 'eat', object: 'her', place: null });
   assert.deepEqual(after.trace.validity, { ok: false, reason: 'nothing_offered' });
   assert.ok(after.beats.length > 0, 'a refusal with no explanation');
@@ -117,7 +132,7 @@ test('palming does not put it in you', () => {
 test('she does not offer the same dose twice — palming is not a tap', () => {
   const { state } = untilSheOffers('medication');
   const after = takeTurn(state, content, { action: 'palm_pill', object: 'her', place: null }).state;
-  assert.notEqual(dueCareNeed(after), 'medication',
+  assert.notEqual(dueCareNeed(after, content), 'medication',
     'she offered the pills again immediately, so palming is unlimited');
 });
 
@@ -156,10 +171,11 @@ test('saying a nice thing twice is not saying two nice things', () => {
   // Before this, thanking her forty times took affection and trust from 40/50 to 100/100 in
   // eighty in-game minutes. Anything that costs nothing to say cannot be a source of affection,
   // or the fastest way to play the game is to press one button until it stops going up.
-  const once = takeTurn(start(), content, { action: 'thank_her', object: 'her', place: null });
-  assert.ok(once.state.her.affection > start().her.affection, 'a sincere thanks stopped landing');
+  const here = untilSheIsHere();
+  const once = takeTurn(here, content, { action: 'thank_her', object: 'her', place: null });
+  assert.ok(once.state.her.affection > here.her.affection, 'a sincere thanks stopped landing');
 
-  let spammed = start();
+  let spammed = here;
   for (let i = 0; i < 40; i++) {
     spammed = takeTurn(spammed, content, { action: 'thank_her', object: 'her', place: null }).state;
   }
@@ -207,7 +223,7 @@ test('she never runs out of things to be doing to you', () => {
   // A care scene with no answer in the menu is a scene the player is trapped in.
   let state = start();
   for (let i = 0; i < 500; i++) {
-    if (dueCareNeed(state) !== null) {
+    if (dueCareNeed(state, content) !== null) {
       const options = herOptions(state);
       assert.ok(options.includes('refuse_care'), 'an offer you cannot even refuse');
       assert.ok(options.length > 3, 'an offer with nothing to answer it');

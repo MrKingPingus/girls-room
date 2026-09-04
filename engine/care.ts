@@ -15,7 +15,9 @@
  */
 
 import type { GameState } from './state.ts';
+import type { ContentBundle, ScheduleBlock } from './content.ts';
 import type { CareNeed } from './vocab.ts';
+import { dayOf, minuteOfDay } from './clock.ts';
 import { pickWeighted } from './random.ts';
 
 /**
@@ -63,6 +65,18 @@ export function carePressure(state: GameState): Record<CareNeed, number> {
   };
 }
 
+/** The block of her day the clock is currently inside. */
+export function blockNow(state: GameState, content: ContentBundle): ScheduleBlock | null {
+  const minute = state.meta.minutesElapsed;
+  const today = content.schedule.find((entry) => entry.day === dayOf(minute))
+    ?? content.schedule[content.schedule.length - 1];
+  if (today === undefined) return null;
+  const at = minuteOfDay(minute);
+  return today.blocks.find((block) => at >= block.from && at < block.to)
+    ?? today.blocks[today.blocks.length - 1]
+    ?? null;
+}
+
 /**
  * The scene she is offering right now, or null.
  *
@@ -76,11 +90,22 @@ export function carePressure(state: GameState): Record<CareNeed, number> {
  * Fixed for the hour, not rolled per turn, so the answer on the table does not change under the
  * player's hand while they are deciding.
  */
-export function dueCareNeed(state: GameState): CareNeed | null {
+export function dueCareNeed(state: GameState, content: ContentBundle): CareNeed | null {
   if (state.her.location !== 'attic') return null;
   if (state.her.activity !== 'tending_you') return null;
 
   const pressure = carePressure(state);
+
+  // A meal is a meal. Left purely to the thresholds, whether she brings food depends on
+  // whether hunger happened to cross a number this hour, so breakfast lands at a different
+  // time every day and some days never comes at all. The player learns this room by its
+  // rhythm, and a rhythm has to be reliable before it can be read. So during a meal block
+  // hunger is on the table whether or not you are starving — which is also just what it is
+  // like to be fed by somebody else.
+  if (blockNow(state, content)?.meal !== undefined) {
+    pressure.hunger = Math.max(pressure.hunger, THRESHOLD.hunger + 30);
+  }
+
   const overdue = (Object.entries(pressure) as [CareNeed, number][])
     .map(([need, value]) => ({ item: need, weight: value - THRESHOLD[need] }))
     .filter((entry) => entry.weight > 0);

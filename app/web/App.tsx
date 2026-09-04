@@ -50,7 +50,7 @@ function freshSeed(): number {
 
 export default function App() {
   const [state, setState] = useState<GameState>(
-    () => saves.load() ?? newGame(content, { seed: freshSeed() }),
+    () => saves.load()?.state ?? newGame(content, { seed: freshSeed() }),
   );
   const [log, setLog] = useState<LogEntry[]>([]);
   const [openThing, setOpenThing] = useState<string | null>(null);

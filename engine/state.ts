@@ -43,7 +43,15 @@ export type PlaceId = string & { readonly __kind: 'PlaceId' };
 export type BeatId = string & { readonly __kind: 'BeatId' };
 export type RuleId = string & { readonly __kind: 'RuleId' };
 export type ActionId = string & { readonly __kind: 'ActionId' };
-export type FactId = string & { readonly __kind: 'FactId' };
+/**
+ * Something the player has learned and now knows — that the eaves are hollow, that she lied
+ * about the phone. Design doc §19 builds on these: knowing a thing is what makes the next
+ * question askable.
+ *
+ * Not to be confused with the facts in `facts.ts`, which are what a *rule* can ask about this
+ * instant. These are what the *player* carries between them.
+ */
+export type KnowledgeId = string & { readonly __kind: 'KnowledgeId' };
 export type PriorId = string & { readonly __kind: 'PriorId' };
 export type ClaimId = string & { readonly __kind: 'ClaimId' };
 export type TopicId = string & { readonly __kind: 'TopicId' };
@@ -170,7 +178,7 @@ export type PlayerState = {
   medication: MedicationState;
 
   /** Facts the player has learned. Half of the game's central gap. EFFECTS. */
-  knows: FactId[];
+  knows: KnowledgeId[];
 
   /** v2. No writer, no reader. See ConfidenceProfile above. */
   confidence: ConfidenceProfile;
@@ -192,7 +200,7 @@ export type Claim = {
   topic: TopicId;
 
   /** The assertion itself, as a content id — never free text. EFFECTS. */
-  assertion: FactId;
+  assertion: KnowledgeId;
 
   /** Whether she took it. null until she has had reason to judge it. APPRAISAL. */
   believed: boolean | null;
@@ -260,7 +268,7 @@ export type HerState = {
   statedReturnAt: Minute | null;
 
   /** What she holds true, including things that aren't. The other half of the gap. APPRAISAL. */
-  believes: FactId[];
+  believes: KnowledgeId[];
 
   /** Design doc §7c. Appended by EFFECTS; each entry's `believed` set by APPRAISAL. */
   claims: Claim[];

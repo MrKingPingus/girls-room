@@ -70,23 +70,42 @@ docs/      the design and the architecture. The source of truth
 engine/    the game. Pure — no screen, no disk, no clock. Runs anywhere
 content/   the game's data. Objects, verbs, her routine, her reactions, every line
 render/    turns beats into something you can see. Swappable
-app/       wiring. Loading, saving, the browser build
+app/       wiring. Loading, saving, the browser build, and the dev tools
 sim/       the headless harness
-test/      33 tests, written against the hard rules rather than the code
+test/      103 tests, written against the hard rules rather than the code
 ```
 
 Read `docs/one-room-sim-architecture.md` and `docs/girls-room-design-doc.md` before changing
 anything. `CLAUDE.md` has the rules that must not be broken and why.
 
+## Writing a scenario without writing any code
+
+There is a second tab, **Scenarios**. It is a dev tool — no player ever sees it — and it writes
+new moments for the game: a thing in the room, a verb for doing something to it, the rules for
+how she answers, and the lines she says. Switch one on and it is in the room; export it and it
+is one file you can hand to somebody.
+
+None of that is code. Content in this game is data by design, so a scenario a playtester writes
+can only ever be more data. It is checked by exactly the same validator the game itself loads
+through, live, while you type.
+
+The panel worth knowing about is **"which rule wins"**. Her responses are chosen by whichever
+rule has the most conditions that hold right now; ties break by weight, and a tie on weight is
+a coin flip *every single time*. That is invisible looking at a rule on its own, and it has
+already caused one real bug here. The builder names the rules that answer the same moment, says
+who takes it and why, and offers to settle a coin flip before it can happen.
+
+`docs/scenario-builder.md` has the whole design, including what is deliberately not in it.
+
 ## Where it is up to
 
-Playable: three days, the eight verbs, eight objects, her routine, sound, deferred discovery,
-re-baselining, saves.
+Playable: three days, the eight verbs, her routine, sound, deferred discovery, the care loop —
+meals, water, dressings, medication, and palming a dose — talking to her in two ways, saves,
+and exportable test reports that replay move for move.
 
-Not built yet: **the care loop** — meals, medication, accepting or refusing help. This is the
-biggest hole and the harness says so plainly: affection never moves in any run, because nothing
-in the game can raise it. She can only ever become more suspicious. Also missing: the mobility
-0→1 climb, the journal, palming pills, and the three endings.
+Not built yet: the mobility 0→1 climb, the journal, the three endings, and talking to her
+properly (designed in design doc §19, not started). The builder's stage 3 — the room's places
+and her routine — is deferred.
 
 **Every line of text is placeholder.** Design doc §16 calls for the ugly version first;
 `content/README.md` says which files hold it and what replacing it involves.

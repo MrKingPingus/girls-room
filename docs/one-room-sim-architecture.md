@@ -352,6 +352,41 @@ Hand-author the twenty beats players will screenshot; let the table cover the ot
 
 ---
 
+## 6a. The fact catalogue
+
+The bag of facts in §6 is assembled by `engine/query.ts`, and **every name that may appear in
+it is declared once in `engine/facts.ts`** — its type, its legal values, and a line of plain
+English describing it.
+
+This is not bookkeeping. Without it, a rule naming a fact that does not exist is invisible:
+
+```json
+{ "id": "caught_late", "when": { "suspicon": 50 }, "beats": ["r_caught"] }
+```
+
+That loads clean. It counts as one criterion when §6 decides which rule wins. And it never
+matches, for the life of the project — a rule that stopped firing looks exactly like a rule
+that was never reached. It is the failure hard rule 9 exists to prevent, and it cannot be
+caught without a list to check against.
+
+The catalogue and the code are held together by the compiler, the same way `vocab.ts` holds the
+game's closed lists together:
+
+- `QueryBag` is keyed by the catalogue, so `query.ts` cannot produce a fact the catalogue omits
+- facts the catalogue marks as always-present are **required** in that bag, so it cannot list
+  one the game never sets
+- `Criteria` is keyed by it too, so conditions written in TypeScript are checked where written
+
+The validator then refuses, at load: an unknown fact (naming the nearest real one), a value
+outside a fact's legal set, a comparison a meter could never satisfy, a comparison against
+something that is not a number, an object id that is not in the room, a bare list where `in`
+was meant, and an invented operator.
+
+**Adding a system means adding a row here.** One row, and every rule ever written can start
+asking about it, with no change to any of them. That is §6's promise, made checkable.
+
+---
+
 ## 7. Content files
 
 All of it data, none of it code. Content is added without touching `engine/`.
@@ -386,8 +421,29 @@ stopping at the first, and additionally proves:
 
 - all eight universal verbs exist, and nothing else claims to be universal
 - every action has exactly one catch-all rule, so the game can never produce nothing (§6)
+- every condition names a real fact, and gives it a value that fact can actually hold (§6a)
 - her schedule has no gaps or overlaps
 - no beat is unreachable by any rule (a warning — it is usually a typo'd criterion)
+
+### 7a. Scenario packs
+
+Content does not only arrive in those six files. A **pack** is a scenario somebody wrote — rows
+for `objects`, `actions`, `reactions` and `beats` in one file — laid over the base content at
+load time by `engine/pack.ts`.
+
+Two rules, both so that switching a pack off is always safe:
+
+- **A pack only adds.** There is no way to delete a row the base game ships.
+- **A colliding id is an override, and it is announced.** Retuning a moment that already exists
+  is the commonest thing an author wants, so it is allowed and said out loud rather than
+  happening quietly.
+
+A pack goes through the ordinary validator, merged, with nothing loosened. It is data and only
+ever data, which is what makes running a pack written by a playtester no different from running
+the game's own content. `docs/scenario-builder.md` covers the tool that writes them.
+
+A save records which packs it was played with, stored beside the run rather than inside it — a
+pack is content, and a state field no stage writes would be a lie in the table in §5a.
 
 ---
 

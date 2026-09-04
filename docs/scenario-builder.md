@@ -3,7 +3,12 @@
 A dev tool: a second tab in the game that lets the designer write new moments for the game
 by filling in forms, test them in the running room, tune them, and export them as a file.
 
-Status: **planned, awaiting build.** Stages 1 and 2 approved. Stage 3 explicitly deferred.
+Status: **stages 1 and 2 built.** Stage 3 (the room's places, her schedule) deferred, as is the
+choice-and-timer editor, which belongs to the v2 dialogue mode rather than here.
+
+Where it lives: `engine/facts.ts` and `engine/pack.ts` in the engine; `app/builder.ts` for the
+tool's thinking and `app/packs.ts` for its files; `app/web/builder/` for the screens. Tests in
+`test/facts.test.ts`, `test/pack.test.ts` and `test/builder.test.ts`.
 
 ---
 
@@ -84,13 +89,15 @@ And in `engine/validate.ts`, a condition naming an unknown fact becomes an **err
 silent nothing. Same for a value outside a fact's legal set — `"mood": "wrm"` and
 `"suspicion": "high"` both stop the game at startup with a clear message.
 
-### Cost of this step
+### Cost of this step — as built
 
-Checked before writing this: **every criteria key in all 167 existing rules is already a real
-fact.** So turning this into a hard error breaks nothing that exists. It is a clean addition
-that closes the hole ahead of the tool that needs it.
+**Every condition in all 167 existing rules already named a real fact**, so making this an error
+broke nothing. The change is behaviourally inert: the simulation runs identically, seed for
+seed, including the one seed in five hundred that stalls under fully random play.
 
-Worth doing even if the builder is cancelled.
+Architecture spec §6a is the permanent record of how the catalogue and the code are held
+together. It was worth doing on its own account, and would have been even if the builder had
+been cancelled.
 
 ---
 
@@ -267,27 +274,38 @@ For whoever builds or extends it later:
 
 ## 10. Build order
 
-**Step 0 — the catalogue.** `engine/facts.ts`; `QueryBag` keyed by `FactId`; validator errors on
+**Step 0 — the catalogue.** ✅ `engine/facts.ts`; `QueryBag` keyed by `FactId`; validator errors on
 unknown facts and illegal values. Tests. This ships on its own and is useful on its own.
 
-**Step 1 — packs.** `engine/pack.ts` (pure merge, override rules) and `app/packs.ts` (storage,
+**Step 1 — packs.** ✅ `engine/pack.ts` (pure merge, override rules) and `app/packs.ts` (storage,
 import, export). Tests: merge, override, round-trip, a pack that fails validation.
 
-**Step 2 — the shell.** A tab in the web build; the game and the builder side by side; a pack
+**Step 2 — the shell.** ✅ A tab in the web build; the game and the builder side by side; a pack
 loaded into the running game; the save-compatibility stamp.
 
-**Step 3 — the rule editor.** Conditions, beats, meters, and the "which rule wins" panel.
+**Step 3 — the rule editor.** ✅ Conditions, beats, meters, and the "which rule wins" panel.
 
-**Step 4 — the object and verb editor.**
+**Step 4 — the object and verb editor.** ✅
 
-**Step 5 — export, and a `tested` line captured from a real run.**
+**Step 5 — export.** ✅ The `tested` line — a seed and a move list captured from a real run, so a
+scenario arrives with proof it fires rather than a promise — is in the pack format and validated,
+but the builder does not yet fill it in from a session. That is the next small piece.
 
 Each step is its own commit, per the small-commits rule — a rule that stops firing looks
 identical to a rule that was never reached, and granular history is the recovery path.
 
-### Verification
+### Verification — as done
 
-`npm run typecheck` and `npm test` throughout. `npm run sim` with a test pack loaded, to prove a
-pack cannot make the game unwinnable without the harness noticing. And a real browser pass
-against the production security headers before it ships, because local storage and file
-downloads are precisely the things that work locally and are silently blocked live.
+103 tests. A real Chromium pass against the production security headers: a scenario authored
+through the forms, checked, switched on, played in the room with the sharper of its two rules
+winning, and exported — with no console errors, which is the thing that matters, because local
+storage and file downloads are precisely what works locally and fails silently live.
+
+Two mistakes the screenshot caught that the tests did not. The rivalry panel told a catch-all
+rule it would "never be seen", which is exactly backwards — being given way to is what a rule
+with no conditions is *for*. And it gave one blanket reason for losing when there are two,
+which are not interchangeable: losing on conditions is usually fine, losing on weight is a tie
+somebody already settled against you.
+
+Still not covered: nothing checks that a pack is *balanced*. The validator proves a scenario is
+legal, never that it is good. `npm run sim` and reading it are the only answers to that.

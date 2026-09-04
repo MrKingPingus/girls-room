@@ -49,10 +49,14 @@ technical terminology and I'm not going to pick it up from context — assume ze
 Read both before your first change in a session. If a request conflicts with either doc, say so
 rather than silently picking one.
 
+- `docs/scenario-builder.md` — the dev tool for authoring content. Read it before touching
+  `app/builder.ts`, `app/web/builder/`, `engine/facts.ts` or `engine/pack.ts`.
+
 ## Stack
 
-TypeScript. React + Vite for the shell. JSON for content. Deployed to GitHub Pages.
-No other frameworks or state libraries without asking.
+TypeScript. React + Vite for the shell. JSON for content. Deployed to Cloudflare as a
+static site, with no back end of any kind. No other frameworks or state libraries without
+asking — the builder is plain React and the code already here, on purpose.
 
 ## Layout
 
@@ -62,7 +66,8 @@ engine/      pure TS. state + action -> new state + beats.
 content/     JSON data. objects, actions, reactions, beats, schedule.
 render/      consumes beats. Swappable. Currently text only.
 sim/         headless test harness.
-app/         wiring, save/load, input. Thin.
+app/         wiring, save/load, input, and the dev tools. Thin.
+app/web/builder/   the scenario builder. Dev only — no player ever sees it.
 ```
 
 ---
@@ -131,6 +136,17 @@ a no-op, or a greyed-out button with no text.
 
 Typo'd ids fail loudly at startup. A rule that silently never fires is close to undebuggable in
 a system this size, so never add a lookup that fails quietly.
+
+Corollary: **every fact a rule can ask about is declared in `engine/facts.ts`**, with its type
+and its legal values. The compiler will not let `query.ts` produce one that isn't listed, or
+the catalogue list one the game never sets. Adding a fact to the bag means adding its row in
+the same change — the same rule as the single-writer table, for the same reason.
+
+### 10. The builder is never a second opinion
+
+The scenario builder writes content, and content only. It uses the real validator to decide
+what is legal and the real rule picker to decide which rule wins. Two opinions about validity
+is the one failure that would make the tool worse than not having it.
 
 ---
 

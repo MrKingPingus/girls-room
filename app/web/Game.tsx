@@ -21,18 +21,16 @@ import { clockFace } from '../../engine/clock.ts';
 import type { ContentBundle } from '../../engine/content.ts';
 import { buildRoomMenu, type MenuEntry } from '../../render/menu.ts';
 import * as saves from '../save.ts';
-import { buildReport, describeMove, type RecordedTurn } from '../report.ts';
+import type { LogEntry } from '../save.ts';
+import { buildReport, encodeMove, replayMoves } from '../report.ts';
 
 const LAST_DAY = 3;
 
-/**
- * One entry in the scrollback: what you did, and what came of it.
- *
- * `repeats` exists because waiting her out is a real strategy and thirty identical boxes
- * saying "Time passes." bury the one line that matters underneath them. Identical turns stack
- * into a single entry with a count instead.
+/*
+ * `LogEntry` lives in `save.ts` — the scrollback is saved with the run. `repeats` on it exists
+ * because waiting her out is a real strategy, and thirty identical boxes saying "Time passes."
+ * bury the one line that matters underneath them.
  */
-type LogEntry = { id: number; you: string | null; beats: Beat[]; repeats: number };
 
 /** How much scrollback to keep on screen. Older than this and nobody is scrolling back to it. */
 const LOG_LIMIT = 14;
@@ -55,23 +53,26 @@ export type GameProps = {
   packIds: string[];
 
   /** Where to pick up. The shell decides this, because only it knows about packs. */
-  initial: GameState;
+  initial: saves.Session;
 };
 
 export default function Game({ content, packIds, initial }: GameProps) {
-  const [state, setState] = useState<GameState>(initial);
-  const [log, setLog] = useState<LogEntry[]>([]);
+  const [state, setState] = useState<GameState>(initial.state);
+  const [log, setLog] = useState<LogEntry[]>([...initial.log]);
   const [openThing, setOpenThing] = useState<string | null>(null);
 
-  // Every turn, kept for the test report. Not game state — it never affects a run, and it is
-  // deliberately not saved: a report is about the session you just played.
-  const [recording, setRecording] = useState<RecordedTurn[]>([]);
+  /**
+   * Every move of the run, in the compact form the replay command takes. Saved with the run,
+   * because a report whose replay line covers only the moves since the last page refresh does
+   * not reproduce the run — it reproduces a different one, and says nothing about it.
+   */
+  const [moves, setMoves] = useState<string[]>([...initial.moves]);
   const [note, setNote] = useState('');
   const [reporting, setReporting] = useState(false);
   const [copied, setCopied] = useState(false);
   const bottom = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { saves.save(state, packIds); }, [state, packIds]);
+  useEffect(() => { saves.save({ state, packs: packIds, log, moves }); }, [state, packIds, log, moves]);
   useEffect(() => { bottom.current?.scrollIntoView({ behavior: 'smooth' }); }, [log]);
 
   const menu = useMemo(() => buildRoomMenu(state, content), [state, content]);
@@ -82,19 +83,9 @@ export default function Game({ content, packIds, initial }: GameProps) {
       action: entry.action, object: entry.object, place: entry.place,
     });
     setState(turn.state);
-    setRecording((previous) => [
+    setMoves((previous) => [
       ...previous,
-      {
-        input: { action: entry.action, object: entry.object, place: entry.place },
-        // Worded from the content, not from the button, so a replay of this report produces a
-        // transcript that diffs cleanly against it.
-        label: describeMove(content, {
-          action: entry.action, object: entry.object, place: entry.place,
-        }),
-        beats: turn.beats,
-        trace: turn.trace,
-        after: turn.state,
-      },
+      encodeMove({ action: entry.action, object: entry.object, place: entry.place }),
     ]);
 
     const you = describe(content, entry);
@@ -115,14 +106,22 @@ export default function Game({ content, packIds, initial }: GameProps) {
     saves.clear();
     setState(newGame(content, { seed: freshSeed() }));
     setLog([]);
-    setRecording([]);
+    setMoves([]);
     setNote('');
     setOpenThing(null);
   }
 
-  const report = () => buildReport({
-    seed: state.meta.seed, turns: recording, final: state, note,
-  });
+  /**
+   * The report, built by replaying the run rather than from what was kept as it happened.
+   *
+   * Same function the replay command uses. If the replay ever stopped matching the live game,
+   * the transcript in the report would visibly disagree with what the player saw — which is far
+   * better than a report that quietly cannot be reproduced.
+   */
+  const report = () => {
+    const { turns, final } = replayMoves(content, state.meta.seed, moves);
+    return buildReport({ seed: state.meta.seed, turns, final, note, packs: packIds });
+  };
 
   async function copyReport() {
     try {
@@ -139,7 +138,7 @@ export default function Game({ content, packIds, initial }: GameProps) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `girls-room-${state.meta.seed}-${recording.length}turns.md`;
+    link.download = `girls-room-${state.meta.seed}-${moves.length}turns.md`;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -160,7 +159,7 @@ export default function Game({ content, packIds, initial }: GameProps) {
       </div>
 
       <div className="log">
-        {log.length === 0 && (
+        {log.length === 0 && state.meta.minutesElapsed === 0 && (
           <div className="beat narrator">
             You wake in a room with a sloped ceiling. Your leg is splinted and heavy.
             {'\n'}There is a hole in the floor at the far end, with stairs going down.
@@ -262,7 +261,7 @@ export default function Game({ content, packIds, initial }: GameProps) {
 
       <div className="footer">
         <span>seed {state.meta.seed}</span>
-        <span>{recording.length} turns</span>
+        <span>{moves.length} turns</span>
         <button onClick={restart}>Start again</button>
         <button onClick={() => setReporting(!reporting)}>
           {reporting ? 'Close report' : 'Report a problem'}
@@ -282,14 +281,14 @@ export default function Game({ content, packIds, initial }: GameProps) {
             rows={3}
           />
           <div className="row">
-            <button onClick={downloadReport} disabled={recording.length === 0}>
+            <button onClick={downloadReport} disabled={moves.length === 0}>
               Download report
             </button>
-            <button onClick={copyReport} disabled={recording.length === 0}>
+            <button onClick={copyReport} disabled={moves.length === 0}>
               {copied ? 'Copied' : 'Copy to clipboard'}
             </button>
           </div>
-          {recording.length === 0 && <p className="muted">Play a turn or two first.</p>}
+          {moves.length === 0 && <p className="muted">Play a turn or two first.</p>}
         </div>
       )}
     </>

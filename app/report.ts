@@ -17,6 +17,8 @@ import type { ContentBundle } from '../engine/content.ts';
 import type { GameState } from '../engine/state.ts';
 import type { TurnInput, TurnResult } from '../engine/turn.ts';
 import { clockFace } from '../engine/clock.ts';
+import { newGame } from '../engine/newgame.ts';
+import { takeTurn } from '../engine/turn.ts';
 
 export type RecordedTurn = {
   input: TurnInput;
@@ -63,6 +65,36 @@ export function describeMove(content: ContentBundle, input: TurnInput): string {
   return label;
 }
 
+/**
+ * Play a list of moves from a seed and record every turn, exactly as the browser does.
+ *
+ * The engine is pure and every roll comes from the seed, so this reproduces a run move for
+ * move. Both the replay command and the browser's own report button go through here — which
+ * means a report is built by the same path that reproduces it, and if replay ever stopped
+ * matching the live game, the report would show it rather than hide it.
+ */
+export function replayMoves(
+  content: ContentBundle, seed: number, moves: readonly string[],
+): { turns: RecordedTurn[]; final: GameState } {
+  let state = newGame(content, { seed });
+  const turns: RecordedTurn[] = [];
+
+  for (const move of moves) {
+    const input = decodeMove(move);
+    const result = takeTurn(state, content, input);
+    state = result.state;
+    turns.push({
+      input,
+      label: describeMove(content, input),
+      beats: result.beats,
+      trace: result.trace,
+      after: state,
+    });
+  }
+
+  return { turns, final: state };
+}
+
 export type ReportOptions = {
   seed: number;
   turns: RecordedTurn[];
@@ -70,9 +102,15 @@ export type ReportOptions = {
 
   /** Anything the tester typed about what looked wrong. */
   note?: string;
+
+  /**
+   * Scenario packs that were loaded. Named in the report because the replay command runs on the
+   * game's own content — a run played with a pack on cannot be reproduced without it.
+   */
+  packs?: readonly string[];
 };
 
-export function buildReport({ seed, turns, final, note }: ReportOptions): string {
+export function buildReport({ seed, turns, final, note, packs }: ReportOptions): string {
   const lines: string[] = [];
   const replay = turns.map((turn) => encodeMove(turn.input)).join(' ');
 
@@ -82,6 +120,7 @@ export function buildReport({ seed, turns, final, note }: ReportOptions): string
   lines.push(`- turns: ${turns.length}`);
   lines.push(`- ended: day ${final.meta.day}, ${clockFace(final.meta.minutesElapsed)}`);
   lines.push(`- save format: ${final.meta.schemaVersion}`);
+  if (packs !== undefined && packs.length > 0) lines.push(`- scenarios loaded: ${packs.join(', ')}`);
   lines.push('');
 
   if (note !== undefined && note.trim() !== '') {
@@ -92,6 +131,12 @@ export function buildReport({ seed, turns, final, note }: ReportOptions): string
   lines.push('```');
   lines.push(`npm run replay -- ${seed}${replay === '' ? '' : ` ${replay}`}`);
   lines.push('```', '');
+  if (packs !== undefined && packs.length > 0) {
+    lines.push(
+      `This run had ${packs.join(', ')} switched on, and the command above runs without them. `
+      + 'Load the same scenarios first, or the replay will not match.', '',
+    );
+  }
 
   lines.push('## Transcript', '');
   lines.push('```');

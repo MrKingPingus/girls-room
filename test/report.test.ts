@@ -13,7 +13,7 @@ import { newGame } from '../engine/newgame.ts';
 import { takeTurn } from '../engine/turn.ts';
 import { loadGameContent } from '../app/load.ts';
 import {
-  buildReport, decodeMove, describeMove, encodeMove, type RecordedTurn,
+  buildReport, decodeMove, describeMove, encodeMove, replayMoves, type RecordedTurn,
 } from '../app/report.ts';
 import type { TurnInput } from '../engine/turn.ts';
 
@@ -105,4 +105,42 @@ test('the report never invents a move the player did not make', () => {
   const report = buildReport({ seed: 5, turns, final });
   const replay = (report.match(/npm run replay -- \d+ (.*)/) ?? [])[1] ?? '';
   assert.equal(replay.split(' ').length, MOVES.length);
+});
+
+// ---------------------------------------------------------------------------
+// Surviving a page refresh
+// ---------------------------------------------------------------------------
+
+test('a run rebuilt from nothing but its moves is the same run', () => {
+  const moves = ['wait', 'look:her', 'open:drawer', 'wait', 'look:clock', 'thank_her:her'];
+  const seed = 5150;
+
+  // What the browser had while you were playing.
+  let live = newGame(content, { seed });
+  for (const move of moves) live = takeTurn(live, content, decodeMove(move)).state;
+
+  // What it has after a refresh: the move list off the save, and nothing else.
+  const { final } = replayMoves(content, seed, moves);
+
+  assert.deepEqual(final, live,
+    'a refresh would produce a report describing a different run than the one you played');
+});
+
+test('and its report carries every move, not only the ones since the refresh', () => {
+  const moves = ['wait', 'open:drawer', 'wait'];
+  const { turns, final } = replayMoves(content, 5150, moves);
+  const report = buildReport({ seed: 5150, turns, final });
+
+  assert.match(report, /npm run replay -- 5150 wait open:drawer wait/);
+  assert.equal(turns.length, moves.length);
+});
+
+test('a report says when scenarios were loaded, because the replay command runs without them', () => {
+  const { turns, final } = replayMoves(content, 5150, ['wait']);
+  const plain = buildReport({ seed: 5150, turns, final });
+  const packed = buildReport({ seed: 5150, turns, final, packs: ['keepsake'] });
+
+  assert.doesNotMatch(plain, /scenarios loaded/);
+  assert.match(packed, /scenarios loaded: keepsake/);
+  assert.match(packed, /the replay will not match/);
 });

@@ -65,14 +65,19 @@ export default function App() {
    * Changing which packs are on therefore starts a fresh run, which is what you want anyway
    * when the point is to see a new scenario from the beginning.
    */
-  const start = useMemo(() => {
+  const start = useMemo((): { session: saves.Session; discarded: string[] | null } => {
     const saved = saves.load();
     const packIds = packKey === '' ? [] : packKey.split('|');
     if (saved !== null && sameSet(saved.packs, packIds)) {
-      return { state: saved.state, discarded: null };
+      return { session: saved, discarded: null };
     }
     return {
-      state: newGame(content, { seed: freshSeed() }),
+      session: {
+        state: newGame(content, { seed: freshSeed() }),
+        packs: packIds,
+        log: [],
+        moves: [],
+      },
       discarded: saved === null ? null : saved.packs,
     };
   }, [packKey, content]);
@@ -111,7 +116,7 @@ export default function App() {
             key={packKey}
             content={content}
             packIds={packKey === '' ? [] : packKey.split('|')}
-            initial={start.state}
+            initial={start.session}
           />
         </>
       ) : (

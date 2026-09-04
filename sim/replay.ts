@@ -11,10 +11,8 @@
  * actually look like" rather than "what did she say".
  */
 
-import { newGame } from '../engine/newgame.ts';
-import { takeTurn } from '../engine/turn.ts';
 import { loadGameContent } from '../app/load.ts';
-import { buildReport, decodeMove, describeMove, type RecordedTurn } from '../app/report.ts';
+import { buildReport, replayMoves } from '../app/report.ts';
 
 const args = process.argv.slice(2);
 const showState = args.includes('--state');
@@ -29,22 +27,9 @@ if (!Number.isFinite(seed)) {
 }
 
 const content = loadGameContent();
-let state = newGame(content, { seed });
-const turns: RecordedTurn[] = [];
 
-for (const move of positional.slice(1)) {
-  const input = decodeMove(move);
-  const result = takeTurn(state, content, input);
-  state = result.state;
-  turns.push({
-    input,
-    label: describeMove(content, input),
-    beats: result.beats,
-    trace: result.trace,
-    after: state,
-  });
-}
-
-// The same transcript the tester saw, from the same three inputs: seed, moves, content.
-const report = buildReport({ seed, turns, final: state });
+// The same transcript the tester saw, from the same three inputs: seed, moves, content — and
+// through the very same function the browser builds its report with.
+const { turns, final } = replayMoves(content, seed, positional.slice(1));
+const report = buildReport({ seed, turns, final });
 console.log(showState ? report : report.split('## Final state')[0]);
